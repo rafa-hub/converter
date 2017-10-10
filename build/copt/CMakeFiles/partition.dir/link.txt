@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/partition.dir/examples/bbmc_partition.cpp.o  -o partition libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

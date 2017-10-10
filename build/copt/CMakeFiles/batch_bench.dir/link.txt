@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/batch_bench.dir/examples/batch_bench.cpp.o  -o batch_bench libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

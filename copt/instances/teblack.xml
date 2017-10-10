@@ -1,0 +1,25 @@
+<instance format="XCSP3" type="CSP">
+  <variables>
+    <array id="w" size="[2]"> 0..1 </array>
+    <array id="y" size="[4]"> 1..3 </array>
+  </variables>
+  <constraints>
+   
+    <group id="Primer grupo" >
+      <extension>
+        <list> %0 %1 </list>
+        <supports> * </supports>
+      </extension>
+      <args> y[2] y[2] </args>
+      <args> y[1] w[1] </args>
+    </group>
+   
+   <extension>
+      <list> y[1] y[3] </list>
+      <supports> (1,2) </supports>
+    </extension>
+
+    
+    
+  </constraints>
+</instance>

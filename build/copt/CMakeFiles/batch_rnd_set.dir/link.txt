@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/batch_rnd_set.dir/examples/batch_rnd_set.cpp.o  -o batch_rnd_set libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

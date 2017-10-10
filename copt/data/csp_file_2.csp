@@ -1,0 +1,15 @@
+c CSP declaration format in DIMACS style
+c for constraint derived graphs which reduce the CSP
+c to a maximum clique search
+c specifies the number of values for each variable
+c date: 28/02/17
+c author: pablo san segundo (pablo.sansegundo@upm.es)
+c
+c x line indicates the number of variables
+c v lines <VAR NUM> <NUMBER OF VALUES>
+
+x 4			
+v 1 1
+v 2 2
+v 3 2
+v 4 2

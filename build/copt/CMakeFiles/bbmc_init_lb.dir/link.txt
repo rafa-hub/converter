@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/bbmc_init_lb.dir/examples/bbmc_init_lb.cpp.o  -o bbmc_init_lb libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/enumeration.dir/examples/enumeration.cpp.o  -o enumeration libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

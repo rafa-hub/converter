@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/published_alg.dir/examples/published_alg.cpp.o  -o published_alg -lpthread libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a 

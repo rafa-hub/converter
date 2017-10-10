@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11  -static -rdynamic -fopenmp CMakeFiles/batch_bench_para.dir/examples/batch_bench_para.cpp.o  -o batch_bench_para libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a 

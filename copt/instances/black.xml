@@ -1,0 +1,171 @@
+<instance format="XCSP3" type="CSP">
+  <variables>
+    <array id="w" size="[2]"> 0 </array>
+    <array id="y" size="[102]"> 0..51 </array>
+  </variables>
+  <constraints>
+    <extension>
+      <list> w[0] w[1] </list>
+      <conflicts>  </conflicts>
+    </extension>
+    <group>
+      <extension>
+        <list> %0 %1 </list>
+        <conflicts> (0,0) </conflicts>
+      </extension>
+      <args> w[0] y[1] </args>
+      <args> w[0] y[3] </args>
+      <args> w[0] y[5] </args>
+      <args> w[0] y[7] </args>
+      <args> w[0] y[9] </args>
+      <args> w[0] y[11] </args>
+      <args> w[0] y[13] </args>
+      <args> w[0] y[15] </args>
+      <args> w[0] y[17] </args>
+      <args> w[0] y[19] </args>
+      <args> w[0] y[21] </args>
+      <args> w[0] y[23] </args>
+      <args> w[0] y[25] </args>
+      <args> w[0] y[27] </args>
+      <args> w[0] y[29] </args>
+      <args> w[0] y[31] </args>
+      <args> w[0] y[33] </args>
+      <args> w[0] y[35] </args>
+      <args> w[0] y[37] </args>
+      <args> w[0] y[39] </args>
+      <args> w[0] y[41] </args>
+      <args> w[0] y[43] </args>
+      <args> w[0] y[45] </args>
+      <args> w[0] y[47] </args>
+      <args> w[0] y[49] </args>
+      <args> w[0] y[51] </args>
+      <args> w[0] y[53] </args>
+      <args> w[0] y[55] </args>
+      <args> w[0] y[57] </args>
+      <args> w[0] y[59] </args>
+      <args> w[0] y[61] </args>
+      <args> w[0] y[63] </args>
+      <args> w[0] y[65] </args>
+      <args> w[0] y[67] </args>
+      <args> w[0] y[69] </args>
+      <args> w[0] y[71] </args>
+      <args> w[0] y[73] </args>
+      <args> w[0] y[75] </args>
+      <args> w[0] y[77] </args>
+      <args> w[0] y[79] </args>
+      <args> w[0] y[81] </args>
+      <args> w[0] y[83] </args>
+      <args> w[0] y[85] </args>
+      <args> w[0] y[87] </args>
+      <args> w[0] y[89] </args>
+      <args> w[0] y[91] </args>
+      <args> w[0] y[93] </args>
+      <args> w[0] y[95] </args>
+      <args> w[0] y[97] </args>
+      <args> w[0] y[99] </args>
+      <args> w[0] y[101] </args>
+      <args> w[0] y[0] </args>
+      <args> w[0] y[2] </args>
+      <args> w[0] y[4] </args>
+      <args> w[0] y[6] </args>
+      <args> w[0] y[8] </args>
+      <args> w[0] y[10] </args>
+      <args> w[0] y[12] </args>
+      <args> w[0] y[14] </args>
+      <args> w[0] y[16] </args>
+      <args> w[0] y[18] </args>
+      <args> w[0] y[20] </args>
+      <args> w[0] y[22] </args>
+      <args> w[0] y[24] </args>
+      <args> w[0] y[26] </args>
+      <args> w[0] y[28] </args>
+      <args> w[0] y[30] </args>
+      <args> w[0] y[32] </args>
+      <args> w[0] y[34] </args>
+      <args> w[0] y[36] </args>
+      <args> w[0] y[38] </args>
+      <args> w[0] y[40] </args>
+      <args> w[0] y[42] </args>
+      <args> w[0] y[44] </args>
+      <args> w[0] y[46] </args>
+      <args> w[0] y[48] </args>
+      <args> w[0] y[50] </args>
+      <args> w[0] y[52] </args>
+      <args> w[0] y[54] </args>
+      <args> w[0] y[56] </args>
+      <args> w[0] y[58] </args>
+      <args> w[0] y[60] </args>
+      <args> w[0] y[62] </args>
+      <args> w[0] y[64] </args>
+      <args> w[0] y[66] </args>
+      <args> w[0] y[68] </args>
+      <args> w[0] y[70] </args>
+      <args> w[0] y[72] </args>
+      <args> w[0] y[74] </args>
+      <args> w[0] y[76] </args>
+      <args> w[0] y[78] </args>
+      <args> w[0] y[80] </args>
+      <args> w[0] y[82] </args>
+      <args> w[0] y[84] </args>
+      <args> w[0] y[86] </args>
+      <args> w[0] y[88] </args>
+      <args> w[0] y[90] </args>
+      <args> w[0] y[92] </args>
+      <args> w[0] y[94] </args>
+      <args> w[0] y[96] </args>
+      <args> w[0] y[98] </args>
+      <args> w[0] y[100] </args>
+      <args> y[0] w[1] </args>
+      <args> y[2] w[1] </args>
+      <args> y[4] w[1] </args>
+      <args> y[6] w[1] </args>
+      <args> y[8] w[1] </args>
+      <args> y[10] w[1] </args>
+      <args> y[12] w[1] </args>
+      <args> y[14] w[1] </args>
+      <args> y[16] w[1] </args>
+      <args> y[18] w[1] </args>
+      <args> y[20] w[1] </args>
+      <args> y[22] w[1] </args>
+      <args> y[24] w[1] </args>
+      <args> y[26] w[1] </args>
+      <args> y[28] w[1] </args>
+      <args> y[30] w[1] </args>
+      <args> y[32] w[1] </args>
+      <args> y[34] w[1] </args>
+      <args> y[36] w[1] </args>
+      <args> y[38] w[1] </args>
+      <args> y[40] w[1] </args>
+      <args> y[42] w[1] </args>
+      <args> y[44] w[1] </args>
+      <args> y[46] w[1] </args>
+      <args> y[48] w[1] </args>
+      <args> y[50] w[1] </args>
+      <args> y[52] w[1] </args>
+      <args> y[54] w[1] </args>
+      <args> y[56] w[1] </args>
+      <args> y[58] w[1] </args>
+      <args> y[60] w[1] </args>
+      <args> y[62] w[1] </args>
+      <args> y[64] w[1] </args>
+      <args> y[66] w[1] </args>
+      <args> y[68] w[1] </args>
+      <args> y[70] w[1] </args>
+      <args> y[72] w[1] </args>
+      <args> y[74] w[1] </args>
+      <args> y[76] w[1] </args>
+      <args> y[78] w[1] </args>
+      <args> y[80] w[1] </args>
+      <args> y[82] w[1] </args>
+      <args> y[84] w[1] </args>
+      <args> y[86] w[1] </args>
+      <args> y[88] w[1] </args>
+      <args> y[90] w[1] </args>
+      <args> y[92] w[1] </args>
+      <args> y[94] w[1] </args>
+      <args> y[96] w[1] </args>
+      <args> y[98] w[1] </args>
+      <args> y[100] w[1] </args>
+    </group>
+  </constraints>
+</instance>
