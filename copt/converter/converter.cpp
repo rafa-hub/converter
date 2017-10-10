@@ -679,6 +679,9 @@ int main(int argc,char **argv) {
         exit(1);
     }
 
+    // Una vez leido el fichero y generada la matriz, se vuelca en un Grafo y se resuelve
+    // Habrá que incluir aquí la generación del fichero Dimacs
+
     ugraph ug(miparser.dimension_matriz);
 
     for(int i=0;i<miparser.dimension_matriz;i++)
