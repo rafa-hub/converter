@@ -20,7 +20,8 @@
 #define RESTRICCION 0
 #define SOPORTE 1
 #define CREAR_MATRIZ 1
-#ifndef BENCHMARK_PATH			"/var/tmp/salida"	
+#ifndef BENCHMARK_PATH 
+    #define BENCHMARK_PATH  "/var/tmp/salida"
 #endif
 
 using namespace XCSP3Core;
@@ -70,7 +71,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         char *nombre_auxiliar;
 
         nombre_auxiliar=strrchr(nombre_fichero,'.');
-        strcpy (nombre_auxiliar,".clq");
+        strcpy(nombre_auxiliar,".clq");
         ofstream fichero_salida(nombre_fichero);
 
     #ifdef midebug
@@ -581,7 +582,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
             }
         } 
         else {
-            // Tenemos lista de conflictos: Hay que decidir si se ponen a uno lo que no esté explicitamente a cero.
+            // Tenemos lista de conflictos: De momento se ponen a uno lo que no esté explicitamente a cero.
             if (hasStar)
             { 
                 // Hay asterisco (*), luego todo a ceros
@@ -658,7 +659,6 @@ int main(int argc,char **argv) {
     MiSolverPrintCallbacks miparser;
    
    
-   
     if(argc!=2){ 
         throw std::runtime_error("usage: ./csp xcsp3instance.xml");
         return 0;
@@ -691,10 +691,10 @@ int main(int argc,char **argv) {
     
     
 
-    clqo::param_t myparam;
-	myparam.alg=clqo::BBMCXR_L;
-	myparam.init_preproc=clqo::init_preproc_t::UB;
-	CliqueAll cug(&ug, myparam);
+    clqo::param_t parametros;
+	parametros.alg=clqo::BBMCXR_L;
+	parametros.init_preproc=clqo::init_preproc_t::UB;
+	CliqueAll cug(&ug, parametros);
 	cug.set_up();
 	cug.run();			
 
