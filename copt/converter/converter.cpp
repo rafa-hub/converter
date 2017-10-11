@@ -709,12 +709,12 @@ int main(int argc,char **argv) {
     ug.write_dimacs(f);
     f.close();
 
-     clqo::param_t parametros;
+    /*  clqo::param_t parametros;
 	parametros.alg=clqo::BBMCXR_L;
 	parametros.init_preproc=clqo::init_preproc_t::UB;
 	CliqueAll cug(&ug, parametros);
 	cug.set_up();
-	cug.run(); 		
+	cug.run(); 	 */	
 
 
     return 0;
