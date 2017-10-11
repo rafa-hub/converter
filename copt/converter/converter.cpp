@@ -31,7 +31,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
     private:
 
-        char *nombre_fichero; // Nombre del fichero XML a procesar
+        
 
         //Variables para poder implementar la lógica de cración de la matriz
         
@@ -59,20 +59,32 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
         int dimension_matriz=0;             //Guarda la dimensión definitiva de la matriz creada
         vector <vector <int>> matriz_datos; // Matriz donde se almacena el resultado
+        char nombre_fichero[256];
+        char fichero_csp[256]; // Nombre del fichero XML a procesar
+        char fichero_dimacs[256];
 
-        //ugraph fg(100);
+        
 
     void set_nombre_fichero(char *nombre){
-        nombre_fichero=nombre;
+            strcpy(nombre_fichero,nombre);
+    }
+
+    void set_fichero_csp(char *nombre){
+        strcpy(fichero_csp,nombre);
+    }
+
+    void set_fichero_dimacs(char *nombre){
+        strcpy(fichero_dimacs,nombre);
     }
 
     void escribe_fichero_csp(){
         string var;
         char *nombre_auxiliar;
 
-        nombre_auxiliar=strrchr(nombre_fichero,'.');
-        strcpy(nombre_auxiliar,".clq");
-        ofstream fichero_salida(nombre_fichero);
+        nombre_auxiliar=strrchr(fichero_csp,'.');
+        strcpy(nombre_auxiliar,".csp");
+        cout << "Nombre fichero CSP: " << fichero_csp << endl;
+        ofstream fichero_salida(fichero_csp);
 
     #ifdef midebug
         cout << "c Fichero creado a partir de un fichero XML que expresa un problema CSP" << endl;
@@ -219,7 +231,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         }
         cout << "\n\n" << endl;
     }
-
+    
 /* ==========Fin de mis funciones============================================================
 
 =========Comienzo de las funciones que invoca el parser ===================================== */
@@ -657,7 +669,9 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
 int main(int argc,char **argv) {
     MiSolverPrintCallbacks miparser;
-   
+    char *nombre_dimacs;
+    
+            
    
     if(argc!=2){ 
         throw std::runtime_error("usage: ./csp xcsp3instance.xml");
@@ -665,6 +679,9 @@ int main(int argc,char **argv) {
     }
 
     miparser.set_nombre_fichero(argv[1]);
+    miparser.set_fichero_csp(argv[1]);
+    miparser.set_fichero_dimacs(argv[1]);
+    
   
     try
     {
@@ -689,14 +706,21 @@ int main(int argc,char **argv) {
             if(miparser.matriz_datos[i][j]==1)
                 ug.add_edge(i,j);
     
+    cout << "Fichero_dimacs: " << miparser.fichero_dimacs << endl;
     
+    nombre_dimacs=strrchr(miparser.fichero_dimacs,'.');
+    strcpy(nombre_dimacs,".clq");
 
-    clqo::param_t parametros;
+    cout << "Nombre dimacs: " << miparser.fichero_dimacs << endl;
+    std::fstream f(miparser.fichero_dimacs,ios::out);            
+    ug.write_dimacs(f);
+    f.close();
+    /* clqo::param_t parametros;
 	parametros.alg=clqo::BBMCXR_L;
 	parametros.init_preproc=clqo::init_preproc_t::UB;
-	CliqueAll cug(&ug, parametros);
-	cug.set_up();
-	cug.run();			
+	//CliqueAll cug(&ug, parametros);
+	//cug.set_up();
+	//cug.run(); */			
 
 
     return 0;
