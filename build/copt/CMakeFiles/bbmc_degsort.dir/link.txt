@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/bbmc_degsort.dir/examples/bbmc_degsort.cpp.o  -o bbmc_degsort libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

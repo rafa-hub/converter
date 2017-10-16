@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/bbmc_infra.dir/examples/bbmc_infra.cpp.o  -o bbmc_infra -lpthread libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a 

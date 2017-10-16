@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/bbmc_watched.dir/examples/bbmc_watched.cpp.o  -o bbmc_watched libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

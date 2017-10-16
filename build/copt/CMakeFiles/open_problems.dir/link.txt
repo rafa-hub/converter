@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11  -static -rdynamic -fopenmp CMakeFiles/open_problems.dir/examples/open_problems.cpp.o  -o open_problems libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

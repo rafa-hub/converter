@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11 -Wno-deprecated   -rdynamic CMakeFiles/converter.dir/converter/converter.cpp.o  -o converter libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread libxcsp3parser.a -lxml2 

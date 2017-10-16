@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/bbmcsp.dir/examples/bbmcsp.cpp.o  -o bbmcsp libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

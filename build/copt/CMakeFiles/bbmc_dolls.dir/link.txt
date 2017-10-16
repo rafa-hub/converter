@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/bbmc_dolls.dir/examples/bbmc_dolls.cpp.o  -o bbmc_dolls -lpthread libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a 

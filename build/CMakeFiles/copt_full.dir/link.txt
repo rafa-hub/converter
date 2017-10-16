@@ -1,1 +1,0 @@
-/usr/bin/c++ -fPIC  -std=c++11 -Wno-deprecated   -shared -Wl,-soname,libcopt_full.so -o libcopt_full.so  

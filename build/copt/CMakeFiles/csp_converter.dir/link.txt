@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11 -Wno-dev  -rdynamic CMakeFiles/csp_converter.dir/prueba.cpp.o  -o csp_converter libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread libxcsp3parser.a -lxml2 

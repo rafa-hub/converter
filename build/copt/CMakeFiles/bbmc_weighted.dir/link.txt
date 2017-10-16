@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11  -static -rdynamic CMakeFiles/bbmc_weighted.dir/examples/bbmc_weighted.cpp.o  -o bbmc_weighted -lpthread libcopt.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a 

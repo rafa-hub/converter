@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11 -Wno-dev  -static -rdynamic -fopenmp CMakeFiles/test_copt.dir/tests/gtest_main.cc.o  -o test_copt libcopt.a ../googletest/libgtest.a ../graph/libgraph.a ../bitscan/libbitscan.a ../utils/libutils.a -lpthread 

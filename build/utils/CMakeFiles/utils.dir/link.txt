@@ -1,2 +1,0 @@
-/usr/bin/ar qc libutils.a  CMakeFiles/utils.dir/benchmark.cpp.o CMakeFiles/utils.dir/logger.cpp.o CMakeFiles/utils.dir/result.cpp.o CMakeFiles/utils.dir/test_analyser.cpp.o
-/usr/bin/ranlib libutils.a
