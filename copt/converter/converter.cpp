@@ -60,7 +60,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         int dimension_matriz=0;             //Guarda la dimensión definitiva de la matriz creada
         vector <vector <int>> matriz_datos; // Matriz donde se almacena el resultado
         
-        char nombre_fichero[256]; // Nombre del fichero XML a procesar
+        char nombre_fichero[512]; // Nombre del fichero XML a procesar
         
 
         
@@ -660,12 +660,13 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 };
 
 
+
+
 int main(int argc,char **argv) {
     MiSolverPrintCallbacks miparser;
     char *nombre_fichero_dimacs;
     
-            
-   
+
     if(argc!=2){ 
         throw std::runtime_error("usage: ./csp xcsp3instance.xml");
         return 0;
@@ -673,8 +674,6 @@ int main(int argc,char **argv) {
 
     miparser.set_nombre_fichero(argv[1]);
     
-    
-  
     try
     {
         XCSP3CoreParser parser(&miparser);
