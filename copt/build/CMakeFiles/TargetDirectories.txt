@@ -1,4 +1,0 @@
-/var/tmp/Pruebas_Compilacion/copt/copt/build/CMakeFiles/rebuild_cache.dir
-/var/tmp/Pruebas_Compilacion/copt/copt/build/CMakeFiles/edit_cache.dir
-/var/tmp/Pruebas_Compilacion/copt/copt/build/CMakeFiles/csp_converter.dir
-/var/tmp/Pruebas_Compilacion/copt/copt/build/CMakeFiles/xcsp3parser.dir
