@@ -668,7 +668,7 @@ int main(int argc,char **argv) {
     
 
     if(argc!=2){ 
-        throw std::runtime_error("usage: ./csp xcsp3instance.xml");
+        throw std::runtime_error("usage: ./converter xcsp3instance.xml");
         return 0;
     }
 

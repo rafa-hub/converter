@@ -95,7 +95,6 @@ target_include_directories (${APPLICATION_NAME} PUBLIC ../googletest/include/)
 target_link_libraries(${APPLICATION_NAME} ${LIBRARY_NAME} ${LIBXML2_LIBRARIES})
 
 
-
 install(TARGETS copt DESTINATION lib)
 
 
