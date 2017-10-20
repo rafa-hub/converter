@@ -189,10 +189,14 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
             cout << "dimensión acumulada: " << dimension_matriz << endl;
         #endif
         }   
-    
+
     // Generación de la matriz inicializando a ceros.
+         //for(int j=0;j<dimension_matriz;j++)     // Una línea
+         //    fila.push_back(0);
+    
+    // Generación de la matriz inicializando a unos.
         for(int j=0;j<dimension_matriz;j++)     // Una línea
-            fila.push_back(0);
+            fila.push_back(1);
 
         for (int j=0;j<dimension_matriz;j++)    // La matriz
             matriz_datos.push_back(fila);
@@ -202,6 +206,11 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
             //imprime_matriz();
     #endif
     }
+
+    void guardo_datos_matriz(){
+        
+    }
+
 
     // Certificación de que la matriz tiene la diagonal principal a cero
     void pongo_diagonal_matriz_a_cero(){
