@@ -16,7 +16,7 @@
 #include <climits>
 #include <map>
 
-#define midebug
+#define nomidebug
 #define RESTRICCION 0
 #define SOPORTE 1
 #define CREAR_MATRIZ 1
@@ -59,6 +59,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
         int dimension_matriz=0;             //Guarda la dimensión definitiva de la matriz creada
         vector <vector <int>> matriz_datos; // Matriz donde se almacena el resultado
+        vector <vector <int>> matriz_shadow; // Matriz donde se almacena el resultado
         
         char nombre_fichero[256]; // Nombre del fichero XML a procesar
         
@@ -167,15 +168,11 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         return;
     }
 
-    // Genera la matriz con la dimensión correspondiente al desdoblamiento de cada una de las variables
-    // por su rango de valores. Inicializa todos los valores a cero.
-    // Como no se puede conocer a priori el número de variables, se invoca la primera vez que se procesa
-    // una regla extensional. Pero podría invocarse en otros puntos del código, si el formato
-    // del fichero cambia.
-    // Otra solución sería proceso previo del fichero, pero de momento no vale la pena intentarlo.
+    // Genera la matriz 
     void genera_matriz(){
         std::vector<string>::iterator lista;
         std::vector<int> fila;
+        std::vector<int> fila_shadow;
 
         for(lista=lista_arrays.begin();lista!=lista_arrays.end();lista++)
         {
@@ -191,11 +188,16 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         }   
     
     // Generación de la matriz inicializando a ceros.
-        for(int j=0;j<dimension_matriz;j++)     // Una línea
+        for(int j=0;j<dimension_matriz;j++){     // Una línea
             fila.push_back(1);
+            fila_shadow.push_back(0);
+        }
 
-        for (int j=0;j<dimension_matriz;j++)    // La matriz
+        for (int j=0;j<dimension_matriz;j++){    // La matriz
             matriz_datos.push_back(fila);
+            matriz_shadow.push_back(fila_shadow);
+        }
+
        
     #ifdef midebug
             cout << "Matriz creada ........ \nDimensión final de la matriz: " << matriz_datos.size() << endl;
@@ -368,7 +370,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         std::vector<vector <int>>::iterator ite_tupla;
 
         
-        // Guardo el valor de las tuplas por si es una restricción de grupo
+        // Guardo el valor de las tuplas por si es una restricción de grupo y para tener el mismo código en ambos métodos
         las_tuplas.clear();
         ite_tupla=las_tuplas.begin();
         
@@ -397,123 +399,103 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         var_cero=get_nombre(list[0]->id);
         var_uno=get_nombre(list[1]->id);
 
-        if (support)
+        if (las_tuplas.size()>0)
         {
-            if (hasStar) // Hay * => luego todo a unos
-            {
-            
-            #ifdef midebug
-                cout << "Tenemos asterisco (*) + support ......" << endl;
-                cout << "Rango variable " << var_cero << ": " << rango_variable[var_cero] << ": " << minimo_variable[var_cero] <<endl;
-                cout << "Rango variable: " << var_uno << ": " << rango_variable[var_uno] << ": " << minimo_variable[var_uno] << endl;
-            #endif
-
-            
-                for(int i=0;i<rango_variable[var_cero]; i++)
-                    for (int j=0; j< rango_variable[var_uno];j++)
-                    {
-                        coordenada_final[0]=coordenadas_base[0]+i;
-                        coordenada_final[1]=coordenadas_base[1]+j;
-                        matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
-                        matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
-                    
-                    #ifdef midebug
-                        cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
-                    #endif
-                    }
-            } 
-            else if (las_tuplas.size()>0)
-            {
-            #ifdef midebug
-                cout << "Es una regla Support: pongo las tuplas especificadas a uno ......" << endl;
-            #endif
-            for(int i=0;i<rango_variable[var_cero]; i++)
-             for (int j=0; j< rango_variable[var_uno];j++)
-             {
-            coordenada_final[0]=coordenadas_base[0]+i;
-            coordenada_final[1]=coordenadas_base[1]+j;
-            matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
-            matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
-            cout << "Soy yo" << endl;
-
-        #ifdef midebug
-            cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
-           #endif
-          } 
-                for (it = las_tuplas.begin() ; it != las_tuplas.end(); ++it)
+            if (support)
                 {
-                    ite=it->begin();
-                    coordenada_final[0]=coordenadas_base[0]+*ite-minimo_variable[var_cero];
-
-                    ite++;
-                    coordenada_final[1]=coordenadas_base[1]+*ite-minimo_variable[var_uno];
                     
-                    #ifdef midebug    
-                        cout << "Tupla: " << *ite << endl;
+                    
+                    #ifdef midebug
+                        cout << "Es una regla Support: pongo todo a ceros y las tuplas especificadas a uno ......" << endl;
                     #endif
-                   
-                    matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
-                    matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
-                
-                #ifdef midebug
-                    cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
-                #endif
-                }                
-            }
-        } 
-        else {
-            // Tenemos lista de conflictos: Hay que decidir si se ponen a uno lo que no esté explicitamente a cero.
-            if (hasStar)
-            { 
-                // Hay * => luego todo a ceros de momento no hago nada, porque por defecto la matriz es todo ceros.
-            #ifdef midebug
-                cout << "Tenemos asterisco (*) + conflict ......" << endl;
-            #endif
-            }
-            else if (las_tuplas.size()>0)
-            {
-                // Primero lo pongo todo a unos y luego escribo las tuplas a cero.
-            #ifdef midebug
-                cout << "Es una regla Conflict: primero pongo todo a unos ......" << endl;
-            #endif
-                 for(int i=0;i<rango_variable[var_cero]; i++)
-                    for (int j=0; j< rango_variable[var_uno];j++)
-                    {
-                        coordenada_final[0]=coordenadas_base[0]+i;
-                        coordenada_final[1]=coordenadas_base[1]+j;
-                        matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
-                        matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
-            
+        
+                    // Pongo la pareja de variables a cero, siempre que no estén ya definidas en la matriz shadow
+                    for(int i=0;i<rango_variable[var_cero]; i++)
+                        for (int j=0; j< rango_variable[var_uno];j++)
+                        {
+                            coordenada_final[0]=coordenadas_base[0]+i;
+                            coordenada_final[1]=coordenadas_base[1]+j;
+                            if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
+                                matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
+                            //matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+                    
                     #ifdef midebug
                         cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
                     #endif
-                    } 
-                // Escribo las tuplas correspondientes a cero.
-            #ifdef midebug
-                cout << "Y ahora escribo las tuplas a cero ......" << endl;
-            #endif    
-                for (it = las_tuplas.begin() ; it != las_tuplas.end(); ++it)
-                    {
-                        ite=it->begin();
-                        coordenada_final[0]=coordenadas_base[0]+*ite-minimo_variable[var_cero];
-    
-                        ite++;
-                        coordenada_final[1]=coordenadas_base[1]+*ite-minimo_variable[var_uno];
-                        
-                    #ifdef midebug
-                        cout << "Tupla: " << *ite << endl;
-                    #endif
-                        
-                        matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
-                        matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+                        }
                     
+                    // Y ahora las tuplas correspondientes a uno, anotándolo en la matriz shadow
+                    for (it = las_tuplas.begin() ; it != las_tuplas.end(); ++it)
+                        {
+                            ite=it->begin();
+                            coordenada_final[0]=coordenadas_base[0]+*ite-minimo_variable[var_cero];
+        
+                            ite++;
+                            coordenada_final[1]=coordenadas_base[1]+*ite-minimo_variable[var_uno];
+                            
+                            #ifdef midebug    
+                                cout << "Tupla: " << *ite << endl;
+                            #endif
+                           
+                            matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
+                            matriz_shadow[coordenada_final[0]][coordenada_final[1]]=1;
+                            //matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
+                        
+                        #ifdef midebug
+                            cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
+                        #endif
+                        }                
+                    
+                } 
+                else
+                {
+                    // Tenemos lista de conflictos: Hay que decidir si se ponen a uno lo que no esté explicitamente a cero.
+                    // Primero lo pongo todo a unos y luego escribo las tuplas a cero.
                     #ifdef midebug
-                        cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
-                    #endif    
-                    }                
-            }
-
+                        cout << "Es una regla Conflict: primero pongo todo a unos ......" << endl;
+                    #endif
+                         for(int i=0;i<rango_variable[var_cero]; i++)
+                            for (int j=0; j< rango_variable[var_uno];j++)
+                            {
+                                coordenada_final[0]=coordenadas_base[0]+i;
+                                coordenada_final[1]=coordenadas_base[1]+j;
+                                if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
+                                    matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
+                                //matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
+                    
+                            #ifdef midebug
+                                cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
+                            #endif
+                            } 
+                    
+                        // Escribo las tuplas correspondientes a cero.
+                        for (it = las_tuplas.begin() ; it != las_tuplas.end(); ++it)
+                            {
+                                ite=it->begin();
+                                coordenada_final[0]=coordenadas_base[0]+*ite-minimo_variable[var_cero];
+            
+                                ite++;
+                                coordenada_final[1]=coordenadas_base[1]+*ite-minimo_variable[var_uno];
+                                
+                            #ifdef midebug
+                                cout << "Tupla: " << *ite << endl;
+                            #endif
+                                
+                                matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
+                                matriz_shadow[coordenada_final[0]][coordenada_final[1]]=1;
+                                //matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+                            
+                            #ifdef midebug
+                                cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
+                            #endif    
+                            }                
+                    
+        
+                }
         }
+            
+
+
         #ifdef midebug
             cout << "\n ** Fin buildConstraintExtension ** " << id << endl;
         #endif
@@ -551,111 +533,99 @@ cout << "Coordenada base calculada: " << coordenadas_base[0] << " - " << coorden
 var_cero=get_nombre(list[0]->id);
 var_uno=get_nombre(list[1]->id);
 
-if (support)
+if (las_tuplas.size()>0)
 {
-    if (hasStar) // Hay asterisco (*), luego todo a unos
-    {
-    #ifdef midebug
-        cout << "Variable en Has Star: " << var_cero << endl;
-        cout << "Rango variable: " << rango_variable[var_cero] << ": " << minimo_variable[var_cero] << endl;
-        cout << "Variable en Has Star: " << var_uno << ": " << minimo_variable[var_uno] << endl;
-        cout << "Rango variable: " << rango_variable[var_uno] << endl;
-    #endif
+    if (support)
+        {
+            
+            
+            #ifdef midebug
+                cout << "Es una regla Support: pongo todo a ceros y las tuplas especificadas a uno ......" << endl;
+            #endif
 
-       // Primero lo pongo todo a ceros y luego escribo las tuplas a uno.
-       
-        for(int i=0;i<rango_variable[var_cero]; i++)
-            for (int j=0; j< rango_variable[var_uno];j++)
-            {
-                coordenada_final[0]=coordenadas_base[0]+i;
-                coordenada_final[1]=coordenadas_base[1]+j;
-                matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
-                matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
+            // Pongo la pareja de variables a cero, siempre que no estén ya definidas en la matriz shadow
+            for(int i=0;i<rango_variable[var_cero]; i++)
+                for (int j=0; j< rango_variable[var_uno];j++)
+                {
+                    coordenada_final[0]=coordenadas_base[0]+i;
+                    coordenada_final[1]=coordenadas_base[1]+j;
+                    if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
+                        matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
+                    //matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
             
             #ifdef midebug
                 cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
             #endif
-            }
-    } 
-    else if (las_tuplas.size()>0)
-    {
+                }
+            
+            // Y ahora las tuplas correspondientes a uno, anotándolo en la matriz shadow
+            for (it = las_tuplas.begin() ; it != las_tuplas.end(); ++it)
+                {
+                    ite=it->begin();
+                    coordenada_final[0]=coordenadas_base[0]+*ite-minimo_variable[var_cero];
 
-        /* for(int i=0;i<rango_variable[var_cero]; i++)
-            for (int j=0; j< rango_variable[var_uno];j++)
-         {
-            coordenada_final[0]=coordenadas_base[0]+i;
-            coordenada_final[1]=coordenadas_base[1]+j;
-            matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
-            matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
- 
-        #ifdef midebug
-            cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;
-        #endif
-         }  */
-
-        for (it = las_tuplas.begin() ; it != las_tuplas.end(); ++it)
+                    ite++;
+                    coordenada_final[1]=coordenadas_base[1]+*ite-minimo_variable[var_uno];
+                    
+                    #ifdef midebug    
+                        cout << "Tupla: " << *ite << endl;
+                    #endif
+                   
+                    matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
+                    matriz_shadow[coordenada_final[0]][coordenada_final[1]]=1;
+                    //matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
+                
+                #ifdef midebug
+                    cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
+                #endif
+                }                
+            
+        } 
+        else
         {
-            ite=it->begin();
-            coordenada_final[0]=coordenadas_base[0]+*ite-minimo_variable[var_cero];
-
-            ite++;
-            coordenada_final[1]=coordenadas_base[1]+*ite-minimo_variable[var_uno];
-
             #ifdef midebug
-                cout << "Tupla: " << *ite << endl;
+                cout << "Es una regla Conflict: primero pongo todo a unos ......" << endl;
             #endif
-        
-        matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
-        matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
+            
+            // Primero lo pongo todo a unos 
+                 for(int i=0;i<rango_variable[var_cero]; i++)
+                    for (int j=0; j< rango_variable[var_uno];j++)
+                    {
+                        coordenada_final[0]=coordenadas_base[0]+i;
+                        coordenada_final[1]=coordenadas_base[1]+j;
+                        if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
+                            matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
+                        //matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
+            
+                    #ifdef midebug
+                        cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
+                    #endif
+                    } 
+            
+                // Escribo las tuplas correspondientes a cero.
+                for (it = las_tuplas.begin() ; it != las_tuplas.end(); ++it)
+                    {
+                        ite=it->begin();
+                        coordenada_final[0]=coordenadas_base[0]+*ite-minimo_variable[var_cero];
     
-    #ifdef midebug
-        cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
-    #endif
-        }                
-    }
-} 
-else {
-    // Tenemos lista de conflictos: Hay que decidir si se ponen a uno lo que no esté explicitamente a cero.
-    if (hasStar)
-    { 
-        // Hay asterisco (*), luego todo a ceros
-    }
-    else if (las_tuplas.size()>0)
-    {
-        // Primero lo pongo todo a unos y luego escribo las tuplas a cero.
-     /* for(int i=0;i<rango_variable[var_cero]; i++)
-        for (int j=0; j< rango_variable[var_uno];j++)
-        {
-            coordenada_final[0]=coordenadas_base[0]+i;
-            coordenada_final[1]=coordenadas_base[1]+j;
-            matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
-            matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
-
-        #ifdef midebug
-            cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;
-        #endif
-        }  */
-    for (it = las_tuplas.begin() ; it != las_tuplas.end(); ++it)
-        {
-            ite=it->begin();
-            coordenada_final[0]=coordenadas_base[0]+*ite-minimo_variable[var_cero];
-
-            ite++;
-            coordenada_final[1]=coordenadas_base[1]+*ite-minimo_variable[var_uno];
+                        ite++;
+                        coordenada_final[1]=coordenadas_base[1]+*ite-minimo_variable[var_uno];
+                        
+                    #ifdef midebug
+                        cout << "Tupla: " << *ite << endl;
+                    #endif
+                        
+                        matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
+                        matriz_shadow[coordenada_final[0]][coordenada_final[1]]=1;
+                        //matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+                    
+                    #ifdef midebug
+                        cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
+                    #endif    
+                    }                
             
-            #ifdef midebug
-                cout << "Tupla: " << *ite << endl;
-            #endif
-            
-            matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
-            matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
-        
-        #ifdef midebug
-            cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
-        #endif
-        }                
-    }
 
+        }
 }
 
 #ifdef midebug
@@ -727,7 +697,7 @@ int main(int argc,char **argv) {
         for(int j=i+1;j<miparser.dimension_matriz;j++)
             if(miparser.matriz_datos[i][j]==1){
                 ug.add_edge(i,j);
-                cout << "Añado edge(" << i << "," << j << ")" << endl;
+                //cout << "Añado edge(" << i << "," << j << ")" << endl;
             }
     
     
