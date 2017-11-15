@@ -201,7 +201,6 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
        
     #ifdef midebug
             cout << "Matriz creada ........ \nDimensión final de la matriz: " << matriz_datos.size() << endl;
-            //imprime_matriz();
     #endif
     }
 
@@ -216,15 +215,30 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
     }
 
 
-    void imprime_matriz(){
+    void imprime_matriz(string matriz){
 
-        for(int x=0;x<dimension_matriz;x++)
+        if (matriz=="datos")
+        {
+        for(int x=0;x<dimension_matriz-1;x++)
         {
             cout << endl;
-            for (int y=0;y<dimension_matriz;y++)
+            for (int y=0;y<dimension_matriz-1;y++)
                 cout << matriz_datos[x][y] << " ";
         }
         cout << "\n\n" << endl;
+        }
+    
+        if (matriz=="shadow")
+        {
+        for(int x=0;x<dimension_matriz-1;x++)
+        {
+            cout << endl;
+            for (int y=0;y<dimension_matriz-1;y++)
+                cout << matriz_shadow[x][y] << " ";
+        }
+        cout << "\n\n" << endl;
+        }
+        
     }
     
 /* ==========Fin de mis funciones============================================================
@@ -250,8 +264,12 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         cout << "\nLa matriz resultante: " << endl;
         pongo_diagonal_matriz_a_cero();
         
-        imprime_matriz();
-        
+        imprime_matriz("datos");
+        cout << "-----------------------------------------------" << endl;
+        cout << "-----------------------------------------------" << endl;
+
+        imprime_matriz("shadow");
+
         for(itero=lista_arrays.begin();itero!=lista_arrays.end();itero++)
         {
             cout << "Array- " << *itero  << endl;
