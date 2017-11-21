@@ -467,7 +467,6 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                 } 
                 else
                 {
-                    // Tenemos lista de conflictos: Hay que decidir si se ponen a uno lo que no esté explicitamente a cero.
                     // Primero lo pongo todo a unos y luego escribo las tuplas a cero.
                     #ifdef midebug
                         cout << "Es una regla Conflict: primero pongo todo a unos ......" << endl;
@@ -523,37 +522,37 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
 
     void buildConstraintExtensionAs(string id, vector<XVariable *> list, bool support, bool hasStar) {
-//int i=0;
-string var_cero,var_uno;
-int coordenadas_base[2];
-int coordenada_final[2];
+        //int i=0;
+        string var_cero,var_uno;
+        int coordenadas_base[2];
+        int coordenada_final[2];
 
-vector<vector<int>>::iterator it;
-vector<int>::iterator ite;
-std::vector<XVariable *>::iterator recorro;
+        vector<vector<int>>::iterator it;
+        vector<int>::iterator ite;
+        std::vector<XVariable *>::iterator recorro;
 
-#ifdef midebug   
-cout << "\n ** Soy buildConstraintExtension-AS ** " << id << endl;
-cout << "Valor support: " << support << endl;
-cout << "Valor hasStar: " << hasStar << endl;
-cout << "Tamaño lista variables: " << list.size() << endl;
-cout << "Tamaño vector tuplas: " << las_tuplas.size() << endl;
-#endif
+    #ifdef midebug   
+        cout << "\n ** Soy buildConstraintExtension-AS ** " << id << endl;
+        cout << "Valor support: " << support << endl;
+        cout << "Valor hasStar: " << hasStar << endl;
+        cout << "Tamaño lista variables: " << list.size() << endl;
+        cout << "Tamaño vector tuplas: " << las_tuplas.size() << endl;
+    #endif
 
-if(list.size()>0)
-    calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
+        if(list.size()>0)
+            calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
 
     
-#ifdef midebug
-cout << "Coordenada base calculada: " << coordenadas_base[0] << " - " << coordenadas_base[1] << endl;
-#endif    
+    #ifdef midebug
+        cout << "Coordenada base calculada: " << coordenadas_base[0] << " - " << coordenadas_base[1] << endl;
+    #endif    
 
-var_cero=get_nombre(list[0]->id);
-var_uno=get_nombre(list[1]->id);
+        var_cero=get_nombre(list[0]->id);
+        var_uno=get_nombre(list[1]->id);
 
-if (las_tuplas.size()>0)
-{
-    if (support)
+    if (las_tuplas.size()>0)
+    {
+        if (support)
         {
             
             
