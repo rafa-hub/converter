@@ -264,7 +264,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                         if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
                         {
                             matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
-                            matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+                            //matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
                         }
                     
                     //#ifdef midebug
@@ -292,8 +292,8 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                     
                     matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
                     matriz_shadow[coordenada_final[0]][coordenada_final[1]]=1;
-                    matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
-                    matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
+                    //matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
+                    //matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
                 //#ifdef midebug
                     cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
                 //#endif
@@ -338,8 +338,8 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                                 
                     matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
                     matriz_shadow[coordenada_final[0]][coordenada_final[1]]=1;
-                    matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
-                    matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
+                    //matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+                    //matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
                             
                 //#ifdef midebug
                     cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
