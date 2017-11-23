@@ -140,17 +140,19 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
     // instancia de la variable y el valor de la coordenada de la restricción
     // Hay que restar el mínimo del rango de valores para el caso en el que no sea cero
     // Si no, se escribe fuera del rango de la matriz
-    void calcula_coordenadas_base(XVariable var0,XVariable var1,int *coordenadas_base){
+    //void calcula_coordenadas_base(XVariable var0,XVariable var1,int *coordenadas_base){
+    void calcula_coordenadas_base(string var_cero,string var_uno,int indice0,int indice1,int *coordenadas_base)
+    {
 
-        int indice0,indice1;
-        string var_cero,var_uno;
+        //int indice0,indice1;
+        //string var_cero,var_uno;
         int coord[2];
 
-        indice0=get_indice(var0);
+        /* indice0=get_indice(var0);
         indice1=get_indice(var1);
 
         var_cero=get_nombre(var0.id);
-        var_uno=get_nombre(var1.id);
+        var_uno=get_nombre(var1.id); */
         
     #ifdef midebug
         cout << "Var cero: " << var_cero << " - índice: " << indice0 << endl;
@@ -486,10 +488,12 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
     void buildConstraintExtension(string id, vector<XVariable *> list, vector<vector<int>> &tuples, bool support, bool hasStar) {
         
-        string var_cero,var_uno;
+        string var_cero,var_uno,var_aux;
+        int indice0,indice1,indice_aux;
         int coordenadas_base[2];
         vector<vector<int>>::iterator itero_parejas;
         
+        cout << "Soy buildConstraintExtension..........................................." << endl;
         
         // Guardo el valor de las tuplas por si es una restricción de grupo y para tener el mismo código en ambos métodos
         las_tuplas.clear();
@@ -502,15 +506,38 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
         cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id) << endl; 
         
+
+        indice0=get_indice(*(list[0]));
+        indice1=get_indice(*(list[1]));
+
+        var_cero=get_nombre(list[0]->id);
+        var_uno=get_nombre(list[1]->id);
+
+        if(indice0>indice1)
+         {
+             //cambiamos el orden para escribir en la misma zona de la matriz
+             indice_aux=indice0;
+             indice0=indice1;
+             indice1=indice_aux;
+
+             var_aux=var_cero;
+             var_cero=var_uno;
+             var_uno=var_aux;
+             
+             cout << "Reordeno Variables: " << var_cero << "["<<indice0 <<"] - " << var_uno << "["<<indice1<< "]" <<endl;
+         }
+        
+        
         if(list.size()>0)
-            calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
+            calcula_coordenadas_base(var_cero,var_uno,indice0,indice1,coordenadas_base);
+        
+            //calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
     
     #ifdef midebug
         cout << "Coordenada base calculada: " << coordenadas_base[0] << " - " << coordenadas_base[1] << endl;
     #endif
 
-        var_cero=get_nombre(list[0]->id);
-        var_uno=get_nombre(list[1]->id);
+        
 
         cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
@@ -526,27 +553,52 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
 
     void buildConstraintExtensionAs(string id, vector<XVariable *> list, bool support, bool hasStar) {
-        //int i=0;
-        string var_cero,var_uno;
+       
+        string var_cero,var_uno,var_aux;
+        int indice0,indice1,indice_aux;
         int coordenadas_base[2];
-        int coordenada_final[2];
+        
 
         vector<vector<int>>::iterator it;
         vector<int>::iterator ite;
 
+        cout << "Soy buildConstraintExtension  AS ........................................." << endl;
+
         cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id) << endl;
 
+        indice0=get_indice(*(list[0]));
+        indice1=get_indice(*(list[1]));
+
+        var_cero=get_nombre(list[0]->id);
+        var_uno=get_nombre(list[1]->id);
+
+        if(indice0>indice1)
+         {
+             //cambiamos el orden para escribir en la misma zona de la matriz
+             indice_aux=indice0;
+             indice0=indice1;
+             indice1=indice_aux;
+
+             var_aux=var_cero;
+             var_cero=var_uno;
+             var_uno=var_aux;
+
+             cout << "Reordeno Variables: " << var_cero << "["<<indice0 <<"] - " << var_uno << "["<<indice1<< "]" <<endl;
+         }
+
         if(list.size()>0)
-            calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
+            calcula_coordenadas_base(var_cero,var_uno,indice0,indice1,coordenadas_base);
+        
+            //calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
 
     
     #ifdef midebug
         cout << "Coordenada base calculada: " << coordenadas_base[0] << " - " << coordenadas_base[1] << endl;
     #endif    
 
-        var_cero=get_nombre(list[0]->id);
+        /* var_cero=get_nombre(list[0]->id);
         var_uno=get_nombre(list[1]->id);
-
+ */
         cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
         if (las_tuplas.size()>0)
@@ -617,7 +669,7 @@ int main(int argc,char **argv) {
     ugraph ug(miparser.dimension_matriz);
 
     for(int i=0;i<miparser.dimension_matriz;i++)
-        for(int j=0;j<miparser.dimension_matriz;j++)
+        for(int j=i+1;j<miparser.dimension_matriz-1;j++)
             if(miparser.matriz_datos[i][j]==1){
                 ug.add_edge(i,j);
                 //cout << "Añado edge(" << i << "," << j << ")" << endl;
