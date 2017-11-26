@@ -264,11 +264,11 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                         coordenada_final[0]=coordenadas_base[0]+i;
                         coordenada_final[1]=coordenadas_base[1]+j;
                         if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
-                        {
                             matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
-                            //matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
-                        }
-                    
+                        
+                        if(!matriz_shadow[coordenada_final[1]][coordenada_final[0]])
+                            matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+
                     //#ifdef midebug
                         cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
                     //#endif
@@ -294,8 +294,8 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                     
                     matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
                     matriz_shadow[coordenada_final[0]][coordenada_final[1]]=1;
-                    //matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
-                    //matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
+                    matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
+                    matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
                 //#ifdef midebug
                     cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
                 //#endif
@@ -340,8 +340,8 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                                 
                     matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
                     matriz_shadow[coordenada_final[0]][coordenada_final[1]]=1;
-                    //matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
-                    //matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
+                    matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+                    matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
                             
                 //#ifdef midebug
                     cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
@@ -513,7 +513,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         var_cero=get_nombre(list[0]->id);
         var_uno=get_nombre(list[1]->id);
 
-        if(indice0>indice1)
+        /* if(indice0>indice1)
          {
              //cambiamos el orden para escribir en la misma zona de la matriz
              indice_aux=indice0;
@@ -525,7 +525,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
              var_uno=var_aux;
              
              cout << "Reordeno Variables: " << var_cero << "["<<indice0 <<"] - " << var_uno << "["<<indice1<< "]" <<endl;
-         }
+         } */
         
         
         if(list.size()>0)
@@ -572,7 +572,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         var_cero=get_nombre(list[0]->id);
         var_uno=get_nombre(list[1]->id);
 
-        if(indice0>indice1)
+        /* if(indice0>indice1)
          {
              //cambiamos el orden para escribir en la misma zona de la matriz
              indice_aux=indice0;
@@ -584,7 +584,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
              var_uno=var_aux;
 
              cout << "Reordeno Variables: " << var_cero << "["<<indice0 <<"] - " << var_uno << "["<<indice1<< "]" <<endl;
-         }
+         } */
 
         if(list.size()>0)
             calcula_coordenadas_base(var_cero,var_uno,indice0,indice1,coordenadas_base);
@@ -596,9 +596,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         cout << "Coordenada base calculada: " << coordenadas_base[0] << " - " << coordenadas_base[1] << endl;
     #endif    
 
-        /* var_cero=get_nombre(list[0]->id);
-        var_uno=get_nombre(list[1]->id);
- */
+    
         cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
         if (las_tuplas.size()>0)
