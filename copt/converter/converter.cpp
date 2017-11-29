@@ -143,17 +143,8 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
     //void calcula_coordenadas_base(XVariable var0,XVariable var1,int *coordenadas_base){
     void calcula_coordenadas_base(string var_cero,string var_uno,int indice0,int indice1,int *coordenadas_base)
     {
-
-        //int indice0,indice1;
-        //string var_cero,var_uno;
         int coord[2];
-
-        /* indice0=get_indice(var0);
-        indice1=get_indice(var1);
-
-        var_cero=get_nombre(var0.id);
-        var_uno=get_nombre(var1.id); */
-        
+   
     #ifdef midebug
         cout << "Var cero: " << var_cero << " - índice: " << indice0 << endl;
         cout << "Var uno: " << var_uno << " - índice: " << indice1 << endl;
@@ -180,13 +171,13 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
         {
             dimension_matriz+=numero_variable[*lista]*rango_variable[*lista];
         
-        #ifdef midebug
+        //#ifdef midebug
             cout << "array: " << *lista << endl;
             cout << "numero variables: " << numero_variable[*lista] << endl;
             cout << "rango variable: " << rango_variable[*lista] << endl;
             cout << "dimensión variable: " << numero_variable[*lista]*rango_variable[*lista] << endl;
             cout << "dimensión acumulada: " << dimension_matriz << endl;
-        #endif
+        //#endif
         }   
     
     // Generación de la matriz inicializando a ceros.
@@ -257,27 +248,30 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
             {
             cout << "Soy support ...................." << endl;
                             
-                // Pongo la pareja de variables a cero, siempre que no estén ya definidas en la matriz shadow
-                for(int i=0;i<rango_variable[var_cero]; i++)
-                    for (int j=0; j< rango_variable[var_uno];j++)
-                    {
-                        coordenada_final[0]=coordenadas_base[0]+i;
-                        coordenada_final[1]=coordenadas_base[1]+j;
-                        if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
-                            matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
+            // Pongo la pareja de variables a cero, siempre que no estén ya definidas en la matriz shadow
+            cout << "Pongo a cero la submatriz: " << var_cero << "["<< coordenadas_base[0] << "] - " << var_uno << "[" << coordenadas_base[1] << "]" << endl;
+            for(int i=0;i<rango_variable[var_cero]; i++)
+                for (int j=0; j< rango_variable[var_uno];j++)
+                {
+                    coordenada_final[0]=coordenadas_base[0]+i;
+                    coordenada_final[1]=coordenadas_base[1]+j;
+                    if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
+                        matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
+                    else
+                        cout << "¡¡Casi la cago!!" << endl;
                         
-                        if(!matriz_shadow[coordenada_final[1]][coordenada_final[0]])
-                            matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+                    if(!matriz_shadow[coordenada_final[1]][coordenada_final[0]])
+                        matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
 
-                    //#ifdef midebug
-                        cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
-                    //#endif
-                    } 
+                //#ifdef midebug
+                    cout << "Coordenada Puesta a \"0\": " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
+                //#endif
+                } 
                     
                     // Y ahora las tuplas correspondientes a uno, anotándolo en la matriz shadow
                     
                 for (itero_parejas = tuplas.begin() ; itero_parejas != tuplas.end(); ++itero_parejas)
-                    {    
+                {    
                     itero_dentro_de_la_pareja=itero_parejas->begin();
                     
                 //#ifdef midebug    
@@ -297,29 +291,15 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                     matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
                     matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
                 //#ifdef midebug
-                    cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
+                    cout << "Coordenada puesta a \"1\": " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
                 //#endif
-                    }                
+                }                
                     
             } 
             else
             {
                
                 cout << "Soy una regla Conflict ......" << endl;
-               
-                         /* for(int i=0;i<rango_variable[var_cero]; i++)
-                            for (int j=0; j< rango_variable[var_uno];j++)
-                            {
-                                coordenada_final[0]=coordenadas_base[0]+i;
-                                coordenada_final[1]=coordenadas_base[1]+j;
-                                if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
-                                    matriz_datos[coordenada_final[0]][coordenada_final[1]]=1;
-                                //matriz_datos[coordenada_final[1]][coordenada_final[0]]=1;
-                    
-                            #ifdef midebug
-                                cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
-                            #endif
-                            }  */
                     
                 // Escribo las tuplas correspondientes a cero.
                 for (itero_parejas = las_tuplas.begin() ; itero_parejas != las_tuplas.end(); ++itero_parejas)
@@ -344,7 +324,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                     matriz_shadow[coordenada_final[1]][coordenada_final[0]]=1;
                             
                 //#ifdef midebug
-                    cout << "Coordenada Final: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
+                    cout << "Coordenada puesta a \"0\": " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
                 //#endif    
                     }
                 }
@@ -393,6 +373,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                 
         cout << "Dimension total matriz: " << dimension_matriz << endl;
         cout << endl;
+        
         cout << "FIN de la instancia" << endl;
 
         //XCSP3PrintCallbacks::endInstance();
@@ -488,6 +469,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
 
     void buildConstraintExtension(string id, vector<XVariable *> list, vector<vector<int>> &tuples, bool support, bool hasStar) {
         
+        //XVariable variable = new XVariable("var0");
         string var_cero,var_uno,var_aux;
         int indice0,indice1,indice_aux;
         int coordenadas_base[2];
@@ -504,9 +486,9 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                 las_tuplas.push_back(*itero_parejas);
             }
 
+        
         cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id) << endl; 
         
-
         indice0=get_indice(*(list[0]));
         indice1=get_indice(*(list[1]));
 
@@ -536,8 +518,6 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
     #ifdef midebug
         cout << "Coordenada base calculada: " << coordenadas_base[0] << " - " << coordenadas_base[1] << endl;
     #endif
-
-        
 
         cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
