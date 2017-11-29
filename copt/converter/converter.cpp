@@ -293,14 +293,40 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                 //#ifdef midebug
                     cout << "Coordenada puesta a \"1\": " << coordenada_final[0] << " - " << coordenada_final[1] << endl;   
                 //#endif
-                }                
+                }
+                                
                     
             } 
             else
             {
                
                 cout << "Soy una regla Conflict ......" << endl;
-                    
+
+                // Pongo la pareja de variables a cero la diagonal de la submatriz
+
+                if (rango_variable[var_cero]==rango_variable[var_uno])
+                {
+                    cout << "Pongo a cero la diagonal de la submatriz: " << var_cero << "["<< coordenadas_base[0] << "] - " << var_uno << "[" << coordenadas_base[1] << "]" << endl;
+                    for(int i=0;i<rango_variable[var_cero]; i++)
+                    {
+                            coordenada_final[0]=coordenadas_base[0]+i;
+                            coordenada_final[1]=coordenadas_base[1]+i;
+                            if(!matriz_shadow[coordenada_final[0]][coordenada_final[1]])
+                                matriz_datos[coordenada_final[0]][coordenada_final[1]]=0;
+                            else
+                                cout << "¡¡Casi la cago!!" << endl;
+                        
+                            if(!matriz_shadow[coordenada_final[1]][coordenada_final[0]])
+                                matriz_datos[coordenada_final[1]][coordenada_final[0]]=0;
+
+                        //#ifdef midebug
+                            cout << "Coordenada Puesta a \"0\": " << coordenada_final[0] << " - " << coordenada_final[1] << endl;  
+                        //#endif
+                    } 
+                }
+
+
+
                 // Escribo las tuplas correspondientes a cero.
                 for (itero_parejas = las_tuplas.begin() ; itero_parejas != las_tuplas.end(); ++itero_parejas)
                 {
@@ -373,7 +399,7 @@ class MiSolverPrintCallbacks : public  XCSP3PrintCallbacks{
                 
         cout << "Dimension total matriz: " << dimension_matriz << endl;
         cout << endl;
-        
+
         cout << "FIN de la instancia" << endl;
 
         //XCSP3PrintCallbacks::endInstance();
