@@ -365,7 +365,7 @@ public:
 						<< endl;
 #endif
 				coordenada_final[1] = coordenadas_base[1]
-						+ *(itero_dentro_de_la_pareja)
+						+ (*itero_dentro_de_la_pareja)
 						- minimo_variable[var_uno];
 
 				//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
@@ -500,13 +500,14 @@ public:
 		//	cout << "-----------------------------------------------" << endl;
 		// imprime_matriz("shadow");
 
+		cout <<"---------------------------------------------------"<<endl;
 		std::vector<string>::iterator itero;
 		for (itero = lista_arrays.begin(); itero != lista_arrays.end();	itero++) {
-			cout << "Array- " << *itero << endl;
-			cout << "Numero variables - " << numero_variable[*itero] << endl;
-			cout << "Base dentro de la matriz - " << base_array[*itero] << endl;
-			cout << "Valor base del rango - " << minimo_variable[*itero]<< endl;
-			cout << "Maximo valor del rango - " << rango_variable[*itero]<< endl;
+			cout << "Array: " << *itero << endl;
+			cout << "Numero variables: " << numero_variable[*itero] << endl;
+			cout << "Fila base de la matriz: " << base_array[*itero] << endl;
+			cout << "Primer valor: " << minimo_variable[*itero]<< endl;
+			cout << "Número de valores: " << rango_variable[*itero]<< endl;
 			cout << endl;
 		}
 
@@ -580,11 +581,12 @@ public:
 		//XCSP3PrintCallbacks::endVariables();
 	}
 
+	//PSS calls here alsp for variables with singleton values (<var id="x0"> -1 <\var> )
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 
 		lista_variables.push_back(id);
 		rango_variables = (maxValue - minValue) + 1;
-		minimo_variables = minValue;
+		minimo_variables = minValue;					/*TODO-hay variables (singleton) con valor -1!!*/
 		numero_variables++;
 		cout << "Variable: " << id << " - min: " << minValue << " - max: "
 				<< maxValue << endl;
@@ -610,6 +612,37 @@ public:
 #endif
 
 		//XCSP3PrintCallbacks::buildVariableInteger(id,minValue,maxValue);
+	}
+
+	//called for stand-alone values independent of a range: we assume they DO belong to a range
+	void buildVariableInteger(string id, vector<int> &values) override {
+
+		lista_variables.push_back(id);
+		rango_variables = values.size();
+		minimo_variables = values.front(); 		/*TODO-extend to non-index values */
+		numero_variables++;
+
+#ifdef mydebug
+		cout << "Variable: " << id << " - min: " << values[0] << " - max: "
+				<< values.back() << endl;
+#endif
+
+		//treats the case of singleton variables
+		if (!is_array) { /* variable extension to arrays: dirty */
+			lista_arrays.push_back(id);
+			base_array[id] = base_siguiente_array;
+			numero_variables = 1;
+
+			base_siguiente_array += rango_variables;
+			numero_variable[id] = 1;
+			rango_variable[id] = rango_variables;
+			minimo_variable[id] = minimo_variables;
+		}
+
+
+//		cout << "   Variable con valores discretos: " << id << " : ";
+//    	cout << "        ";
+//    	displayList(values);
 	}
 
 	void beginConstraints() {
