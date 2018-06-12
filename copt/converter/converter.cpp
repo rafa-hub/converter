@@ -314,7 +314,6 @@ public:
 				o << endl;
 			}
 			o << "\n\n" << endl;
-			//cout<<"-------------------------------"<<endl;
 		}
 		if (matriz == "shadow") {
 			//cout<<"MATRIZ SHADOW----------------"<<endl;
@@ -322,9 +321,9 @@ public:
 				for (int y = 0; y < dimension_matriz; y++){
 					o << matriz_shadow[x][y] << " ";
 				}
+				o << endl;
 			}
 			o << "\n\n" << endl;
-			//cout<<"----------------------------"<<endl;
 		}
 		return o;
 	}
@@ -339,68 +338,87 @@ public:
 		int coordenada_final[2];
 
 		//support
+
 		if (support) {
+
 			cout << "Soy support ...................." << endl;
 			cout << "Var_0:" << var_cero << " min var: "
 					<< minimo_variable[var_cero] << endl;
 			cout << "Var_1:" << var_uno << " min var: "
 					<< minimo_variable[var_uno] << endl;
 
-			for (itero_parejas = tuplas.begin(); itero_parejas != tuplas.end();
-					++itero_parejas) {
-				itero_dentro_de_la_pareja = itero_parejas->begin();
+			// No hay tuplas y es una regla support => todo a ceros
+
+			if (tuplas.size()==0)
+			{
+				cout << "CONJUNTO DE TUPLAS VACIO: TODO A CEROS" << endl;
+				for (int i = 0; i < rango_variable[var_cero]; i++)
+					for (int j = 0; j < rango_variable[var_uno]; j++) {
+						coordenada_final[0] = coordenadas_base[0] + i;
+						coordenada_final[1] = coordenadas_base[1] + j;
+						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+//#ifdef midebug
+							cout << "writing-0-S en:(" << coordenada_final[0] << ","
+								<< coordenada_final[1] << ")" << endl;
+//#endif
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+						}
+					}
+			} else {
+					for (itero_parejas = tuplas.begin(); itero_parejas != tuplas.end();
+							++itero_parejas) {
+						itero_dentro_de_la_pareja = itero_parejas->begin();
 
 #ifdef midebug
-				cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
-						<< endl;
+						cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
+							<< endl;
 #endif
 
-				coordenada_final[0] = coordenadas_base[0]
-						+ (*itero_dentro_de_la_pareja)
-						- minimo_variable[var_cero];
+						coordenada_final[0] = coordenadas_base[0]
+							+ (*itero_dentro_de_la_pareja)
+							- minimo_variable[var_cero];
 
-				itero_dentro_de_la_pareja++;
+						itero_dentro_de_la_pareja++;
 #ifdef midebug
-				cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
-						<< endl;
+						cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
+							<< endl;
 #endif
-				coordenada_final[1] = coordenadas_base[1]
-						+ (*itero_dentro_de_la_pareja)
-						- minimo_variable[var_uno];
+						coordenada_final[1] = coordenadas_base[1]
+							+ (*itero_dentro_de_la_pareja)
+							- minimo_variable[var_uno];
 
-				//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-				matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
-				//matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-				matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
+						//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+						matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
+						//matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+						matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
 #ifdef midebug
-				cout << "Tupla support leida-coord:(" << coordenada_final[0]
-						<< "," << coordenada_final[1] << ")" << endl;
+						cout << "Tupla support leida-coord:(" << coordenada_final[0]
+							<< "," << coordenada_final[1] << ")" << endl;
 #endif
+					}
 
-
-			}
-
-			// Borro el resto de restricciones
-			for (int i = 0; i < rango_variable[var_cero]; i++)
-				for (int j = 0; j < rango_variable[var_uno]; j++) {
-					coordenada_final[0] = coordenadas_base[0] + i;
-					coordenada_final[1] = coordenadas_base[1] + j;
-					if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+					// Borro el resto de restricciones
+					for (int i = 0; i < rango_variable[var_cero]; i++)
+						for (int j = 0; j < rango_variable[var_uno]; j++) {
+							coordenada_final[0] = coordenadas_base[0] + i;
+							coordenada_final[1] = coordenadas_base[1] + j;
+						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
 #ifdef midebug
-						cout << "writing-0-S en:(" << coordenada_final[0] << ","
+							cout << "writing-0-S en:(" << coordenada_final[0] << ","
 								<< coordenada_final[1] << ")" << endl;
 #endif
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
 
 						//testing
 #ifdef mitest
-						if (matriz_check[coordenada_final[0]][coordenada_final[1]] ) {
-							cout<<"SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<<endl;
-							cin.get();
-						} else {
+							if (matriz_check[coordenada_final[0]][coordenada_final[1]] ) {
+								cout<<"SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<<endl;
+								cin.get();
+							} else {
 							matriz_check[coordenada_final[0]][coordenada_final[1]] =1;
-						}
+							}
 #endif
 					}
 
@@ -423,6 +441,7 @@ public:
 #endif
 					}
 				}
+			}
 
 		} else {
 
@@ -431,6 +450,7 @@ public:
 			// Escribo las tuplas correspondientes a cero.
 			for (itero_parejas = las_tuplas.begin();
 					itero_parejas != las_tuplas.end(); ++itero_parejas) {
+				
 				itero_dentro_de_la_pareja = itero_parejas->begin();
 
 				//#ifdef midebug
@@ -450,10 +470,10 @@ public:
 				coordenada_final[1] = coordenadas_base[1]
 						+ (*itero_dentro_de_la_pareja)
 						- minimo_variable[var_uno];
-#ifdef midebug
+//#ifdef midebug
 				cout << "writing-0-C en:(" << coordenada_final[0] << ","
 						<< coordenada_final[1] << ")" << endl;
-#endif
+//#endif
 				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
@@ -490,15 +510,15 @@ public:
 	void endInstance() {
 		pongo_diagonal_matriz_a_cero();
 
-		//I/O: Nota-la matriz de datos no est· terminada todavia
+		//I/O: Nota-la matriz de datos no estÔøΩ terminada todavia
 		//Hay que eliminar las relaciones entra valores de la misma variable
-		//TODO-cambiar la lÛgica y hacerlo aqui
+		//TODO-cambiar la lÔøΩgica y hacerlo aqui
 
 		//	cout << "\nLa matriz resultante: " << endl;
-		//	imprime_matriz("datos");
+			imprime_matriz("datos");
 		//	cout << "-----------------------------------------------" << endl;
 		//	cout << "-----------------------------------------------" << endl;
-		// imprime_matriz("shadow");
+			imprime_matriz("shadow");
 
 		cout <<"---------------------------------------------------"<<endl;
 		std::vector<string>::iterator itero;
@@ -507,7 +527,7 @@ public:
 			cout << "Numero variables: " << numero_variable[*itero] << endl;
 			cout << "Fila base de la matriz: " << base_array[*itero] << endl;
 			cout << "Primer valor: " << minimo_variable[*itero]<< endl;
-			cout << "N˙mero de valores: " << rango_variable[*itero]<< endl;
+			cout << "NÔøΩmero de valores: " << rango_variable[*itero]<< endl;
 			cout << endl;
 		}
 
@@ -622,10 +642,10 @@ public:
 		minimo_variables = values.front(); 		/*TODO-extend to non-index values */
 		numero_variables++;
 
-#ifdef mydebug
+//#ifdef mydebug
 		cout << "Variable: " << id << " - min: " << values[0] << " - max: "
 				<< values.back() << endl;
-#endif
+//#endif
 
 		//treats the case of singleton variables
 		if (!is_array) { /* variable extension to arrays: dirty */
@@ -675,8 +695,11 @@ public:
 		var_uno = get_nombre(list[1]->id);
 
 
-		if (list.size() > 0){
+		if (list.size() == 2){
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+		} else{
+			throw std::runtime_error("Error, este c√≥digo s√≥lo funciona con relaciones binarias");
+			exit(2);
 		}
 
 
@@ -687,10 +710,10 @@ public:
 #endif
 
 #ifdef midebug
-		cout << "TamaÒo tuplas: " << las_tuplas.size() << endl;
+		cout << "TamaÔøΩo tuplas: " << las_tuplas.size() << endl;
 #endif
 
-		if (las_tuplas.size() > 0) {
+		
 #ifdef midebug
 			if (support)
 				cout << "escribiendo support en: " << "(" << var_cero << ","
@@ -702,9 +725,9 @@ public:
 #ifdef mipause
         	cin.get();
 #endif
-			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
+		escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
 					support);
-		}
+		
 
 #ifdef midebug
 		cout << "\n ** Fin buildConstraintExtension ** " << id << endl;
@@ -732,10 +755,13 @@ public:
 		var_cero = get_nombre(list[0]->id);
 		var_uno = get_nombre(list[1]->id);
 
-
-		if (list.size() > 0)
-			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,
-					coordenadas_base);
+		if (list.size() == 2){
+			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+		} else{
+			throw std::runtime_error("Error, este c√≥digo s√≥lo funciona con relaciones binarias");
+			exit(2);
+		}
+		
 
 		//calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
 
@@ -745,10 +771,10 @@ public:
 #endif
 
 #ifdef midebug
-		cout << "TamaÒo tuplas: " << las_tuplas.size() << endl;
+		cout << "TamaÔøΩo tuplas: " << las_tuplas.size() << endl;
 #endif
 
-		if (las_tuplas.size() > 0) {
+		
 #ifdef midebug
 			if (support)
 				cout << "escribiendo support en: " << "(" << var_cero << ","
@@ -761,9 +787,9 @@ public:
 #ifdef mipause
         	cin.get();
 #endif
-			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
+		escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
 					support);
-		}
+		
 
 #ifdef midebug
 		cout << "\n ** Fin buildConstraintExtensionAS ** " << id << endl;
