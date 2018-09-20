@@ -515,10 +515,10 @@ public:
 		//TODO-cambiar la l�gica y hacerlo aqui
 
 		//	cout << "\nLa matriz resultante: " << endl;
-			imprime_matriz("datos");
+			//imprime_matriz("datos");
 		//	cout << "-----------------------------------------------" << endl;
 		//	cout << "-----------------------------------------------" << endl;
-			imprime_matriz("shadow");
+			//imprime_matriz("shadow");
 
 		cout <<"---------------------------------------------------"<<endl;
 		std::vector<string>::iterator itero;
@@ -816,6 +816,19 @@ public:
 		//XCSP3PrintCallbacks::endGroup();
 	}
 
+
+////////////////////
+//
+// PROCESSING ALL DIFFERENT
+//
+///////////////////
+
+	void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
+    	cout << "\n   Mi allDiff constraint" << id << endl;
+   		cout << "        ";
+    	displayList(list);
+	}
+
 };
 
 ///////////////////
@@ -828,6 +841,7 @@ int main(int argc, char **argv) {
 	MiSolverPrintCallbacks miparser;
 	char *nombre_fichero_dimacs;
 
+	cout << "\nPrueba de que todo va bien .....\n" << endl;
 	if (argc != 2) {
 		throw std::runtime_error("usage: ./csp xcsp3instance.xml");
 		return 0;
@@ -878,186 +892,6 @@ int main(int argc, char **argv) {
 	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos", fmat);
 	fmat.close();
-
-
-/////////////////////////////////////////////
-//TESTING:TODO-use test framework
-//Instance: driveslogw-01c
-//A-CONFLICTING CONSTRAINTS
-
-#ifdef mitest
-	string v1, val1, v2, val2;
-	v1 = "x[2]", val1 = "1", v2 = "x[1]", val2 = "1";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "x[31]", val1 = "1", v2 = "x[20]", val2 = "1";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "x[24]", val1 = "1", v2 = "x[22]", val2 = "1";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "x[27]", val1 = "1", v2 = "x[22]", val2 = "1";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	//non-conflicts
-	v1 = "x[27]", val1 = "1", v2 = "x[22]", val2 = "0";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "x[24]", val1 = "1", v2 = "x[22]", val2 = "0";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-
-
-
-//B-SUPPORTS
-	v1 = "z[4]", val1 = "0", v2 = "y[5]", val2 = "0";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[4]", val1 = "0", v2 = "y[5]", val2 = "1";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[4]", val1 = "0", v2 = "y[5]", val2 = "2";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[4]", val1 = "1", v2 = "y[5]", val2 = "0";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[4]", val1 = "2", v2 = "y[5]", val2 = "0";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[4]", val1 = "3", v2 = "y[5]", val2 = "0";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "0", v2 = "z[1]", val2 = "0";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "0", v2 = "z[1]", val2 = "1";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "0", v2 = "z[1]", val2 = "2";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "0", v2 = "z[1]", val2 = "3";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "1", v2 = "z[1]", val2 = "0";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "2", v2 = "z[1]", val2 = "0";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "3", v2 = "z[1]", val2 = "0";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	//non-support
-	v1 = "z[4]", val1 = "3", v2 = "y[5]", val2 = "1";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "1", v2 = "z[1]", val2 = "1";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-	v1 = "z[2]", val1 = "2", v2 = "z[1]", val2 = "1";
-	if (!miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "SUPPORT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-
-
-//C-Incompatible values of same variable
-	v1 = "z[0]", val1 = "0", v2 = "z[0]", val2 = "1";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[0]", val1 = "0", v2 = "z[0]", val2 = "2";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[0]", val1 = "0", v2 = "z[0]", val2 = "3";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[0]", val1 = "1", v2 = "z[0]", val2 = "2";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[0]", val1 = "1", v2 = "z[0]", val2 = "3";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "z[0]", val1 = "2", v2 = "z[0]", val2 = "3";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "x[0]", val1 = "0", v2 = "x[0]", val2 = "1";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-	v1 = "y[0]", val1 = "2", v2 = "y[0]", val2 = "1";
-	if (miparser.is_conflicting(v1, val1, v2, val2)) {
-		cout << "CONFLICT:" << "(" << v1 << "=" << val1 << ")" << "(" << v2
-				<< "=" << val2 << ")" << endl;
-	}
-#endif
 
 	return 0;
 }
