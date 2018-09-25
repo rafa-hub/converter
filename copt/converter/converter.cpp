@@ -828,6 +828,10 @@ int main(int argc, char **argv) {
 	MiSolverPrintCallbacks miparser;
 	char *nombre_fichero_dimacs;
 
+
+	cout << "\nPrueba de que compila ................. \n" << endl;
+
+
 	if (argc != 2) {
 		throw std::runtime_error("usage: ./csp xcsp3instance.xml");
 		return 0;
