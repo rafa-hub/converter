@@ -829,6 +829,22 @@ public:
     	displayList(list);
 	}
 
+////////////////////
+//
+// PROCESSING ALL EQUAL
+//
+///////////////////
+
+
+	void buildConstraintAllEqual(string id, vector<XVariable *> &list) {
+    	cout << "\n   \"Mi\" allEqual constraint" << id << endl;
+    	cout << "        ";
+    	displayList(list);
+	}
+
+
+
+
 };
 
 ///////////////////
