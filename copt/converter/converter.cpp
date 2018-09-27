@@ -829,6 +829,22 @@ public:
     	displayList(list);
 	}
 
+////////////////////
+//
+// PROCESSING ALL EQUAL
+//
+///////////////////
+
+
+	void buildConstraintAllEqual(string id, vector<XVariable *> &list) {
+    	cout << "\n   \"Mi\" allEqual constraint" << id << endl;
+    	cout << "        ";
+    	displayList(list);
+	}
+
+
+
+
 };
 
 ///////////////////
@@ -842,6 +858,8 @@ int main(int argc, char **argv) {
 	char *nombre_fichero_dimacs;
 
 	cout << "\nPrueba de que todo va bien .....\n" << endl;
+
+
 	if (argc != 2) {
 		throw std::runtime_error("usage: ./csp xcsp3instance.xml");
 		return 0;
