@@ -492,6 +492,178 @@ public:
 			}
 		}
 	}
+
+	//Funcion que escribe en la matriz
+	void escribe_en_matriz_ternaria(int *coordenadas_base, vector<vector<int> >& tuplas,
+			string var_cero, string var_uno, bool support) {
+		//vector<vector<int>>::iterator it;
+
+		std::vector<vector<int>>::iterator itero_parejas;
+		vector<int>::iterator itero_dentro_de_la_pareja;
+		int coordenada_final[2];
+
+		//support
+
+		if (support) {
+
+			cout << "Soy support ...................." << endl;
+			cout << "Var_0:" << var_cero << " min var: "
+					<< minimo_variable[var_cero] << endl;
+			cout << "Var_1:" << var_uno << " min var: "
+					<< minimo_variable[var_uno] << endl;
+
+			// No hay tuplas y es una regla support => todo a ceros
+
+			if (tuplas.size()==0)
+			{
+				cout << "CONJUNTO DE TUPLAS VACIO: TODO A CEROS" << endl;
+				for (int i = 0; i < rango_variable[var_cero]; i++)
+					for (int j = 0; j < rango_variable[var_uno]; j++) {
+						coordenada_final[0] = coordenadas_base[0] + i;
+						coordenada_final[1] = coordenadas_base[1] + j;
+						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+//#ifdef midebug
+							cout << "writing-0-S en:(" << coordenada_final[0] << ","
+								<< coordenada_final[1] << ")" << endl;
+//#endif
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+						}
+					}
+			} else {
+					for (itero_parejas = tuplas.begin(); itero_parejas != tuplas.end();
+							++itero_parejas) {
+						itero_dentro_de_la_pareja = itero_parejas->begin();
+
+#ifdef midebug
+						cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
+							<< endl;
+#endif
+
+						coordenada_final[0] = coordenadas_base[0]
+							+ (*itero_dentro_de_la_pareja)
+							- minimo_variable[var_cero];
+
+						itero_dentro_de_la_pareja++;
+#ifdef midebug
+						cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
+							<< endl;
+#endif
+						coordenada_final[1] = coordenadas_base[1]
+							+ (*itero_dentro_de_la_pareja)
+							- minimo_variable[var_uno];
+
+						//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+						matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
+						//matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+						matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
+#ifdef midebug
+						cout << "Tupla support leida-coord:(" << coordenada_final[0]
+							<< "," << coordenada_final[1] << ")" << endl;
+#endif
+					}
+
+					// Borro el resto de restricciones
+					for (int i = 0; i < rango_variable[var_cero]; i++)
+						for (int j = 0; j < rango_variable[var_uno]; j++) {
+							coordenada_final[0] = coordenadas_base[0] + i;
+							coordenada_final[1] = coordenadas_base[1] + j;
+						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+#ifdef midebug
+							cout << "writing-0-S en:(" << coordenada_final[0] << ","
+								<< coordenada_final[1] << ")" << endl;
+#endif
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+
+						//testing
+#ifdef mitest
+							if (matriz_check[coordenada_final[0]][coordenada_final[1]] ) {
+								cout<<"SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<<endl;
+								cin.get();
+							} else {
+							matriz_check[coordenada_final[0]][coordenada_final[1]] =1;
+							}
+#endif
+					}
+
+					if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
+#ifdef midebug
+						cout << "writing-0-S en:(" << coordenada_final[1] << ","
+								<< coordenada_final[0] << ")" << endl;
+#endif
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+
+						//testing
+#ifdef mitest
+						if (matriz_check[coordenada_final[1]][coordenada_final[0]]) {
+							cout<< "SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<< endl;
+							cin.get();
+						} else {
+							matriz_check[coordenada_final[1]][coordenada_final[0]] =1;
+						}
+#endif
+					}
+				}
+			}
+
+		} else {
+
+			cout << "Soy una regla Conflict ......" << endl;
+
+			// Escribo las tuplas correspondientes a cero.
+			for (itero_parejas = las_tuplas.begin();
+					itero_parejas != las_tuplas.end(); ++itero_parejas) {
+				
+				itero_dentro_de_la_pareja = itero_parejas->begin();
+
+				//#ifdef midebug
+				cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
+						<< endl;
+				//#endif
+
+				coordenada_final[0] = coordenadas_base[0]
+						+ (*itero_dentro_de_la_pareja)
+						- minimo_variable[var_cero];
+
+				itero_dentro_de_la_pareja++;
+				//#ifdef midebug
+				cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
+						<< endl;
+				//#endif
+				coordenada_final[1] = coordenadas_base[1]
+						+ (*itero_dentro_de_la_pareja)
+						- minimo_variable[var_uno];
+//#ifdef midebug
+				cout << "writing-0-C en:(" << coordenada_final[0] << ","
+						<< coordenada_final[1] << ")" << endl;
+//#endif
+				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+
+				//testing
+#ifdef mitest
+				if (matriz_check[coordenada_final[0]][coordenada_final[1]] ||
+					matriz_check[coordenada_final[1]][coordenada_final[0]] ) {
+					cout << "SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<< endl;
+					cin.get();
+				} else {
+					matriz_check[coordenada_final[0]][coordenada_final[1]] = 1;
+					matriz_check[coordenada_final[1]][coordenada_final[0]] = 1;
+				}
+#endif
+
+			}
+		}
+	}
+
+
+
+
+
+
+
 /////////////////////////////////////////////
 	/* ==========Fin de mis funciones============================================================
 
@@ -824,9 +996,71 @@ public:
 ///////////////////
 
 	void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
-    	cout << "\n   Mi allDiff constraint" << id << endl;
-   		cout << "        ";
-    	displayList(list);
+    	
+		string var_cero, var_uno, var_dos, var_aux;
+		int indice0, indice1, indice2,indice_aux;
+		int coordenadas_base[2];
+		int i,j,k;
+		int support = 1;
+		int cuento = 0;
+		
+		
+		cout << "\n   Mi allDiff constraint " << id << endl;
+   		
+    	//displayList(list);
+
+		cout << "\n\n Lo mio: " << endl;
+		cout << "Tres variables: " << (list[0]->id) << " - " << (list[1]->id) << " - " << (list[2]->id) << endl;
+
+		indice0 = get_indice(*(list[0]));
+		indice1 = get_indice(*(list[1]));
+		indice2 = get_indice(*(list[2]));
+		
+		var_cero = get_nombre(list[0]->id);
+		var_uno = get_nombre(list[1]->id);
+		var_dos = get_nombre(list[2]->id);
+
+		cout<< "Mínivo variable cero: " << minimo_variable[var_cero]<< " - rango variable cero: " 
+			<< rango_variable[var_cero] << endl;
+		
+		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
+		{	
+			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
+			{
+				
+				for (k=minimo_variable[var_dos];k<(rango_variable[var_dos]+minimo_variable[var_dos]);k++)
+				{
+					cout << "i: " << i << " - j: " << j << " - k: " << k ;
+
+					if((i!=j) && (i!=k) && (j!=k))
+					{
+						cuento++;
+						cout << " ---> ¡Son diferentes! ";
+						calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+						escribe_en_matriz_ternaria(coordenadas_base, las_tuplas, var_cero, var_uno, support);
+					}
+					cout << endl;
+				}
+				
+			} 
+
+		}
+
+		cout << "\nHan sido " << cuento << " las reglas con todo diferente." << endl;
+		
+
+
+		/* if (var_cero!=var_uno){
+
+		}
+		calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+		escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,support); */
+
+
+		//calcula_coordenadas_base_ternaria(var_cero, var_uno, var_dos, indice0, indice1, indice2, coordenadas_base);
+		//escribe_en_matriz_ternaria(coordenadas_base, las_tuplas, var_cero, var_uno, support);
+
+		
 	}
 
 ////////////////////
