@@ -59,10 +59,16 @@ public:
 
 	char nombre_fichero[256]; 			// Nombre del fichero XML a procesar
 
+
+
+
 	void set_nombre_fichero(char *nombre) {
 		strcpy(nombre_fichero, nombre);
 	}
 
+
+
+	// Escribe los resultados en un fichero
 	void escribe_nombre_fichero() {
 		string var;
 		char *nombre_fichero_csp;
@@ -76,7 +82,6 @@ public:
 		cout<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
 		cout << "x " << lista_variables.size() << endl;
 #endif
-
 		fichero_salida<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
 		fichero_salida << "x " << lista_variables.size() << endl;
 
@@ -94,7 +99,12 @@ public:
 		fichero_salida.close();
 	}
 
+
+
+
+
 	// Extrae y devuelve el indice de una variable
+
 	int get_indice(XVariable variable) {
 		string indice_str, valor;
 		size_t aux1, aux2;
@@ -118,6 +128,10 @@ public:
 		return (std::stoi(indice_str));
 	}
 
+
+
+
+
 	//Extrae y devuelve el nombre de la variable sin indice, es decir, el nombre del array
 	string get_nombre(string variable) {
 		string nombre, vector;
@@ -137,6 +151,8 @@ public:
 
 		return vector;
 	}
+
+
 
 	//Muestra en pantalla coord base de todas las variables
 	//TODO-mapping de "nombre var" con coordenada base?
@@ -158,6 +174,8 @@ public:
 	}
 
 
+
+
 	// Calcula las coordenadas base de la variable. A esto habra que sumar el orden de la
 	// instancia de la variable y el valor de la coordenada de la restriccion
 	// Hay que restar el minimo del rango de valores para el caso en el que no sea cero
@@ -176,6 +194,10 @@ public:
 
 		return;
 	}
+
+
+
+
 
 	//for testing: x[0], 3, y[0], 1 -> true/false
 	//assumes values are integers
@@ -201,6 +223,10 @@ public:
 
 		return !((bool) matriz_datos[row_1][row_2]);
 	}
+
+
+
+
 
 	//removes edges corresponding to values of the same variable, from ug and matriz_datos
 	//(all incompatible since a variable may only have one value)
@@ -494,168 +520,22 @@ public:
 	}
 
 	//Funcion que escribe en la matriz
-	void escribe_en_matriz_ternaria(int *coordenadas_base, vector<vector<int> >& tuplas,
-			string var_cero, string var_uno, bool support) {
-		//vector<vector<int>>::iterator it;
+	void escribe_en_matriz_ternaria(vector<XVariable *> &list, int *base_01, int *base_02, int *base_12) {
 
-		std::vector<vector<int>>::iterator itero_parejas;
-		vector<int>::iterator itero_dentro_de_la_pareja;
-		int coordenada_final[2];
+		string var_cero, var_uno, var_dos, var_aux;
+		int indice0, indice1, indice2;
 
-		//support
+		indice0 = get_indice(*(list[0]));
+		indice1 = get_indice(*(list[1]));
+		indice2 = get_indice(*(list[2]));
+		
+		var_cero = get_nombre(list[0]->id);
+		var_uno = get_nombre(list[1]->id);
+		var_dos = get_nombre(list[2]->id);
 
-		if (support) {
 
-			cout << "Soy support ...................." << endl;
-			cout << "Var_0:" << var_cero << " min var: "
-					<< minimo_variable[var_cero] << endl;
-			cout << "Var_1:" << var_uno << " min var: "
-					<< minimo_variable[var_uno] << endl;
-
-			// No hay tuplas y es una regla support => todo a ceros
-
-			if (tuplas.size()==0)
-			{
-				cout << "CONJUNTO DE TUPLAS VACIO: TODO A CEROS" << endl;
-				for (int i = 0; i < rango_variable[var_cero]; i++)
-					for (int j = 0; j < rango_variable[var_uno]; j++) {
-						coordenada_final[0] = coordenadas_base[0] + i;
-						coordenada_final[1] = coordenadas_base[1] + j;
-						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
-//#ifdef midebug
-							cout << "writing-0-S en:(" << coordenada_final[0] << ","
-								<< coordenada_final[1] << ")" << endl;
-//#endif
-							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-						}
-					}
-			} else {
-					for (itero_parejas = tuplas.begin(); itero_parejas != tuplas.end();
-							++itero_parejas) {
-						itero_dentro_de_la_pareja = itero_parejas->begin();
-
-#ifdef midebug
-						cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
-							<< endl;
-#endif
-
-						coordenada_final[0] = coordenadas_base[0]
-							+ (*itero_dentro_de_la_pareja)
-							- minimo_variable[var_cero];
-
-						itero_dentro_de_la_pareja++;
-#ifdef midebug
-						cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
-							<< endl;
-#endif
-						coordenada_final[1] = coordenadas_base[1]
-							+ (*itero_dentro_de_la_pareja)
-							- minimo_variable[var_uno];
-
-						//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
-						//matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-						matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
-#ifdef midebug
-						cout << "Tupla support leida-coord:(" << coordenada_final[0]
-							<< "," << coordenada_final[1] << ")" << endl;
-#endif
-					}
-
-					// Borro el resto de restricciones
-					for (int i = 0; i < rango_variable[var_cero]; i++)
-						for (int j = 0; j < rango_variable[var_uno]; j++) {
-							coordenada_final[0] = coordenadas_base[0] + i;
-							coordenada_final[1] = coordenadas_base[1] + j;
-						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
-#ifdef midebug
-							cout << "writing-0-S en:(" << coordenada_final[0] << ","
-								<< coordenada_final[1] << ")" << endl;
-#endif
-							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-
-						//testing
-#ifdef mitest
-							if (matriz_check[coordenada_final[0]][coordenada_final[1]] ) {
-								cout<<"SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<<endl;
-								cin.get();
-							} else {
-							matriz_check[coordenada_final[0]][coordenada_final[1]] =1;
-							}
-#endif
-					}
-
-					if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
-#ifdef midebug
-						cout << "writing-0-S en:(" << coordenada_final[1] << ","
-								<< coordenada_final[0] << ")" << endl;
-#endif
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-
-						//testing
-#ifdef mitest
-						if (matriz_check[coordenada_final[1]][coordenada_final[0]]) {
-							cout<< "SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<< endl;
-							cin.get();
-						} else {
-							matriz_check[coordenada_final[1]][coordenada_final[0]] =1;
-						}
-#endif
-					}
-				}
-			}
-
-		} else {
-
-			cout << "Soy una regla Conflict ......" << endl;
-
-			// Escribo las tuplas correspondientes a cero.
-			for (itero_parejas = las_tuplas.begin();
-					itero_parejas != las_tuplas.end(); ++itero_parejas) {
-				
-				itero_dentro_de_la_pareja = itero_parejas->begin();
-
-				//#ifdef midebug
-				cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
-						<< endl;
-				//#endif
-
-				coordenada_final[0] = coordenadas_base[0]
-						+ (*itero_dentro_de_la_pareja)
-						- minimo_variable[var_cero];
-
-				itero_dentro_de_la_pareja++;
-				//#ifdef midebug
-				cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
-						<< endl;
-				//#endif
-				coordenada_final[1] = coordenadas_base[1]
-						+ (*itero_dentro_de_la_pareja)
-						- minimo_variable[var_uno];
-//#ifdef midebug
-				cout << "writing-0-C en:(" << coordenada_final[0] << ","
-						<< coordenada_final[1] << ")" << endl;
-//#endif
-				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-				//testing
-#ifdef mitest
-				if (matriz_check[coordenada_final[0]][coordenada_final[1]] ||
-					matriz_check[coordenada_final[1]][coordenada_final[0]] ) {
-					cout << "SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<< endl;
-					cin.get();
-				} else {
-					matriz_check[coordenada_final[0]][coordenada_final[1]] = 1;
-					matriz_check[coordenada_final[1]][coordenada_final[0]] = 1;
-				}
-#endif
-
-			}
-		}
+		
+		
 	}
 
 
@@ -998,11 +878,10 @@ public:
 	void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
     	
 		string var_cero, var_uno, var_dos, var_aux;
-		int indice0, indice1, indice2,indice_aux;
-		int coordenadas_base[2];
+		int indice0, indice1, indice2;
+		
+		int coordenadas_base[2],base_01[2],base_02[2],base_12[2];
 		int i,j,k;
-		int support = 1;
-		int cuento = 0;
 		
 		
 		cout << "\n   Mi allDiff constraint " << id << endl;
@@ -1012,6 +891,9 @@ public:
 		cout << "\n\n Lo mio: " << endl;
 		cout << "Tres variables: " << (list[0]->id) << " - " << (list[1]->id) << " - " << (list[2]->id) << endl;
 
+
+		//Preproceso de las variables implicadas en la regla ternaria
+
 		indice0 = get_indice(*(list[0]));
 		indice1 = get_indice(*(list[1]));
 		indice2 = get_indice(*(list[2]));
@@ -1019,6 +901,11 @@ public:
 		var_cero = get_nombre(list[0]->id);
 		var_uno = get_nombre(list[1]->id);
 		var_dos = get_nombre(list[2]->id);
+		
+		calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,base_01);
+		calcula_coordenadas_base(var_cero, var_dos, indice0, indice2,base_02);
+		calcula_coordenadas_base(var_uno, var_dos, indice1, indice2,base_12);
+
 
 		cout<< "Mínivo variable cero: " << minimo_variable[var_cero]<< " - rango variable cero: " 
 			<< rango_variable[var_cero] << endl;
@@ -1034,10 +921,9 @@ public:
 
 					if((i!=j) && (i!=k) && (j!=k))
 					{
-						cuento++;
 						cout << " ---> ¡Son diferentes! ";
-						calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-						escribe_en_matriz_ternaria(coordenadas_base, las_tuplas, var_cero, var_uno, support);
+						escribe_en_matriz_ternaria(list,base_01,base_02,base_12);
+						
 					}
 					cout << endl;
 				}
@@ -1046,7 +932,11 @@ public:
 
 		}
 
-		cout << "\nHan sido " << cuento << " las reglas con todo diferente." << endl;
+		
+
+		
+
+		
 		
 
 
