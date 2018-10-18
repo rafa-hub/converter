@@ -103,6 +103,7 @@ public:
 
 
 
+
 	// Extrae y devuelve el indice de una variable
 
 	int get_indice(XVariable variable) {
@@ -132,6 +133,8 @@ public:
 
 
 
+
+
 	//Extrae y devuelve el nombre de la variable sin indice, es decir, el nombre del array
 	string get_nombre(string variable) {
 		string nombre, vector;
@@ -151,6 +154,8 @@ public:
 
 		return vector;
 	}
+
+
 
 
 
@@ -176,6 +181,8 @@ public:
 
 
 
+
+
 	// Calcula las coordenadas base de la variable. A esto habra que sumar el orden de la
 	// instancia de la variable y el valor de la coordenada de la restriccion
 	// Hay que restar el minimo del rango de valores para el caso en el que no sea cero
@@ -194,6 +201,8 @@ public:
 
 		return;
 	}
+
+
 
 
 
@@ -273,6 +282,10 @@ public:
 	}
 
 
+
+
+
+
 	// Genera la matriz
 	void genera_matriz() {
 		std::vector<string>::iterator lista;
@@ -323,6 +336,12 @@ public:
 #endif
 	}
 
+
+
+
+
+
+
 	// Certificacion de que la matriz tiene la diagonal principal a cero
 	void pongo_diagonal_matriz_a_cero() {
 		for (int x = 0; x < dimension_matriz; x++) {
@@ -330,6 +349,13 @@ public:
 		}
 	}
 
+
+
+
+
+
+	//Vuelca en pantalla la matriz, solo útil para depuración, en casos reales
+	//la matriz suele ser demasiado grande
 	ostream& imprime_matriz(string matriz, ostream& o=cout) {
 		if (matriz == "datos") {
 			//cout<<"MATRIZ DE DATOS-----------------"<<endl;
@@ -353,6 +379,11 @@ public:
 		}
 		return o;
 	}
+
+
+
+
+
 
 	//Funcion que escribe en la matriz
 	void escribe_en_matriz(int *coordenadas_base, vector<vector<int> >& tuplas,
@@ -550,6 +581,10 @@ public:
 	 =========Comienzo de las funciones que invoca el parser ===================================== */
 ////////////////////////////////////////////
 
+
+
+
+
 	void beginInstance(InstanceType type) {
 
 #ifdef midebug
@@ -558,6 +593,11 @@ public:
 
 		//XCSP3PrintCallbacks::beginInstance(type);
 	}
+
+
+
+
+
 
 	void endInstance() {
 		pongo_diagonal_matriz_a_cero();
@@ -587,9 +627,16 @@ public:
 		cout << endl;
 		cout << "FIN del parsing----------------" << endl;
 
-		//XCSP3PrintCallbacks::endInstance();
+		
 	}
 
+
+
+
+
+	// Se invoca cuando se comienza a procesar un array.
+	// Se resetean los contadores para poder llevar registro del
+	// tamaño del array y del rango de las variables.
 	void beginVariableArray(string id) {
 
 		lista_arrays.push_back(id);
@@ -603,9 +650,18 @@ public:
 
 		is_array=true;
 
-		//XCSP3PrintCallbacks::beginVariableArray(id);
+		
 	}
 
+
+
+
+
+
+
+	// Se invoca cuando se termina de procesar todas las variables de un array.
+	// En este momento se actualizan las variables globales.
+	// Con esa información se realiza el cálculo para poder escribir en la matriz.
 	void endVariableArray() {
 
 		base_siguiente_array += (numero_variables * rango_variables);
@@ -621,9 +677,16 @@ public:
 				<< rango_variables << endl;
 #endif
 
-		//XCSP3PrintCallbacks::endVariableArray();
 	}
 
+
+
+
+
+
+
+
+	// Comienza el proceso de variables. De momento no se hace nada.
 	void beginVariables() {
 
 
@@ -631,9 +694,20 @@ public:
 		cout << " - Comienza la declaracion de variables - " << endl;
 #endif
 
-		//XCSP3PrintCallbacks::beginVariables();
 	}
 
+
+
+
+
+
+
+
+
+
+	// Se invoca al terminar de procesar las variables.
+	// Escribe el fichero .csp que contiene todas las variables con sus rangos.
+	// Genera la matriz, que una vez escrita, servirá para generar el grafo.
 	void endVariables() {
 
 		//Escribo el fichero .csp
@@ -650,8 +724,15 @@ public:
 #endif
 #endif
 
-		//XCSP3PrintCallbacks::endVariables();
+
 	}
+
+
+
+
+
+
+
 
 	//PSS calls here alsp for variables with singleton values (<var id="x0"> -1 <\var> )
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
@@ -683,8 +764,15 @@ public:
 				<< " - Minimo valor Variable: " << minimo_variables << endl;
 #endif
 
-		//XCSP3PrintCallbacks::buildVariableInteger(id,minValue,maxValue);
 	}
+
+
+
+
+
+
+
+
 
 	//called for stand-alone values independent of a range: we assume they DO belong to a range
 	void buildVariableInteger(string id, vector<int> &values) override {
@@ -717,15 +805,11 @@ public:
 //    	displayList(values);
 	}
 
-	void beginConstraints() {
 
-		//XCSP3PrintCallbacks::beginConstraints();
-	}
 
-	void endConstraints() {
 
-		//XCSP3PrintCallbacks::endConstraints();
-	}
+
+
 
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
@@ -787,6 +871,13 @@ public:
 
 		//XCSP3PrintCallbacks::buildConstraintExtension(id, list,tuples,support,hasStar);
 	}
+
+
+
+
+
+
+
 
 	void buildConstraintExtensionAs(string id, vector<XVariable *> list,
 			bool support, bool hasStar) {
@@ -869,6 +960,17 @@ public:
 	}
 
 
+
+
+
+
+
+
+
+
+
+
+
 ////////////////////
 //
 // PROCESSING ALL DIFFERENT
@@ -880,7 +982,7 @@ public:
 		string var_cero, var_uno, var_dos, var_aux;
 		int indice0, indice1, indice2;
 		
-		int coordenadas_base[2],base_01[2],base_02[2],base_12[2];
+		int coordenada_final[2],base_01[2],base_02[2],base_12[2];
 		int i,j,k;
 		
 		
@@ -893,7 +995,6 @@ public:
 
 
 		//Preproceso de las variables implicadas en la regla ternaria
-
 		indice0 = get_indice(*(list[0]));
 		indice1 = get_indice(*(list[1]));
 		indice2 = get_indice(*(list[2]));
@@ -902,6 +1003,8 @@ public:
 		var_uno = get_nombre(list[1]->id);
 		var_dos = get_nombre(list[2]->id);
 		
+
+		//Cálculo de la ubicación dentro de la matriz
 		calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,base_01);
 		calcula_coordenadas_base(var_cero, var_dos, indice0, indice2,base_02);
 		calcula_coordenadas_base(var_uno, var_dos, indice1, indice2,base_12);
@@ -910,6 +1013,8 @@ public:
 		cout<< "Mínivo variable cero: " << minimo_variable[var_cero]<< " - rango variable cero: " 
 			<< rango_variable[var_cero] << endl;
 		
+		
+		// Bucle para buscar los que son diferentes
 		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
 		{	
 			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
@@ -921,9 +1026,21 @@ public:
 
 					if((i!=j) && (i!=k) && (j!=k))
 					{
-						cout << " ---> ¡Son diferentes! ";
-						escribe_en_matriz_ternaria(list,base_01,base_02,base_12);
+						cout << " -->  Son diferentes " ;
+						coordenada_final[0]=base_01[0]+i;
+						coordenada_final[1]=base_01[1]+j;
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 						
+						coordenada_final[0]=base_02[0]+i;
+						coordenada_final[1]=base_02[1]+k;
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+
+						coordenada_final[0]=base_12[0]+j;
+						coordenada_final[1]=base_12[1]+k;
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 					}
 					cout << endl;
 				}
@@ -931,27 +1048,18 @@ public:
 			} 
 
 		}
-
 		
-
-		
-
-		
-		
-
-
-		/* if (var_cero!=var_uno){
-
-		}
-		calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-		escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,support); */
-
-
-		//calcula_coordenadas_base_ternaria(var_cero, var_uno, var_dos, indice0, indice1, indice2, coordenadas_base);
-		//escribe_en_matriz_ternaria(coordenadas_base, las_tuplas, var_cero, var_uno, support);
 
 		
 	}
+
+
+
+
+
+
+
+
 
 ////////////////////
 //
@@ -970,6 +1078,15 @@ public:
 
 
 };
+
+
+
+
+
+
+
+
+
 
 ///////////////////
 //
