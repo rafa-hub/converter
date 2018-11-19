@@ -21,6 +21,8 @@
 #define CREAR_MATRIZ 1
 #ifndef BENCHMARK_PATH 
 #define BENCHMARK_PATH  "/var/tmp/salida"
+#define DIFERENTE 0
+#define IGUAL 1
 #endif
 
 using namespace XCSP3Core;
@@ -550,22 +552,69 @@ public:
 		}
 	}
 
-	//Funcion que escribe en la matriz
-	void escribe_en_matriz_ternaria(vector<XVariable *> &list, int *base_01, int *base_02, int *base_12) {
+	//Funcion que escribe en la matriz una regla AllEqual o AllDifferent
+	void  escribe_regla_all(int *coordenadas_base, string var_cero, string var_uno, int REGLA)
+	{
+		int i=0,j=0;
+		int coordenada_final[2];
 
-		string var_cero, var_uno, var_dos, var_aux;
-		int indice0, indice1, indice2;
+	if(REGLA==DIFERENTE)
+	{
+		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
+		{	
+			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
+			{
+				cout << "i: " << i << " - j: " << j;
 
-		indice0 = get_indice(*(list[0]));
-		indice1 = get_indice(*(list[1]));
-		indice2 = get_indice(*(list[2]));
-		
-		var_cero = get_nombre(list[0]->id);
-		var_uno = get_nombre(list[1]->id);
-		var_dos = get_nombre(list[2]->id);
+					if(i!=j)
+					{
+						cout << " -->  Son diferentes " ;
+						coordenada_final[0]=coordenadas_base[0]+i;
+						coordenada_final[1]=coordenadas_base[1]+j;
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+					}
+					else {
+						coordenada_final[0]=coordenadas_base[0]+i;
+						coordenada_final[1]=coordenadas_base[1]+j;
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
+					}
+					cout << endl;
+			}
+				
+		}
+	}
 
-		
+	if(REGLA==IGUAL)
+	{
+		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
+		{	
+			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
+			{
+				cout << "i: " << i << " - j: " << j;
+
+					if(i==j)
+					{
+						cout << " -->  Son iguales " ;
+						coordenada_final[0]=coordenadas_base[0]+i;
+						coordenada_final[1]=coordenadas_base[1]+j;
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+					}
+					else {
+						coordenada_final[0]=coordenadas_base[0]+i;
+						coordenada_final[1]=coordenadas_base[1]+j;
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+
+					}
+					cout << endl;
+			}
+				
+		}
+	}
 		
 	}
 
@@ -607,7 +656,7 @@ public:
 		//TODO-cambiar la l�gica y hacerlo aqui
 
 		//	cout << "\nLa matriz resultante: " << endl;
-			//imprime_matriz("datos");
+			imprime_matriz("datos");
 		//	cout << "-----------------------------------------------" << endl;
 		//	cout << "-----------------------------------------------" << endl;
 			//imprime_matriz("shadow");
@@ -979,93 +1028,32 @@ public:
 
 	void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
     	
-		string var_cero, var_uno, var_dos, var_aux;
-		int indice0, indice1, indice2;
-		
-		int coordenada_final[2],base_01[2],base_02[2],base_12[2];
+		int indice0,indice1;
+		string var_cero, var_uno;
+		int coordenadas_base[2];
 		int i,j,k;
+		int REGLA;
+
+		REGLA=DIFERENTE;		
+		cout << "\n   Mi allDiff constraint " << id << "Tamaño de la tupla: "<< list.size() << endl;
 		
 		
-		cout << "\n   Mi allDiff constraint " << id << endl;
-   		
-    	//displayList(list);
-
-		cout << "\n\n Lo mio: " << endl;
-		cout << "Tres variables: " << (list[0]->id) << " - " << (list[1]->id) << " - " << (list[2]->id) << endl;
-
-
-		//Preproceso de las variables implicadas en la regla ternaria
-		indice0 = get_indice(*(list[0]));
-		indice1 = get_indice(*(list[1]));
-		indice2 = get_indice(*(list[2]));
-		
-		var_cero = get_nombre(list[0]->id);
-		var_uno = get_nombre(list[1]->id);
-		var_dos = get_nombre(list[2]->id);
-		
-
-		//Cálculo de la ubicación dentro de la matriz
-		calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,base_01);
-		calcula_coordenadas_base(var_cero, var_dos, indice0, indice2,base_02);
-		calcula_coordenadas_base(var_uno, var_dos, indice1, indice2,base_12);
-
-
-		cout<< "Mínivo variable cero: " << minimo_variable[var_cero]<< " - rango variable cero: " 
-			<< rango_variable[var_cero] << endl;
-		
-		
-		// Bucle para buscar los que son diferentes
-		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
-		{	
-			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
+		for (k=0;k<(list.size()-1);k++)
+		{
+			for(i=k,j=i+1; j<list.size();j++)
 			{
-				
-				for (k=minimo_variable[var_dos];k<(rango_variable[var_dos]+minimo_variable[var_dos]);k++)
-				{
-					cout << "i: " << i << " - j: " << j << " - k: " << k ;
+				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
 
-					if((i!=j) && (i!=k) && (j!=k))
-					{
-						cout << " -->  Son diferentes " ;
-						coordenada_final[0]=base_01[0]+i;
-						coordenada_final[1]=base_01[1]+j;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-						
-						coordenada_final[0]=base_02[0]+i;
-						coordenada_final[1]=base_02[1]+k;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+				indice0 = get_indice(*(list[i]));
+				indice1 = get_indice(*(list[j]));
+				var_cero = get_nombre(list[i]->id);
+				var_uno = get_nombre(list[j]->id);
 
-						coordenada_final[0]=base_12[0]+j;
-						coordenada_final[1]=base_12[1]+k;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-					}
-					else {
-						coordenada_final[0]=base_01[0]+i;
-						coordenada_final[1]=base_01[1]+j;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-						
-						coordenada_final[0]=base_02[0]+i;
-						coordenada_final[1]=base_02[1]+k;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-						coordenada_final[0]=base_12[0]+j;
-						coordenada_final[1]=base_12[1]+k;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-					}
-					cout << endl;
-				}
-				
-			} 
-
+				calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+				escribe_regla_all(coordenadas_base,var_cero,var_uno,REGLA);
+			}
 		}
-		
+
 
 		
 	}
@@ -1086,95 +1074,34 @@ public:
 
 
 	void buildConstraintAllEqual(string id, vector<XVariable *> &list) {
-    	string var_cero, var_uno, var_dos, var_aux;
-		int indice0, indice1, indice2;
-		
-		int coordenada_final[2],base_01[2],base_02[2],base_12[2];
+    	
+		int indice0,indice1;
+		string var_cero, var_uno;
+		int coordenadas_base[2];
 		int i,j,k;
+		int REGLA;
+
+		REGLA=IGUAL;
+		cout << "\n   Mi allEqual constraint " << id << "Tamaño de la tupla: "<< list.size() << endl;
 		
 		
-		cout << "\n   Mi all equal constraint " << id << endl;
-   		
-    	//displayList(list);
-
-		cout << "\n\n Lo mio: " << endl;
-		cout << "Tres variables: " << (list[0]->id) << " - " << (list[1]->id) << " - " << (list[2]->id) << endl;
-
-
-		//Preproceso de las variables implicadas en la regla ternaria
-		indice0 = get_indice(*(list[0]));
-		indice1 = get_indice(*(list[1]));
-		indice2 = get_indice(*(list[2]));
-		
-		var_cero = get_nombre(list[0]->id);
-		var_uno = get_nombre(list[1]->id);
-		var_dos = get_nombre(list[2]->id);
-		
-
-		//Cálculo de la ubicación dentro de la matriz
-		calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,base_01);
-		calcula_coordenadas_base(var_cero, var_dos, indice0, indice2,base_02);
-		calcula_coordenadas_base(var_uno, var_dos, indice1, indice2,base_12);
-
-
-		cout<< "Mínivo variable cero: " << minimo_variable[var_cero]<< " - rango variable cero: " 
-			<< rango_variable[var_cero] << endl;
-		
-		
-		// Bucle para buscar los que son diferentes
-		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
-		{	
-			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
+		for (k=0;k<(list.size()-1);k++)
+		{
+			for(i=k,j=i+1; j<list.size();j++)
 			{
-				
-				for (k=minimo_variable[var_dos];k<(rango_variable[var_dos]+minimo_variable[var_dos]);k++)
-				{
-					cout << "i: " << i << " - j: " << j << " - k: " << k ;
+				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
 
-					if((i==j) && (i==k))
-					{
-						cout << " -->  Son iguales " ;
-						coordenada_final[0]=base_01[0]+i;
-						coordenada_final[1]=base_01[1]+j;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-						
-						coordenada_final[0]=base_02[0]+i;
-						coordenada_final[1]=base_02[1]+k;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+				indice0 = get_indice(*(list[i]));
+				indice1 = get_indice(*(list[j]));
+				var_cero = get_nombre(list[i]->id);
+				var_uno = get_nombre(list[j]->id);
 
-						coordenada_final[0]=base_12[0]+j;
-						coordenada_final[1]=base_12[1]+k;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-					}
-					else {
-						coordenada_final[0]=base_01[0]+i;
-						coordenada_final[1]=base_01[1]+j;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-						
-						coordenada_final[0]=base_02[0]+i;
-						coordenada_final[1]=base_02[1]+k;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-						coordenada_final[0]=base_12[0]+j;
-						coordenada_final[1]=base_12[1]+k;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-					}
-					cout << endl;
-				}
-				
-			} 
-
+				calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+				escribe_regla_all(coordenadas_base,var_cero,var_uno,REGLA);
+			}
 		}
-		
 
-		
+
 		
 
 
