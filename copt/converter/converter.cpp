@@ -568,7 +568,7 @@ public:
 
 					if(i!=j)
 					{
-						cout << " -->  Son diferentes " ;
+						cout << "  -->  Son diferentes " ;
 						coordenada_final[0]=coordenadas_base[0]+i;
 						coordenada_final[1]=coordenadas_base[1]+j;
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
@@ -597,7 +597,7 @@ public:
 
 					if(i==j)
 					{
-						cout << " -->  Son iguales " ;
+						cout << "  -->  Son iguales " ;
 						coordenada_final[0]=coordenadas_base[0]+i;
 						coordenada_final[1]=coordenadas_base[1]+j;
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
