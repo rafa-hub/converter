@@ -577,6 +577,8 @@ public:
 					else {
 						coordenada_final[0]=coordenadas_base[0]+i;
 						coordenada_final[1]=coordenadas_base[1]+j;
+						if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
+							throw std::runtime_error("Error: SE ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
@@ -606,6 +608,8 @@ public:
 					else {
 						coordenada_final[0]=coordenadas_base[0]+i;
 						coordenada_final[1]=coordenadas_base[1]+j;
+						if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
+							throw std::runtime_error("Error: SE ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
