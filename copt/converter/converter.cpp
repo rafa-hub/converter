@@ -552,6 +552,19 @@ public:
 		}
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 	//Funcion que escribe en la matriz una regla AllEqual o AllDifferent
 	void  escribe_regla_all(int *coordenadas_base, string var_cero, string var_uno, int REGLA)
 	{
@@ -577,8 +590,8 @@ public:
 					else {
 						coordenada_final[0]=coordenadas_base[0]+i;
 						coordenada_final[1]=coordenadas_base[1]+j;
-						if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
-							throw std::runtime_error("Error: SE ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
+						//if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
+						//	throw std::runtime_error("Error: UNA REGLA AllDifferent ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
@@ -608,8 +621,8 @@ public:
 					else {
 						coordenada_final[0]=coordenadas_base[0]+i;
 						coordenada_final[1]=coordenadas_base[1]+j;
-						if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
-							throw std::runtime_error("Error: SE ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
+						//if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
+						//	throw std::runtime_error("Error: UNA REGLA AllEqual ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
@@ -621,6 +634,11 @@ public:
 	}
 		
 	}
+
+
+
+
+
 
 
 
@@ -1068,6 +1086,33 @@ public:
 
 
 
+	void buildConstraintAlldifferentMatrix(string id, vector<vector<XVariable *>> &matrix) {
+  		cout << "\n  ¡Mi!  allDiff matrix constraint" << id << endl;
+   		for(unsigned int i = 0 ; i < matrix.size() ; i++) {
+        	cout << "    i:    " << i << "  ";
+        	displayList(matrix[i]);
+    	}
+	}
+
+
+
+
+
+
+	void buildConstraintAlldifferentList(string id, vector<vector<XVariable *>> &lists) {
+    	cout << "\n  ¡Mi!  allDiff list constraint" << id << endl;
+    	for(unsigned int i = 0 ; i < (lists.size() < 4 ? lists.size() : 3) ; i++) {
+        	cout << "        ";
+        	displayList(lists[i]);
+    	}
+	}
+
+
+
+
+
+
+
 
 
 ////////////////////
@@ -1115,6 +1160,8 @@ public:
 
 
 
+
+	
 };
 
 
