@@ -14,7 +14,7 @@
 #include <map>
 
 //#define mipause
-//#define midebug
+#define midebug
 //#define mitest
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -678,7 +678,7 @@ public:
 		//TODO-cambiar la l�gica y hacerlo aqui
 
 		//	cout << "\nLa matriz resultante: " << endl;
-			imprime_matriz("datos");
+			//imprime_matriz("datos");
 		//	cout << "-----------------------------------------------" << endl;
 		//	cout << "-----------------------------------------------" << endl;
 			//imprime_matriz("shadow");
@@ -710,6 +710,8 @@ public:
 	// tamaño del array y del rango de las variables.
 	void beginVariableArray(string id) {
 
+		cout << "Empiezo con el Array, reseteo los valores para el array:  " << id << endl;
+
 		lista_arrays.push_back(id);
 		array_actual = id;
 		base_array[id] = base_siguiente_array;
@@ -723,6 +725,8 @@ public:
 
 		
 	}
+
+
 
 
 
@@ -817,6 +821,7 @@ public:
 
 		//PSS-treats the case of singleton variables
 		if(!is_array){						/* variable extension to arrays: dirty */
+			cout << "¡¡¡ Soy Singelton !!!" << endl;
 			lista_arrays.push_back(id);
 			base_array[id] = base_siguiente_array;
 			numero_variables=1;
@@ -860,6 +865,7 @@ public:
 
 		//treats the case of singleton variables
 		if (!is_array) { /* variable extension to arrays: dirty */
+			cout << "¡¡¡ Soy Singelton !!!" << endl;
 			lista_arrays.push_back(id);
 			base_array[id] = base_siguiente_array;
 			numero_variables = 1;
@@ -1014,9 +1020,9 @@ public:
 
 	void beginGroup(string id) {
 
-#ifdef midebug
+
 		cout << "Comienzo Grupo ....... " << id << endl;
-#endif
+
 
 		//XCSP3PrintCallbacks::beginGroup(id);
 	}
@@ -1160,6 +1166,44 @@ public:
 
 
 
+	// string id, vector<XVariable *> &list, int startIndex
+	void buildConstraintChannel(string, vector<XVariable *> &list, int startIndex) {
+    	cout << "\n   1) channel constraint" << endl;
+    	cout << "        ";
+    	displayList(list);
+    	cout << "        Start index : " << startIndex << endl;
+	}
+
+
+	// string id, vector<XVariable *> &list1, int startIndex1, vector<XVariable *> &list2, int startIndex2
+	void buildConstraintChannel(string, vector<XVariable *> &list1, int, vector<XVariable *> &list2, int) {
+    	cout << "\n    2) channel constraint" << endl;
+    	cout << "        list1 ";
+    	displayList(list1);
+    	cout << "        list2 ";
+    	displayList(list2);
+	}
+
+
+	// string id, vector<XVariable *> &list, int startIndex, XVariable *value
+	void buildConstraintChannel(string, vector<XVariable *> &list, int, XVariable *value) {
+    	cout << "\n   3) channel constraint" << endl;
+    	cout << "        ";
+    	displayList(list);
+    	cout << "        value: " << *value << endl;
+	}
+
+
+	// string id, vector<XVariable *> &list, vector<int> &values
+	void buildConstraintInstantiation(string, vector<XVariable *> &list, vector<int> &values) {
+    	cout << "\n   Mi instantiation constraint" << endl;
+    	cout << "        list:";
+    	displayList(list);
+    	cout << "        values:";
+    	displayList(values);
+
+	}
+
 
 	
 };
@@ -1183,8 +1227,7 @@ int main(int argc, char **argv) {
 	MiSolverPrintCallbacks miparser;
 	char *nombre_fichero_dimacs;
 
-	cout << "\nPrueba de que todo va bien .....\n" << endl;
-
+	
 
 	if (argc != 2) {
 		throw std::runtime_error("usage: ./csp xcsp3instance.xml");
