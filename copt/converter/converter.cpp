@@ -31,8 +31,10 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 
 private:
 
-	vector<string> lista_arrays;    		// Guarda la lista de arrays
-	vector<string> lista_variables; 		// Guarda la lista de variables
+	vector<string> lista_arrays;    			// Guarda la lista de arrays
+	vector<string> lista_variables; 			// Guarda la lista de variables
+	map<string,int> mapa_indices;				// Guarda el índice de cada variable
+	
 	bool is_array=false;					// PSS-determina si una varaible es un singleton o forma parte de un array
 
 	std::map<string, int> base_array; 		// Mapa de cada array con su coordenada base
@@ -49,6 +51,7 @@ private:
 
 	vector<vector<int>> las_tuplas;   	// Guarda las tuplas, puesto que en
 									  	// buildConstraintExtensionAs() no me las pasan como argumento
+	vector<int> tuplas_unarias;			// Lo mismo, pero para variables unarias
 
 public:
 
@@ -109,26 +112,18 @@ public:
 	// Extrae y devuelve el indice de una variable
 
 	int get_indice(XVariable variable) {
-		string indice_str, valor;
-		size_t aux1, aux2;
+		string valor;
+		int indice;
 
 		valor = variable.id;
-
-		aux1 = valor.find_first_of('[', 0);
-		aux2 = valor.find_first_of(']', aux1);
-		if (aux1 != string::npos)
-			indice_str = valor.substr(aux1 + 1, aux2 - 2);
-		else {
-			//singleton variable
-			indice_str = "0";
-		}
-
+		indice=mapa_indices[valor];
 
 #ifdef midebug
-		cout << valor << " indice: " << indice_str << endl;
+		cout << "En get_indice(), id variable: " << valor << " es: " << indice<< endl;
 #endif
 
-		return (std::stoi(indice_str));
+		return(indice);
+// 		return(mapa_indices[variable.id]);  //Todo la función
 	}
 
 
@@ -178,6 +173,8 @@ public:
 			}
 		}
 		cout<<"------------------------------------"<<endl;
+
+		displayList(lista_arrays);
 	}
 
 
@@ -195,10 +192,15 @@ public:
 		*coordenadas_base = base_array[var_cero] + (indice0 * rango_variable[var_cero]);
 		coordenadas_base++;
 		*coordenadas_base = base_array[var_uno] + (indice1 * rango_variable[var_uno]);
-
+		
 #ifdef midebug
-		cout << "Var cero: " << var_cero << " - indice: " << indice0 << endl;
-		cout << "Var uno: " << var_uno << " - indice: " << indice1 << endl;
+		coordenadas_base--;
+		cout << "Var cero: " << var_cero << " - indice: " << indice0 << " - Coordenada Base X: " 
+		<< *coordenadas_base << endl;
+		
+		coordenadas_base++;
+		cout << "Var uno: " << var_uno << " - indice: " << indice1 << " - Coordenada Base Y: " 
+		<< *coordenadas_base << endl;
 #endif
 
 		return;
@@ -384,10 +386,171 @@ public:
 
 
 
+	//Funcion que escribe en la matriz reglas unarias
+	void escribe_en_matriz_unaria(int *coordenadas_base, vector<int>& tuplas,
+			string var_cero, string var_uno, bool support) {
+		//vector<vector<int>>::iterator it;
+
+		std::vector<int>::iterator itero_variable_unaria;
+		std::vector<int>::iterator itero_valores;
+		int coordenada_final[2];
+
+		//support
+
+		if (support) {
+
+			cout << "Soy support ...................." << endl;
+			cout << "Var:" << var_cero << "," << var_uno << " min var: "
+					<< minimo_variable[var_cero] << endl;
+			
+			// No hay tuplas y es una regla support => todo a ceros
+
+			if (tuplas.size()==0)
+			{
+				cout << "CONJUNTO DE TUPLAS VACIO: TODO A CEROS" << endl;
+				for (int i = 0; i < rango_variable[var_cero]; i++)
+					for (int j = 0; j < rango_variable[var_uno]; j++) {
+						coordenada_final[0] = coordenadas_base[0] + i;
+						coordenada_final[1] = coordenadas_base[1] + j;
+						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+//#ifdef midebug
+							cout << "writing-0-S en:(" << coordenada_final[0] << ","
+								<< coordenada_final[1] << ")" << endl;
+//#endif
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+						}
+					}
+			} else {
+					for (itero_valores = tuplas.begin(); itero_valores != tuplas.end();
+							++itero_valores) {
+						
+#ifdef midebug
+						cout << "Valor Tupla: " << *itero_valores
+							<< endl;
+#endif
+
+						coordenada_final[0] = coordenadas_base[0]
+							+ (*itero_valores)
+							- minimo_variable[var_cero];
+
+						coordenada_final[1] = coordenadas_base[1]
+							+ (*itero_valores)
+							- minimo_variable[var_uno];
+
+						//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+						matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
+						//matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+						matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
+#ifdef midebug
+						cout << "Tupla support leida-coord:(" << coordenada_final[0]
+							<< "," << coordenada_final[1] << ")" << endl;
+#endif
+					}
+
+					// Borro el resto de restricciones
+					for (int i = 0; i < rango_variable[var_cero]; i++)
+						for (int j = 0; j < rango_variable[var_uno]; j++) {
+							coordenada_final[0] = coordenadas_base[0] + i;
+							coordenada_final[1] = coordenadas_base[1] + j;
+						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+#ifdef midebug
+							cout << "writing-0-S en:(" << coordenada_final[0] << ","
+								<< coordenada_final[1] << ")" << endl;
+#endif
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+
+						//testing
+#ifdef mitest
+							if (matriz_check[coordenada_final[0]][coordenada_final[1]] ) {
+								cout<<"SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<<endl;
+								cin.get();
+							} else {
+							matriz_check[coordenada_final[0]][coordenada_final[1]] =1;
+							}
+#endif
+					}
+
+					if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
+#ifdef midebug
+						cout << "writing-0-S en:(" << coordenada_final[1] << ","
+								<< coordenada_final[0] << ")" << endl;
+#endif
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+
+						//testing
+#ifdef mitest
+						if (matriz_check[coordenada_final[1]][coordenada_final[0]]) {
+							cout<< "SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<< endl;
+							cin.get();
+						} else {
+							matriz_check[coordenada_final[1]][coordenada_final[0]] =1;
+						}
+#endif
+					}
+				}
+			}
+
+		} else {
+
+			cout << "Soy una regla Conflict ......" << endl;
+
+			// Escribo las tuplas correspondientes a cero.
+			for (itero_valores = tuplas_unarias.begin();
+					itero_valores != tuplas_unarias.end(); ++itero_valores) {
+								
+				//#ifdef midebug
+				cout << "Primer valor Tupla: " << *itero_valores
+						<< endl;
+				//#endif
+
+				coordenada_final[0] = coordenadas_base[0]
+						+ (*itero_valores)
+						- minimo_variable[var_cero];
+
+				coordenada_final[1] = coordenadas_base[1]
+						+ (*itero_valores)
+						- minimo_variable[var_uno];
+
+//#ifdef midebug
+				cout << "writing-0-C en:(" << coordenada_final[0] << ","
+						<< coordenada_final[1] << ")" << endl;
+//#endif
+				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+
+				//testing
+#ifdef mitest
+				if (matriz_check[coordenada_final[0]][coordenada_final[1]] ||
+					matriz_check[coordenada_final[1]][coordenada_final[0]] ) {
+					cout << "SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<< endl;
+					cin.get();
+				} else {
+					matriz_check[coordenada_final[0]][coordenada_final[1]] = 1;
+					matriz_check[coordenada_final[1]][coordenada_final[0]] = 1;
+				}
+#endif
+
+			}
+		}
+	}
 
 
 
-	//Funcion que escribe en la matriz
+
+
+
+
+
+
+
+
+
+
+
+	//Funcion que escribe en la matriz reglas binarias
 	void escribe_en_matriz(int *coordenadas_base, vector<vector<int> >& tuplas,
 			string var_cero, string var_uno, bool support) {
 		//vector<vector<int>>::iterator it;
@@ -813,10 +976,11 @@ public:
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 
 		lista_variables.push_back(id);
+		mapa_indices[id]=numero_variables;
 		rango_variables = (maxValue - minValue) + 1;
 		minimo_variables = minValue;					/*TODO-hay variables (singleton) con valor -1!!*/
 		numero_variables++;
-		cout << "Variable: " << id << " - min: " << minValue << " - max: "
+		cout << "Variable: " << id << " Índice var: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
 				<< maxValue << endl;
 
 		//PSS-treats the case of singleton variables
@@ -836,7 +1000,7 @@ public:
 #ifdef midebug
 		cout << "Array actual " << array_actual << endl;
 		cout << "Rango valores: " << rango_variables
-				<< " - Instancia Variable: " << numero_variables
+				<< " - Instancia Variable: " << (numero_variables-1)
 				<< " - Minimo valor Variable: " << minimo_variables << endl;
 #endif
 
@@ -888,6 +1052,67 @@ public:
 
 
 
+	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
+		string var_cero, var_uno, var_aux;
+		int indice0, indice1, indice_aux;
+		int coordenadas_base[2];
+		vector<vector<int>>::iterator itero_parejas;
+
+    	cout << "\n  LA QUE LLAMA  extension constraint with one variable: " << id << endl;
+    	cout << "        " << (support ? "support" : "conflict") << " nb tuples: " << tuples.size() << " star: " << hasStar << endl;
+    	cout << (*variable) << endl;
+
+
+		tuplas_unarias=tuples;
+		cout << "La variables: " << (variable->id)	<< endl;
+
+		indice0 = get_indice(*variable);
+		indice1 = indice0;
+		var_cero = get_nombre(variable->id);
+		var_uno = var_cero;
+		
+		
+		calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+		
+		
+#ifdef midebug
+		cout << "Coordenada base calculada: " << coordenadas_base[0] << " - "
+				<< coordenadas_base[1] << endl;
+#endif
+
+#ifdef midebug
+		cout << "Tama�o tuplas: " << tuplas_unarias.size() << endl;
+#endif
+
+		
+#ifdef midebug
+			if (support)
+				cout << "escribiendo support en: " << "(" << var_cero << ","
+						<< var_uno << ")" << endl;
+			else
+				cout << "escribiendo conflict en: " << "(" << var_cero << ","
+						<< var_uno << ")" << endl;
+#endif
+
+#ifdef mipause
+        	cin.get();
+#endif
+		escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, var_uno,
+					support);
+		
+
+#ifdef midebug
+		cout << "\n ** Fin buildConstraintExtension ** " << id << endl;
+#endif
+
+	}
+
+
+
+
+
+
+
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
@@ -911,7 +1136,7 @@ public:
 		if (list.size() == 2){
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
 		} else{
-			throw std::runtime_error("Error, este código sólo funciona con relaciones binarias");
+			throw std::runtime_error("Error en buildConstrainEstension(), este código sólo funciona con relaciones binarias");
 			exit(2);
 		}
 
@@ -946,7 +1171,6 @@ public:
 		cout << "\n ** Fin buildConstraintExtension ** " << id << endl;
 #endif
 
-		//XCSP3PrintCallbacks::buildConstraintExtension(id, list,tuples,support,hasStar);
 	}
 
 
@@ -966,21 +1190,40 @@ public:
 		vector<vector<int>>::iterator it;
 		vector<int>::iterator ite;
 
+
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
-		cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-
-		indice0 = get_indice(*(list[0]));
-		indice1 = get_indice(*(list[1]));
-
-		var_cero = get_nombre(list[0]->id);
-		var_uno = get_nombre(list[1]->id);
-
-		if (list.size() == 2){
-			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-		} else{
-			throw std::runtime_error("Error, este código sólo funciona con relaciones binarias");
+		cout << "Tamaño de la lista: " << list.size() << endl;
+		displayList(list);
+		
+		if(list.size()==0 || list.size()>2)
+		{
+			throw runtime_error("Tamaño de tupla no procesado.");
 			exit(2);
 		}
+
+
+		if (list.size() == 1){
+			cout << "Variable Unaria: " << (list[0]->id) << endl;
+
+			indice0 = get_indice(*(list[0]));
+			indice1 = indice0;
+
+			var_cero = get_nombre(list[0]->id);
+			var_uno = var_cero;
+			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+		} 
+		
+		
+		if (list.size() == 2){
+			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+
+			indice0 = get_indice(*(list[0]));
+			indice1 = get_indice(*(list[1]));
+
+			var_cero = get_nombre(list[0]->id);
+			var_uno = get_nombre(list[1]->id);
+			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+		} 
 		
 
 		//calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
@@ -991,7 +1234,8 @@ public:
 #endif
 
 #ifdef midebug
-		cout << "Tama�o tuplas: " << las_tuplas.size() << endl;
+		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+		cout << "Tamaño tuplas individuales: " << tuplas_unarias.size() << endl;
 #endif
 
 		
@@ -1007,16 +1251,40 @@ public:
 #ifdef mipause
         	cin.get();
 #endif
-		escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
+		
+		if(list.size()==1)
+		{	cout << "Escribo unaria" << endl;
+			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, var_uno,
 					support);
+		}
+		
+		if(list.size()==2)
+		{	cout << "Escribo binaria" << endl;
+			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
+					support);
+		}
 		
 
 #ifdef midebug
 		cout << "\n ** Fin buildConstraintExtensionAS ** " << id << endl;
 #endif
 
-		//XCSP3PrintCallbacks::buildConstraintExtensionAs(id,list,support,hasStar);
+		
 	}
+
+
+
+
+
+
+
+////////////////////
+//
+// PROCESSING Group
+//
+///////////////////
+
+// Sin uso de momento
 
 	void beginGroup(string id) {
 
@@ -1024,8 +1292,12 @@ public:
 		cout << "Comienzo Grupo ....... " << id << endl;
 
 
-		//XCSP3PrintCallbacks::beginGroup(id);
+		
 	}
+
+
+
+
 
 	void endGroup() {
 
@@ -1033,7 +1305,7 @@ public:
 		cout << "Fin Grupo .......\n\n " << endl;
 #endif
 
-		//XCSP3PrintCallbacks::endGroup();
+		
 	}
 
 
@@ -1064,7 +1336,7 @@ public:
 
 		REGLA=DIFERENTE;		
 		cout << "\n   Mi allDiff constraint " << id << "Tamaño de la tupla: "<< list.size() << endl;
-		
+		displayList(list);
 		
 		for (k=0;k<(list.size()-1);k++)
 		{
