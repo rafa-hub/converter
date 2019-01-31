@@ -14,7 +14,7 @@
 #include <map>
 
 //#define mipause
-#define midebug
+//#define midebug
 //#define mitest
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -337,6 +337,9 @@ public:
 
 #ifdef midebug
 		cout << "Matriz creada ........ \nDimension de la matriz: "	<< matriz_datos.size() << endl;
+		ofstream fmatriz("pocholo.txt", ios::out);
+		imprime_matriz("datos",fmatriz);
+		imprime_matriz("shadow",fmatriz);
 #endif
 	}
 
@@ -388,7 +391,7 @@ public:
 
 	//Funcion que escribe en la matriz reglas unarias
 	void escribe_en_matriz_unaria(int *coordenadas_base, vector<int>& tuplas,
-			string var_cero, string var_uno, bool support) {
+		string var_cero, string var_uno, bool support) {
 		//vector<vector<int>>::iterator it;
 
 		std::vector<int>::iterator itero_variable_unaria;
@@ -399,11 +402,12 @@ public:
 
 		if (support) {
 
-			cout << "Soy support ...................." << endl;
+			cout << "Regla SUPPORT UNARIA....." << endl;
 			cout << "Var:" << var_cero << "," << var_uno << " min var: "
 					<< minimo_variable[var_cero] << endl;
 			
 			// No hay tuplas y es una regla support => todo a ceros
+
 
 			if (tuplas.size()==0)
 			{
@@ -495,31 +499,57 @@ public:
 
 		} else {
 
-			cout << "Soy una regla Conflict ......" << endl;
+			cout << "Regla CONFLICT UNARIA......" << endl;
 
-			// Escribo las tuplas correspondientes a cero.
+			// Escribo una a una las tuplas correspondientes a cero.
+
 			for (itero_valores = tuplas_unarias.begin();
 					itero_valores != tuplas_unarias.end(); ++itero_valores) {
 								
-				//#ifdef midebug
-				cout << "Primer valor Tupla: " << *itero_valores
+		#ifdef midebug
+				cout << "Valor Unario: " << *itero_valores
 						<< endl;
-				//#endif
+		#endif
+
+
+			// Escribo ceros en horizontal
 
 				coordenada_final[0] = coordenadas_base[0]
 						+ (*itero_valores)
 						- minimo_variable[var_cero];
 
-				coordenada_final[1] = coordenadas_base[1]
-						+ (*itero_valores)
-						- minimo_variable[var_uno];
 
-//#ifdef midebug
-				cout << "writing-0-C en:(" << coordenada_final[0] << ","
+				for (int i=0;i<dimension_matriz;i++)
+				{
+					coordenada_final[1] = i;
+#ifdef midebug
+					cout << "writing-0-C en:(" << coordenada_final[0] << ","
 						<< coordenada_final[1] << ")" << endl;
-//#endif
-				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+#endif
+					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+				}
+
+		// ¿Habría que escribir en la posición simétrica?
+
+
+
+
+		// Escribo ceros en vertical
+
+				coordenada_final[1] = coordenada_final[0];
+
+
+				for (int i=0;i<dimension_matriz;i++)
+				{
+					coordenada_final[0] = i;
+#ifdef midebug
+					cout << "writing-0-C en:(" << coordenada_final[0] << ","
+						<< coordenada_final[1] << ")" << endl;
+#endif
+					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+				}
+			// ¿Habría que escribir en la posición simétrica?
+
 
 				//testing
 #ifdef mitest
@@ -853,7 +883,7 @@ public:
 			cout << "Numero variables: " << numero_variable[*itero] << endl;
 			cout << "Fila base de la matriz: " << base_array[*itero] << endl;
 			cout << "Primer valor: " << minimo_variable[*itero]<< endl;
-			cout << "N�mero de valores: " << rango_variable[*itero]<< endl;
+			cout << "Número de valores: " << rango_variable[*itero]<< endl;
 			cout << endl;
 		}
 
@@ -961,8 +991,6 @@ public:
 		cin.get();
 #endif
 #endif
-
-
 	}
 
 
@@ -1051,14 +1079,15 @@ public:
 
 
 
-
+	//Versión para Restricciones UNARIAS
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
 		string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
+		int direccion;
 		int coordenadas_base[2];
 		vector<vector<int>>::iterator itero_parejas;
 
-    	cout << "\n  LA QUE LLAMA  extension constraint with one variable: " << id << endl;
+    	cout << "\n  Extension constraint UNARIA variable: " << id << endl;
     	cout << "        " << (support ? "support" : "conflict") << " nb tuples: " << tuples.size() << " star: " << hasStar << endl;
     	cout << (*variable) << endl;
 
@@ -1067,18 +1096,19 @@ public:
 		cout << "La variables: " << (variable->id)	<< endl;
 
 		indice0 = get_indice(*variable);
-		indice1 = indice0;
+		indice1 = 0;
 		var_cero = get_nombre(variable->id);
-		var_uno = var_cero;
+		var_uno = lista_variables[0];
 		
 		
 		calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
 		
-		
-#ifdef midebug
+		#ifdef midebug
 		cout << "Coordenada base calculada: " << coordenadas_base[0] << " - "
 				<< coordenadas_base[1] << endl;
-#endif
+		#endif
+		escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, var_uno,
+					support);
 
 #ifdef midebug
 		cout << "Tama�o tuplas: " << tuplas_unarias.size() << endl;
@@ -1097,9 +1127,7 @@ public:
 #ifdef mipause
         	cin.get();
 #endif
-		escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, var_uno,
-					support);
-		
+	
 
 #ifdef midebug
 		cout << "\n ** Fin buildConstraintExtension ** " << id << endl;
@@ -1112,7 +1140,7 @@ public:
 
 
 
-
+	//Versión para restricciones binarias
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
@@ -1179,7 +1207,7 @@ public:
 
 
 
-
+	//Versión para restricciones Unarias y Binarias.
 	void buildConstraintExtensionAs(string id, vector<XVariable *> list,
 			bool support, bool hasStar) {
 
@@ -1211,6 +1239,9 @@ public:
 			var_cero = get_nombre(list[0]->id);
 			var_uno = var_cero;
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, var_uno,
+					support);
+		
 		} 
 		
 		
@@ -1222,11 +1253,16 @@ public:
 
 			var_cero = get_nombre(list[0]->id);
 			var_uno = get_nombre(list[1]->id);
+
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+			
+			cout << "Escribo binaria" << endl;
+			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
+					support);
 		} 
 		
 
-		//calcula_coordenadas_base(*(list[0]),*(list[1]),coordenadas_base);
+/* 		
 
 #ifdef midebug
 		cout << "Coordenada base calculada: " << coordenadas_base[0] << " - "
@@ -1251,23 +1287,11 @@ public:
 #ifdef mipause
         	cin.get();
 #endif
-		
-		if(list.size()==1)
-		{	cout << "Escribo unaria" << endl;
-			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, var_uno,
-					support);
-		}
-		
-		if(list.size()==2)
-		{	cout << "Escribo binaria" << endl;
-			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
-					support);
-		}
-		
+			
 
 #ifdef midebug
 		cout << "\n ** Fin buildConstraintExtensionAS ** " << id << endl;
-#endif
+#endif */
 
 		
 	}
@@ -1550,6 +1574,7 @@ int main(int argc, char **argv) {
 	//salida matriz de datos
 	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos", fmat);
+	miparser.imprime_matriz("shadow",fmat);
 	fmat.close();
 
 	return 0;
