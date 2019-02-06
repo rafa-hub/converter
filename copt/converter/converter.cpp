@@ -337,9 +337,9 @@ public:
 
 #ifdef midebug
 		cout << "Matriz creada ........ \nDimension de la matriz: "	<< matriz_datos.size() << endl;
-		ofstream fmatriz("pocholo.txt", ios::out);
-		imprime_matriz("datos",fmatriz);
-		imprime_matriz("shadow",fmatriz);
+		/*ofstream fmatriz("pocholo.txt", ios::out);
+		 imprime_matriz("datos",fmatriz);
+		imprime_matriz("shadow",fmatriz); */
 #endif
 	}
 
@@ -391,10 +391,9 @@ public:
 
 	//Funcion que escribe en la matriz reglas unarias
 	void escribe_en_matriz_unaria(int *coordenadas_base, vector<int>& tuplas,
-		string var_cero, string var_uno, bool support) {
+		string var_cero, bool support) {
 		//vector<vector<int>>::iterator it;
 
-		std::vector<int>::iterator itero_variable_unaria;
 		std::vector<int>::iterator itero_valores;
 		int coordenada_final[2];
 
@@ -403,17 +402,18 @@ public:
 		if (support) {
 
 			cout << "Regla SUPPORT UNARIA....." << endl;
-			cout << "Var:" << var_cero << "," << var_uno << " min var: "
+			cout << "Var:" << var_cero << " min var: "
 					<< minimo_variable[var_cero] << endl;
 			
-			// No hay tuplas y es una regla support => todo a ceros
+			
 
 
 			if (tuplas.size()==0)
 			{
+				// No hay tuplas y es una regla support => todo a ceros
 				cout << "CONJUNTO DE TUPLAS VACIO: TODO A CEROS" << endl;
 				for (int i = 0; i < rango_variable[var_cero]; i++)
-					for (int j = 0; j < rango_variable[var_uno]; j++) {
+					for (int j = 0; j < rango_variable[var_cero]; j++) {
 						coordenada_final[0] = coordenadas_base[0] + i;
 						coordenada_final[1] = coordenadas_base[1] + j;
 						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
@@ -426,27 +426,53 @@ public:
 						}
 					}
 			} else {
+
+					//La regla SUPPORT dice cuales son posibles (por tanto se ELIMINAN el RESTO de valores)
+
 					for (itero_valores = tuplas.begin(); itero_valores != tuplas.end();
-							++itero_valores) {
+							++itero_valores) { 
 						
 #ifdef midebug
 						cout << "Valor Tupla: " << *itero_valores
 							<< endl;
 #endif
 
-						coordenada_final[0] = coordenadas_base[0]
-							+ (*itero_valores)
-							- minimo_variable[var_cero];
+						//Escritura en horizontal y vertical
+						for(int i=0;i<dimension_matriz;i++)
+						{
+							coordenada_final[0] = coordenadas_base[0]
+								+ (*itero_valores)
+								- minimo_variable[var_cero];
 
-						coordenada_final[1] = coordenadas_base[1]
-							+ (*itero_valores)
-							- minimo_variable[var_uno];
+							coordenada_final[1] =i;
 
-						//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
-						//matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-						matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+							matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+							matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
+						}
+
+
+						//Escritura en matriz shadow vertical
+						/* for(int i=0;i<dimension_matriz;i++)
+						{	
+							coordenada_final[0] = i;
+
+							coordenada_final[1] = coordenadas_base[0]
+								+ (*itero_valores)
+								- minimo_variable[var_cero];
+
+							//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+							matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
+							//matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+							matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
+						} */
+
+
 #ifdef midebug
+						cout << "Coordenada base variable: "<< var_cero << "-> (" << 
+						coordenadas_base[0] << "," << coordenadas_base[1] << ")" << endl;
+						
 						cout << "Tupla support leida-coord:(" << coordenada_final[0]
 							<< "," << coordenada_final[1] << ")" << endl;
 #endif
@@ -454,46 +480,31 @@ public:
 
 					// Borro el resto de restricciones
 					for (int i = 0; i < rango_variable[var_cero]; i++)
-						for (int j = 0; j < rango_variable[var_uno]; j++) {
+						for (int j = 0; j < dimension_matriz; j++) {
 							coordenada_final[0] = coordenadas_base[0] + i;
-							coordenada_final[1] = coordenadas_base[1] + j;
-						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+							coordenada_final[1] = j;
+
 #ifdef midebug
 							cout << "writing-0-S en:(" << coordenada_final[0] << ","
-								<< coordenada_final[1] << ")" << endl;
+									<< coordenada_final[1] << ")" << endl;
 #endif
-							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
 
-						//testing
-#ifdef mitest
-							if (matriz_check[coordenada_final[0]][coordenada_final[1]] ) {
-								cout<<"SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<<endl;
-								cin.get();
-							} else {
-							matriz_check[coordenada_final[0]][coordenada_final[1]] =1;
+							if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+	
+								matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+								matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
 							}
-#endif
-					}
 
-					if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
 #ifdef midebug
-						cout << "writing-0-S en:(" << coordenada_final[1] << ","
-								<< coordenada_final[0] << ")" << endl;
+							cout << "writing-0-S en:(" << coordenada_final[1] << ","
+										<< coordenada_final[0] << ")" << endl;
 #endif
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
 
-						//testing
-#ifdef mitest
-						if (matriz_check[coordenada_final[1]][coordenada_final[0]]) {
-							cout<< "SOBREESCRIBIENDO EN MATRIZ DE DATOS!!!!!!!!"<< endl;
-							cin.get();
-						} else {
-							matriz_check[coordenada_final[1]][coordenada_final[0]] =1;
-						}
-#endif
-					}
+							if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
+
+								matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+								matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+							}
 				}
 			}
 
@@ -512,7 +523,7 @@ public:
 		#endif
 
 
-			// Escribo ceros en horizontal
+			// Escribo ceros en horizontal y vertical
 
 				coordenada_final[0] = coordenadas_base[0]
 						+ (*itero_valores)
@@ -527,16 +538,13 @@ public:
 						<< coordenada_final[1] << ")" << endl;
 #endif
 					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+					matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 				}
 
-		// ¿Habría que escribir en la posición simétrica?
-
-
-
-
+		
 		// Escribo ceros en vertical
 
-				coordenada_final[1] = coordenada_final[0];
+			/* 	coordenada_final[1] = coordenada_final[0];
 
 
 				for (int i=0;i<dimension_matriz;i++)
@@ -547,8 +555,8 @@ public:
 						<< coordenada_final[1] << ")" << endl;
 #endif
 					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-				}
-			// ¿Habría que escribir en la posición simétrica?
+				} */
+			
 
 
 				//testing
@@ -863,18 +871,15 @@ public:
 
 
 
+
+
+
 	void endInstance() {
 		pongo_diagonal_matriz_a_cero();
 
 		//I/O: Nota-la matriz de datos no est� terminada todavia
 		//Hay que eliminar las relaciones entra valores de la misma variable
 		//TODO-cambiar la l�gica y hacerlo aqui
-
-		//	cout << "\nLa matriz resultante: " << endl;
-			//imprime_matriz("datos");
-		//	cout << "-----------------------------------------------" << endl;
-		//	cout << "-----------------------------------------------" << endl;
-			//imprime_matriz("shadow");
 
 		cout <<"---------------------------------------------------"<<endl;
 		std::vector<string>::iterator itero;
@@ -1107,8 +1112,7 @@ public:
 		cout << "Coordenada base calculada: " << coordenadas_base[0] << " - "
 				<< coordenadas_base[1] << endl;
 		#endif
-		escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, var_uno,
-					support);
+		escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, support);
 
 #ifdef midebug
 		cout << "Tama�o tuplas: " << tuplas_unarias.size() << endl;
@@ -1239,8 +1243,7 @@ public:
 			var_cero = get_nombre(list[0]->id);
 			var_uno = var_cero;
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, var_uno,
-					support);
+			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, support);
 		
 		} 
 		
@@ -1559,7 +1562,7 @@ int main(int argc, char **argv) {
 
 	//removes incompatible edges between values of the same variable-  MUST BE!
 	miparser.remove_edges_same_var(ug);
-////////////////////
+	////////////////////
 
 	ug.set_name(miparser.nombre_fichero, false);
 	ug.print_data(false /* from scratch*/, cout);
@@ -1574,8 +1577,18 @@ int main(int argc, char **argv) {
 	//salida matriz de datos
 	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos", fmat);
-	miparser.imprime_matriz("shadow",fmat);
-	fmat.close();
+	miparser.imprime_matriz("datos",fmat);
+
+	/* cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
+	ostream & terminal=cout;
+	miparser.imprime_matriz("datos", terminal);
+
+	cout << "\n\nEl resultado de la matriz SHADOW ......................\n " << endl;
+	miparser.imprime_matriz("shadow", terminal); */
+
+
+
+	//fmat.close();
 
 	return 0;
 }
