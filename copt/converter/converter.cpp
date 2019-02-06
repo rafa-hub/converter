@@ -402,10 +402,13 @@ public:
 		if (support) {
 
 			cout << "Regla SUPPORT UNARIA....." << endl;
-			cout << "Var:" << var_cero << " min var: "
-					<< minimo_variable[var_cero] << endl;
 			
-			
+			cout << "Var:" << var_cero << " min var: " << endl;
+
+
+#ifdef midebug			
+			cout << minimo_variable[var_cero] << endl;
+#endif			
 
 
 			if (tuplas.size()==0)
@@ -417,10 +420,10 @@ public:
 						coordenada_final[0] = coordenadas_base[0] + i;
 						coordenada_final[1] = coordenadas_base[1] + j;
 						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
-//#ifdef midebug
+#ifdef midebug
 							cout << "writing-0-S en:(" << coordenada_final[0] << ","
 								<< coordenada_final[1] << ")" << endl;
-//#endif
+#endif
 							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
 							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
 						}
@@ -510,21 +513,18 @@ public:
 
 		} else {
 
-			cout << "Regla CONFLICT UNARIA......" << endl;
+			cout << "Escribiendo en la matriz una Regla CONFLICT UNARIA.........." << endl;
 
 			// Escribo una a una las tuplas correspondientes a cero.
 
 			for (itero_valores = tuplas_unarias.begin();
 					itero_valores != tuplas_unarias.end(); ++itero_valores) {
 								
-		#ifdef midebug
 				cout << "Valor Unario: " << *itero_valores
 						<< endl;
-		#endif
 
 
 			// Escribo ceros en horizontal y vertical
-
 				coordenada_final[0] = coordenadas_base[0]
 						+ (*itero_valores)
 						- minimo_variable[var_cero];
@@ -602,10 +602,12 @@ public:
 		if (support) {
 
 			cout << "Soy support ...................." << endl;
-			cout << "Var_0:" << var_cero << " min var: "
-					<< minimo_variable[var_cero] << endl;
-			cout << "Var_1:" << var_uno << " min var: "
-					<< minimo_variable[var_uno] << endl;
+			//cout << "Var_0: " << var_cero << "- Var_1: " << var_uno << endl;
+
+#ifdef midebug
+			cout << " min var: " << minimo_variable[var_cero] << endl;
+			cout << " min var: " << minimo_variable[var_uno] << endl;
+#endif
 
 			// No hay tuplas y es una regla support => todo a ceros
 
@@ -617,10 +619,10 @@ public:
 						coordenada_final[0] = coordenadas_base[0] + i;
 						coordenada_final[1] = coordenadas_base[1] + j;
 						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
-//#ifdef midebug
+#ifdef midebug
 							cout << "writing-0-S en:(" << coordenada_final[0] << ","
 								<< coordenada_final[1] << ")" << endl;
-//#endif
+#endif
 							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
 							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
 						}
@@ -713,27 +715,29 @@ public:
 				
 				itero_dentro_de_la_pareja = itero_parejas->begin();
 
-				//#ifdef midebug
+#ifdef midebug
 				cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
 						<< endl;
-				//#endif
+#endif
 
 				coordenada_final[0] = coordenadas_base[0]
 						+ (*itero_dentro_de_la_pareja)
 						- minimo_variable[var_cero];
 
 				itero_dentro_de_la_pareja++;
-				//#ifdef midebug
+#ifdef midebug
 				cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
 						<< endl;
-				//#endif
+#endif
+
 				coordenada_final[1] = coordenadas_base[1]
 						+ (*itero_dentro_de_la_pareja)
 						- minimo_variable[var_uno];
-//#ifdef midebug
+
+#ifdef midebug
 				cout << "writing-0-C en:(" << coordenada_final[0] << ","
 						<< coordenada_final[1] << ")" << endl;
-//#endif
+#endif
 				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
@@ -778,11 +782,14 @@ public:
 		{	
 			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
 			{
+#ifdef midebug
 				cout << "i: " << i << " - j: " << j;
-
+#endif
 					if(i!=j)
 					{
+#ifdef midebug
 						cout << "  -->  Son diferentes " ;
+#endif
 						coordenada_final[0]=coordenadas_base[0]+i;
 						coordenada_final[1]=coordenadas_base[1]+j;
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
@@ -797,7 +804,9 @@ public:
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
 					}
+#ifdef midebug					
 					cout << endl;
+#endif
 			}
 				
 		}
@@ -813,7 +822,9 @@ public:
 
 					if(i==j)
 					{
+#ifdef midebug
 						cout << "  -->  Son iguales " ;
+#endif
 						coordenada_final[0]=coordenadas_base[0]+i;
 						coordenada_final[1]=coordenadas_base[1]+j;
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
@@ -828,7 +839,9 @@ public:
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 
 					}
+#ifdef midebug	
 					cout << endl;
+#endif
 			}
 				
 		}
@@ -1092,9 +1105,10 @@ public:
 		int coordenadas_base[2];
 		vector<vector<int>>::iterator itero_parejas;
 
-    	cout << "\n  Extension constraint UNARIA variable: " << id << endl;
-    	cout << "        " << (support ? "support" : "conflict") << " nb tuples: " << tuples.size() << " star: " << hasStar << endl;
-    	cout << (*variable) << endl;
+    	cout << "\n  Extension-Constraint UNARIA en buildConstraintExtension(): " << id << endl;
+    	cout << "       regla " << (support ? "support" : "conflict") << ", número tuplas: " << tuples.size() 
+			<< " star: " << hasStar << endl;
+
 
 
 		tuplas_unarias=tuples;
@@ -1225,7 +1239,7 @@ public:
 
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
 		cout << "Tamaño de la lista: " << list.size() << endl;
-		displayList(list);
+		//displayList(list);
 		
 		if(list.size()==0 || list.size()>2)
 		{
@@ -1369,8 +1383,9 @@ public:
 		{
 			for(i=k,j=i+1; j<list.size();j++)
 			{
+#ifdef midebug
 				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
-
+#endif
 				indice0 = get_indice(*(list[i]));
 				indice1 = get_indice(*(list[j]));
 				var_cero = get_nombre(list[i]->id);
@@ -1578,6 +1593,7 @@ int main(int argc, char **argv) {
 	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos", fmat);
 	miparser.imprime_matriz("datos",fmat);
+	fmat.close();
 
 	/* cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
 	ostream & terminal=cout;
@@ -1587,8 +1603,6 @@ int main(int argc, char **argv) {
 	miparser.imprime_matriz("shadow", terminal); */
 
 
-
-	//fmat.close();
 
 	return 0;
 }
