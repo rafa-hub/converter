@@ -14,7 +14,7 @@
 #include <map>
 
 //#define mipause
-//#define midebug
+#define midebug
 //#define mitest
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -762,6 +762,47 @@ public:
 
 
 
+	//Funcion que escribe en la matriz reglas ternarias
+	void escribe_en_matriz_ternaria(int *coordenadas_base, vector<vector<int> >& tuplas,
+			string var_cero, string var_uno, int orden0, int orden1, bool support) 
+	{
+		std::vector<vector<int>>::iterator itero_tuplas,itero_tupla_nueva;
+		//vector<int>::iterator itero_dentro_de_la_tupla;
+		vector<vector<int>> valores_tupla;
+		vector <int> primera_tupla;
+		int coordenada_final[2];
+
+		
+
+
+		cout << "Soy una regla ternaria o superior --> support: " << support << endl;
+		
+		
+		for (itero_tuplas = tuplas.begin(); itero_tuplas != tuplas.end(); ++itero_tuplas) 
+		{
+			primera_tupla.clear();
+			valores_tupla.clear();
+
+			primera_tupla.push_back((*itero_tuplas)[orden0]);
+			primera_tupla.push_back((*itero_tuplas)[orden1]);
+
+			valores_tupla.push_back(primera_tupla);
+			
+			cout << "Tupla ternaria a binaria: " << valores_tupla[0] [0] << " - " << valores_tupla[0][1] << endl;
+
+
+
+			escribe_en_matriz(coordenadas_base,valores_tupla,var_cero,var_uno,support);
+
+			cout << endl;
+
+		}
+
+
+
+
+	}
+
 
 
 
@@ -1000,8 +1041,9 @@ public:
 		escribe_nombre_fichero();
 
 		// Genero la matriz
+		cout << "Genero la matriz ............." << endl;
 		genera_matriz();
-
+		cout << "Matriz generada .............." << endl;
 #ifdef midebug
 		print_coordenadas_base();
 		cout << " - FIN declaracion variables - " << endl << endl;
@@ -1026,7 +1068,7 @@ public:
 		rango_variables = (maxValue - minValue) + 1;
 		minimo_variables = minValue;					/*TODO-hay variables (singleton) con valor -1!!*/
 		numero_variables++;
-		cout << "Variable: " << id << " Índice var: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
+		cout << "Variable: " << id << " indice var: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
 				<< maxValue << endl;
 
 		//PSS-treats the case of singleton variables
@@ -1066,11 +1108,12 @@ public:
 		lista_variables.push_back(id);
 		rango_variables = values.size();
 		minimo_variables = values.front(); 		/*TODO-extend to non-index values */
+		mapa_indices[id]=numero_variables;
 		numero_variables++;
 
 //#ifdef mydebug
 		cout << "Variable: " << id << " - min: " << values[0] << " - max: "
-				<< values.back() << endl;
+				<< values.back() << "Índice: " << mapa_indices[id] <<  endl;
 //#endif
 
 		//treats the case of singleton variables
@@ -1162,8 +1205,8 @@ public:
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
-		string var_cero, var_uno, var_aux;
-		int indice0, indice1, indice_aux;
+		string var_cero, var_uno;
+		int indice0, indice1, i,j,k;
 		int coordenadas_base[2];
 		vector<vector<int>>::iterator itero_parejas;
 
@@ -1171,24 +1214,50 @@ public:
 
 		// Guardo el valor de las tuplas por si es una restriccion de grupo
 		las_tuplas=tuples;
-		cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-
-		indice0 = get_indice(*(list[0]));
-		indice1 = get_indice(*(list[1]));
-		var_cero = get_nombre(list[0]->id);
-		var_uno = get_nombre(list[1]->id);
+		
 
 
 		if (list.size() == 2){
+			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+
+			indice0 = get_indice(*(list[0]));
+			indice1 = get_indice(*(list[1]));
+			var_cero = get_nombre(list[0]->id);
+			var_uno = get_nombre(list[1]->id);
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-		} else{
-			throw std::runtime_error("Error en buildConstrainEstension(), este código sólo funciona con relaciones binarias");
-			exit(2);
+			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support);
 		}
 
+		if (list.size() >= 3){
+
+			displayList(list);
+			
+
+			for (k=0;k<(list.size()-1);k++)
+			{
+				for(i=k,j=i+1; j<list.size();j++)
+				{
+					cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
+
+					indice0 = get_indice(*(list[i]));
+					indice1 = get_indice(*(list[j]));
+					cout << "Índices: " << indice0 << " , " << indice1 << endl;
+					var_cero = get_nombre(list[i]->id);
+					var_uno = get_nombre(list[j]->id);
+
+					calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+					escribe_en_matriz_ternaria(coordenadas_base,las_tuplas, var_cero, var_uno,i,j,support);
+			}
+		}
+			
+		} /* else{
+			throw std::runtime_error("Error en buildConstrainEstension(), este código sólo funciona hasta relaciones ternarias");
+			exit(2);
+		} */
 
 
-#ifdef midebug
+
+/* #ifdef midebug
 		cout << "Coordenada base calculada: " << coordenadas_base[0] << " - "
 				<< coordenadas_base[1] << endl;
 #endif
@@ -1209,13 +1278,12 @@ public:
 #ifdef mipause
         	cin.get();
 #endif
-		escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
-					support);
+		
 		
 
 #ifdef midebug
 		cout << "\n ** Fin buildConstraintExtension ** " << id << endl;
-#endif
+#endif */
 
 	}
 
@@ -1228,7 +1296,8 @@ public:
 	//Versión para restricciones Unarias y Binarias.
 	void buildConstraintExtensionAs(string id, vector<XVariable *> list,
 			bool support, bool hasStar) {
-
+		
+		int i,j,k;
 		string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int coordenadas_base[2];
@@ -1239,9 +1308,9 @@ public:
 
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
 		cout << "Tamaño de la lista: " << list.size() << endl;
-		//displayList(list);
+		displayList(list);
 		
-		if(list.size()==0 || list.size()>2)
+		if(list.size()==0 || list.size()>3)
 		{
 			throw runtime_error("Tamaño de tupla no procesado.");
 			exit(2);
@@ -1260,6 +1329,7 @@ public:
 			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, support);
 		
 		} 
+
 		
 		
 		if (list.size() == 2){
@@ -1278,6 +1348,34 @@ public:
 					support);
 		} 
 		
+		if (list.size() >= 3)
+		{
+			displayList(list);
+			
+
+			for (k=0;k<(list.size()-1);k++)
+			{
+				for(i=k,j=i+1; j<list.size();j++)
+				{
+					cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
+
+					indice0 = get_indice(*(list[i]));
+					indice1 = get_indice(*(list[j]));
+					cout << "Índices: " << indice0 << " , " << indice1 << endl;
+					var_cero = get_nombre(list[i]->id);
+					var_uno = get_nombre(list[j]->id);
+
+					calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+					escribe_en_matriz_ternaria(coordenadas_base,las_tuplas, var_cero, var_uno,i,j,support);
+				}
+			}
+			
+		} else{
+			throw std::runtime_error("Error en buildConstrainEstension(), este código sólo funciona hasta relaciones ternarias");
+			exit(2);
+		}
+
+
 
 /* 		
 
@@ -1342,10 +1440,8 @@ public:
 
 	void endGroup() {
 
-#ifdef midebug
-		cout << "Fin Grupo .......\n\n " << endl;
-#endif
 
+		cout << "Fin Grupo .......\n\n " << endl;
 		
 	}
 
