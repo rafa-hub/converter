@@ -14,7 +14,7 @@
 #include <map>
 
 //#define mipause
-#define midebug
+//#define midebug
 //#define mitest
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -123,7 +123,7 @@ public:
 #endif
 
 		return(indice);
-// 		return(mapa_indices[variable.id]);  //Todo la función
+// 		return(mapa_indices[variable.id]);  //Toda la función
 	}
 
 
@@ -361,6 +361,9 @@ public:
 
 
 
+
+
+
 	//Vuelca en pantalla la matriz, solo útil para depuración, en casos reales
 	//la matriz suele ser demasiado grande
 	ostream& imprime_matriz(string matriz, ostream& o=cout) {
@@ -386,6 +389,12 @@ public:
 		}
 		return o;
 	}
+
+
+
+
+
+
 
 
 
@@ -601,10 +610,10 @@ public:
 
 		if (support) {
 
-			cout << "Soy support ...................." << endl;
-			//cout << "Var_0: " << var_cero << "- Var_1: " << var_uno << endl;
 
-#ifdef midebug
+#ifdef midebug	
+			cout << "Regla Support ...................." << endl;
+			cout << "Var_0: " << var_cero << "- Var_1: " << var_uno << endl;
 			cout << " min var: " << minimo_variable[var_cero] << endl;
 			cout << " min var: " << minimo_variable[var_uno] << endl;
 #endif
@@ -707,7 +716,10 @@ public:
 
 		} else {
 
-			cout << "Soy una regla Conflict ......" << endl;
+
+#ifdef midebug
+			cout << "Regla Conflict ......" << endl;
+#endif
 
 			// Escribo las tuplas correspondientes a cero.
 			for (itero_parejas = las_tuplas.begin();
@@ -766,19 +778,19 @@ public:
 	void escribe_en_matriz_ternaria(int *coordenadas_base, vector<vector<int> >& tuplas,
 			string var_cero, string var_uno, int orden0, int orden1, bool support) 
 	{
-		std::vector<vector<int>>::iterator itero_tuplas,itero_tupla_nueva;
-		//vector<int>::iterator itero_dentro_de_la_tupla;
+		std::vector<vector<int>>::iterator itero_tuplas;
 		vector<vector<int>> valores_tupla;
 		vector <int> primera_tupla;
 		int coordenada_final[2];
 
 		
 
-
-		cout << "Soy una regla ternaria o superior --> support: " << support << endl;
+#ifdef midebug
+		cout << "Pareja de la Regla n-aria, índices: " << orden0 << "," << orden1  
+		<< "--> support: " << support << endl;
+#endif
 		
-		
-		for (itero_tuplas = tuplas.begin(); itero_tuplas != tuplas.end(); ++itero_tuplas) 
+		for (itero_tuplas = tuplas.begin(); itero_tuplas != tuplas.end(); ++itero_tuplas)
 		{
 			primera_tupla.clear();
 			valores_tupla.clear();
@@ -787,19 +799,14 @@ public:
 			primera_tupla.push_back((*itero_tuplas)[orden1]);
 
 			valores_tupla.push_back(primera_tupla);
-			
-			cout << "Tupla ternaria a binaria: " << valores_tupla[0] [0] << " - " << valores_tupla[0][1] << endl;
 
-
+#ifdef midebug			
+			cout << "Valores Tupla n-aria a binaria: " << valores_tupla[0] [0] << "," << primera_tupla[0]
+			<< " - " << valores_tupla[0][1] << "," << primera_tupla[1] << endl;
+#endif
 
 			escribe_en_matriz(coordenadas_base,valores_tupla,var_cero,var_uno,support);
-
-			cout << endl;
-
 		}
-
-
-
 
 	}
 
@@ -929,7 +936,7 @@ public:
 
 
 	void endInstance() {
-		pongo_diagonal_matriz_a_cero();
+		//pongo_diagonal_matriz_a_cero();
 
 		//I/O: Nota-la matriz de datos no est� terminada todavia
 		//Hay que eliminar las relaciones entra valores de la misma variable
@@ -1111,10 +1118,9 @@ public:
 		mapa_indices[id]=numero_variables;
 		numero_variables++;
 
-//#ifdef mydebug
 		cout << "Variable: " << id << " - min: " << values[0] << " - max: "
-				<< values.back() << "Índice: " << mapa_indices[id] <<  endl;
-//#endif
+				<< values.back() << " Índice: " << mapa_indices[id] <<  endl;
+
 
 		//treats the case of singleton variables
 		if (!is_array) { /* variable extension to arrays: dirty */
@@ -1215,6 +1221,7 @@ public:
 		// Guardo el valor de las tuplas por si es una restriccion de grupo
 		las_tuplas=tuples;
 		
+		cout << "Número variables: " << list.size() << endl;
 
 
 		if (list.size() == 2){
@@ -1241,21 +1248,19 @@ public:
 
 					indice0 = get_indice(*(list[i]));
 					indice1 = get_indice(*(list[j]));
-					cout << "Índices: " << indice0 << " , " << indice1 << endl;
+	#ifdef midebug
+					cout << "Índices: " << indice0 << " - " << i << " , " << indice1 << " - " << j << endl;
+	#endif
 					var_cero = get_nombre(list[i]->id);
 					var_uno = get_nombre(list[j]->id);
 
 					calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-					escribe_en_matriz_ternaria(coordenadas_base,las_tuplas, var_cero, var_uno,i,j,support);
+					escribe_en_matriz_ternaria(coordenadas_base, las_tuplas, 
+					var_cero, var_uno, i, j,support);
 			}
 		}
 			
-		} /* else{
-			throw std::runtime_error("Error en buildConstrainEstension(), este código sólo funciona hasta relaciones ternarias");
-			exit(2);
-		} */
-
-
+		} 
 
 /* #ifdef midebug
 		cout << "Coordenada base calculada: " << coordenadas_base[0] << " - "
@@ -1310,7 +1315,7 @@ public:
 		cout << "Tamaño de la lista: " << list.size() << endl;
 		displayList(list);
 		
-		if(list.size()==0 || list.size()>3)
+		if(list.size()==0)
 		{
 			throw runtime_error("Tamaño de tupla no procesado.");
 			exit(2);
@@ -1350,7 +1355,7 @@ public:
 		
 		if (list.size() >= 3)
 		{
-			displayList(list);
+			//displayList(list);
 			
 
 			for (k=0;k<(list.size()-1);k++)
@@ -1361,7 +1366,9 @@ public:
 
 					indice0 = get_indice(*(list[i]));
 					indice1 = get_indice(*(list[j]));
+	#ifdef midebug
 					cout << "Índices: " << indice0 << " , " << indice1 << endl;
+	#endif
 					var_cero = get_nombre(list[i]->id);
 					var_uno = get_nombre(list[j]->id);
 
@@ -1370,13 +1377,8 @@ public:
 				}
 			}
 			
-		} else{
-			throw std::runtime_error("Error en buildConstrainEstension(), este código sólo funciona hasta relaciones ternarias");
-			exit(2);
-		}
-
-
-
+		} 
+		
 /* 		
 
 #ifdef midebug
@@ -1672,7 +1674,7 @@ int main(int argc, char **argv) {
 	}
 
 	//removes incompatible edges between values of the same variable-  MUST BE!
-	miparser.remove_edges_same_var(ug);
+	//miparser.remove_edges_same_var(ug);
 	////////////////////
 
 	ug.set_name(miparser.nombre_fichero, false);
