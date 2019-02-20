@@ -14,7 +14,7 @@
 #include <map>
 
 //#define mipause
-//#define midebug
+#define midebug
 //#define mitest
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -56,8 +56,8 @@ private:
 public:
 
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada
-	vector<vector<int>> matriz_datos; 	// Matriz donde se almacena el resultado
-	vector<vector<int>> matriz_shadow; 	// Matriz donde se almacena el resultado
+	int **matriz_datos; 	// Matriz donde se almacena el resultado
+	int **matriz_shadow; 	// Matriz donde se almacena el resultado
 #ifdef mitest
 	vector<vector<int>> matriz_check; 	// Matriz donde se almacena el resultado
 #endif
@@ -319,24 +319,45 @@ public:
 //
 
 		// Generacion de la matriz inicializando a ceros.
-		fila.assign(dimension_matriz,1);
-		fila_shadow.assign(dimension_matriz,0);
+		//fila.assign(dimension_matriz,1);
+		//fila_shadow.assign(dimension_matriz,0);
 
 //		for (int j = 0; j < dimension_matriz; j++) {
 //			fila.push_back(1);
 //			fila_shadow.push_back(0);
 //		}
 
-		for (int j = 0; j < dimension_matriz; j++) {
-			matriz_datos.push_back(fila);
-			matriz_shadow.push_back(fila_shadow);
-#ifdef mitest
-			matriz_check.push_back(fila_shadow);
-#endif
-		}
+
+// 		for (int j = 0; j < dimension_matriz; j++) {
+// 			matriz_datos.push_back(fila);
+// 			matriz_shadow.push_back(fila_shadow);
+// #ifdef mitest
+// 			matriz_check.push_back(fila_shadow);
+// #endif
+// 		}
+
+
+		matriz_datos = new int *[dimension_matriz];
+    
+    	for(int i = 0; i<dimension_matriz;i++)
+    	{
+      		matriz_datos[i] = new int[dimension_matriz];
+			//cout << i << " " ;
+    	}
+		//cout << endl;
+
+
+		matriz_shadow = new int *[dimension_matriz];
+    
+    	for(int i = 0; i<dimension_matriz;i++)
+    	{
+      		matriz_shadow[i] = new int[dimension_matriz];
+    	}
+
+
 
 #ifdef midebug
-		cout << "Matriz creada ........ \nDimension de la matriz: "	<< matriz_datos.size() << endl;
+		//cout << "Matriz creada ........ \nDimension de la matriz: "	<< matriz_datos.size() << endl;
 		/*ofstream fmatriz("pocholo.txt", ios::out);
 		 imprime_matriz("datos",fmatriz);
 		imprime_matriz("shadow",fmatriz); */
