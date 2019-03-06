@@ -33,6 +33,7 @@ private:
 
 	vector<string> lista_arrays;    			// Guarda la lista de arrays
 	vector<string> lista_variables; 			// Guarda la lista de variables
+	vector<string> lista_variables_ternarias;	// Guarda la lista de variables
 	map<string,int> mapa_indices;				// Guarda el índice de cada variable
 	
 	bool is_array=false;					// PSS-determina si una varaible es un singleton o forma parte de un array
@@ -56,8 +57,10 @@ private:
 public:
 
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada
+	int dimension_matriz_ternaria = 0;	//Guarda la dimension definitiva de la matriz ternaria
 	int **matriz_datos; 	// Matriz donde se almacena el resultado
-	int **matriz_shadow; 	// Matriz donde se almacena el resultado
+	int **matriz_shadow; 	// Matriz donde se almacenan las escrituras
+	int **matriz_datos_ternaria;  // MMatriz donde se almacenan los datos ternarios
 #ifdef mitest
 	vector<vector<int>> matriz_check; 	// Matriz donde se almacena el resultado
 #endif
@@ -288,13 +291,55 @@ public:
 
 
 
+	void genera_matriz_ternaria()
+	{
+		int i=0,j,k;
+		std::vector<string>::iterator primer_nivel;
+		std::vector<string>::iterator segundo_nivel;
+		std::vector<string>::iterator tercer_nivel;
+
+		matriz_datos_ternaria = new int *[3];
+		dimension_matriz_ternaria=lista_variables.size()*3;
+
+		cout << "Dimensión matriz ternaria --> número de filas " << lista_variables.size() << " * 3 = "
+		 << dimension_matriz_ternaria << endl; 
+
+		for (i=0; i< dimension_matriz_ternaria;i++)
+			for (j=0;j<3; j++)
+			{	
+				matriz_datos_ternaria[i]=new int[3];
+				matriz_datos_ternaria[i][j]=1;
+			}
+		
+		
+		i=0;
+/*
+		for (primer_nivel = lista_variables.begin() ; primer_nivel < lista_variables.end()-2; primer_nivel++)
+		{
+			for (segundo_nivel = primer_nivel+1 ; segundo_nivel < lista_variables.end()-1; segundo_nivel++)
+			{
+				for(tercer_nivel = segundo_nivel+1 ; tercer_nivel < lista_variables.end(); tercer_nivel++){
+					cout << "U[" << i << "]= " << *primer_nivel << " - " <<
+					*segundo_nivel << " - " << *tercer_nivel << endl;
+
+					//matriz_datos_ternaria[i]=new int[3];
+					 for (k=0;k<3;k++)
+						matriz_datos_ternaria[i][k]=1;
+					i++; */
+					
+				}
+			}
+		}
+		
+
+		
+	}
+
 
 
 	// Genera la matriz
 	void genera_matriz() {
 		std::vector<string>::iterator lista;
-		std::vector<int> fila;
-		std::vector<int> fila_shadow;
 
 		for (lista = lista_arrays.begin(); lista != lista_arrays.end();
 				lista++) {
@@ -309,33 +354,6 @@ public:
 			cout << "dimension acumulada: " << dimension_matriz << endl;
 #endif
 		}
-
-		//I/O
-//        com::stl::print_collection(lista_arrays);
-//        cin.get();
-
-//         com::stl::print_collection(lista_variables);
-//         cin.get();
-//
-
-		// Generacion de la matriz inicializando a ceros.
-		//fila.assign(dimension_matriz,1);
-		//fila_shadow.assign(dimension_matriz,0);
-
-//		for (int j = 0; j < dimension_matriz; j++) {
-//			fila.push_back(1);
-//			fila_shadow.push_back(0);
-//		}
-
-
-// 		for (int j = 0; j < dimension_matriz; j++) {
-// 			matriz_datos.push_back(fila);
-// 			matriz_shadow.push_back(fila_shadow);
-// #ifdef mitest
-// 			matriz_check.push_back(fila_shadow);
-// #endif
-// 		}
-
 
 		matriz_datos = new int *[dimension_matriz];
     
@@ -357,10 +375,9 @@ public:
 
 
 #ifdef midebug
-		//cout << "Matriz creada ........ \nDimension de la matriz: "	<< matriz_datos.size() << endl;
-		/*ofstream fmatriz("pocholo.txt", ios::out);
-		 imprime_matriz("datos",fmatriz);
-		imprime_matriz("shadow",fmatriz); */
+		//ofstream fmatriz("pocholo.txt", ios::out);
+		//imprime_matriz("datos",fmatriz);
+		//imprime_matriz("shadow",fmatriz); 
 #endif
 	}
 
@@ -1069,8 +1086,13 @@ public:
 		escribe_nombre_fichero();
 
 		// Genero la matriz
-		cout << "Genero la matriz ............." << endl;
+		cout << "Genero la matriz Ternaria............." << endl;
+		
+		genera_matriz_ternaria();
+
+		cout << "Genero la matriz Binaria............." << endl;
 		genera_matriz();
+		
 		cout << "Matriz generada .............." << endl;
 #ifdef midebug
 		print_coordenadas_base();
@@ -1256,7 +1278,12 @@ public:
 			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support);
 		}
 
-		if (list.size() >= 3){
+		if(list.size() == 3)
+		{
+
+		}
+
+		if (list.size() > 3){
 
 			displayList(list);
 			
@@ -1374,7 +1401,13 @@ public:
 					support);
 		} 
 		
-		if (list.size() >= 3)
+		if (list.size() == 3)
+		{
+
+
+		}
+
+		if (list.size() > 3)
 		{
 			//displayList(list);
 			
