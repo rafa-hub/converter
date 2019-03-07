@@ -16,6 +16,8 @@
 //#define mipause
 #define midebug
 //#define mitest
+#define DIMENSION_BUFFER 1000*1024
+#define TERNARIA 3
 #define RESTRICCION 0
 #define SOPORTE 1
 #define CREAR_MATRIZ 1
@@ -31,9 +33,11 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 
 private:
 
-	vector<string> lista_arrays;    			// Guarda la lista de arrays
-	vector<string> lista_variables; 			// Guarda la lista de variables
-	vector<string> lista_variables_ternarias;	// Guarda la lista de variables
+	vector<string> 	lista_arrays;    			// Guarda la lista de arrays
+	vector<string> 	lista_variables; 			// Guarda la lista de variables
+	vector<int> 	lista_variables_ternarias;	// Guarda la lista de variables binarizadas, 
+												// en cada posición se guarda el "número" de tuplas.
+	int indice_var_ternarias = 0;
 	map<string,int> mapa_indices;				// Guarda el índice de cada variable
 	
 	bool is_array=false;					// PSS-determina si una varaible es un singleton o forma parte de un array
@@ -60,7 +64,9 @@ public:
 	int dimension_matriz_ternaria = 0;	//Guarda la dimension definitiva de la matriz ternaria
 	int **matriz_datos; 	// Matriz donde se almacena el resultado
 	int **matriz_shadow; 	// Matriz donde se almacenan las escrituras
-	int **matriz_datos_ternaria;  // MMatriz donde se almacenan los datos ternarios
+	int **matriz_datos_ternaria;  // Matriz donde se almacenan los datos ternarios
+	int *puntero_base_matriz;	// Puntero para guardar la base de la ubicación de la matriz ternaria
+	int *puntero_ternario; 		// Puntero para recorrer la matriz ternaria
 #ifdef mitest
 	vector<vector<int>> matriz_check; 	// Matriz donde se almacena el resultado
 #endif
@@ -106,6 +112,40 @@ public:
 
 		fichero_salida.close();
 	}
+
+
+
+
+
+	void escribe_fichero_csp_ternario() 
+	{
+		string var;
+		char *nombre_fichero_csp;
+
+		nombre_fichero_csp = strrchr(nombre_fichero, '.');
+		strcpy(nombre_fichero_csp, ".csp");
+		cout << "Nombre fichero CSP: " << nombre_fichero << endl;
+		
+		ofstream fichero_salida(nombre_fichero);
+
+		fichero_salida<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
+		fichero_salida << "x " << lista_variables_ternarias.size() << endl;
+
+		for (unsigned int j = 0; j < lista_variables_ternarias.size(); j++)
+			fichero_salida << "v " << (j + 1) << " " << lista_variables_ternarias[j]
+					<< endl;
+		
+
+		fichero_salida.close();
+	}
+
+	
+
+
+
+
+
+
 
 
 
@@ -298,6 +338,11 @@ public:
 		std::vector<string>::iterator segundo_nivel;
 		std::vector<string>::iterator tercer_nivel;
 
+		puntero_base_matriz = new int [DIMENSION_BUFFER];
+		cout << "Creada matriz con " << (DIMENSION_BUFFER) << " números enteros" << endl;
+		puntero_ternario = puntero_base_matriz;
+
+/* 
 		matriz_datos_ternaria = new int *[3];
 		dimension_matriz_ternaria=lista_variables.size()*3;
 
@@ -313,7 +358,7 @@ public:
 		
 		
 		i=0;
-/*
+ *//*
 		for (primer_nivel = lista_variables.begin() ; primer_nivel < lista_variables.end()-2; primer_nivel++)
 		{
 			for (segundo_nivel = primer_nivel+1 ; segundo_nivel < lista_variables.end()-1; segundo_nivel++)
@@ -325,11 +370,11 @@ public:
 					//matriz_datos_ternaria[i]=new int[3];
 					 for (k=0;k<3;k++)
 						matriz_datos_ternaria[i][k]=1;
-					i++; */
+					i++; 
 					
 				}
 			}
-		}
+		} */
 		
 
 		
@@ -427,6 +472,33 @@ public:
 		}
 		return o;
 	}
+
+	
+	//Vuelca en pantalla la matriz, solo útil para depuración, en casos reales
+	//la matriz suele ser demasiado grande
+	ostream& imprime_matriz_ternaria(ostream& o=cout) {
+		
+		for (int i=0; i< lista_variables_ternarias.size();i++)
+			{
+				cout << "Número tuplas de U[" << i << "] -> " << lista_variables_ternarias[i] << endl;
+				
+				for (int j=0;j<lista_variables_ternarias[i]; j++)
+				{
+					for(int k=0; k < TERNARIA; k++)
+					{
+						cout << matriz_datos_ternaria[i][(TERNARIA*j)+k] << ",";
+					}
+					cout << endl;
+				}
+				
+				
+			}
+			cout << endl;
+
+
+		return o;
+	}
+
 
 
 
@@ -979,9 +1051,12 @@ public:
 		//I/O: Nota-la matriz de datos no est� terminada todavia
 		//Hay que eliminar las relaciones entra valores de la misma variable
 		//TODO-cambiar la l�gica y hacerlo aqui
+		ostream & terminal=cout;
 
 		cout <<"---------------------------------------------------"<<endl;
-		std::vector<string>::iterator itero;
+		//imprime_matriz_ternaria(terminal);
+		cout <<"---------------------------------------------------"<<endl;
+		vector<string>::iterator itero;
 		for (itero = lista_arrays.begin(); itero != lista_arrays.end();	itero++) {
 			cout << "Array: " << *itero << endl;
 			cout << "Numero variables: " << numero_variable[*itero] << endl;
@@ -1083,17 +1158,16 @@ public:
 	void endVariables() {
 
 		//Escribo el fichero .csp
-		escribe_nombre_fichero();
+		//escribe_nombre_fichero();
 
 		// Genero la matriz
-		cout << "Genero la matriz Ternaria............." << endl;
-		
+		//cout << "Genero la matriz Ternaria............." << endl;
 		genera_matriz_ternaria();
 
-		cout << "Genero la matriz Binaria............." << endl;
-		genera_matriz();
+		//cout << "Genero la matriz Binaria............." << endl;
+		//genera_matriz();
 		
-		cout << "Matriz generada .............." << endl;
+		//cout << "Matriz generada .............." << endl;
 #ifdef midebug
 		print_coordenadas_base();
 		cout << " - FIN declaracion variables - " << endl << endl;
@@ -1191,7 +1265,9 @@ public:
 
 	//Versión para Restricciones UNARIAS
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
-		string var_cero, var_uno, var_aux;
+		cout << "Regla UNARIA:" << endl;
+		cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+		/* string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int direccion;
 		int coordenadas_base[2];
@@ -1241,7 +1317,7 @@ public:
 
 #ifdef midebug
 		cout << "\n ** Fin buildConstraintExtension ** " << id << endl;
-#endif
+#endif */
 
 	}
 
@@ -1254,10 +1330,14 @@ public:
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
-		string var_cero, var_uno;
+		string var_cero, var_uno, var_ternaria;
 		int indice0, indice1, i,j,k;
 		int coordenadas_base[2];
 		vector<vector<int>>::iterator itero_parejas;
+
+		vector<vector<int>>::iterator itero_tuplas;
+		vector <int>::iterator itero_dentro_tuplas;
+
 
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
 
@@ -1268,23 +1348,57 @@ public:
 
 
 		if (list.size() == 2){
-			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout << "Regla BINARIA:" << endl;
+			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl;
+			/* cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 
 			indice0 = get_indice(*(list[0]));
 			indice1 = get_indice(*(list[1]));
 			var_cero = get_nombre(list[0]->id);
 			var_uno = get_nombre(list[1]->id);
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support);
+			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); */
 		}
 
 		if(list.size() == 3)
 		{
+			cout << "Regla TERNARIA:" << endl;
+			
+			
+			displayList(list);
+			cout << "Soy U[" << indice_var_ternarias << "]" << endl;
+			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+
+			lista_variables_ternarias.push_back(las_tuplas.size());
+			matriz_datos_ternaria[indice_var_ternarias]=puntero_ternario;
+			indice_var_ternarias++;
+
+			
+			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+			{
+				itero_dentro_tuplas = itero_tuplas->begin();
+				cout << "(";
+				for(int i=0; i<itero_tuplas->size(); i++)
+				{
+					cout << *itero_dentro_tuplas << ",";
+					*puntero_ternario=*itero_dentro_tuplas;
+					puntero_ternario++;
+					itero_dentro_tuplas++;
+				}
+				cout <<")";
+			}
+			cout << endl;
+
+			//Creo la nueva variable y la añado
 
 		}
 
-		if (list.size() > 3){
 
+		if (list.size() > 3){
+			cout << "Regla N-ARIA > 3: " << endl;
+			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl;
+
+/* 
 			displayList(list);
 			
 
@@ -1306,7 +1420,7 @@ public:
 					escribe_en_matriz_ternaria(coordenadas_base, las_tuplas, 
 					var_cero, var_uno, i, j,support);
 			}
-		}
+		} */
 			
 		} 
 
@@ -1354,14 +1468,16 @@ public:
 		string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int coordenadas_base[2];
-
+		
 		vector<vector<int>>::iterator it;
 		vector<int>::iterator ite;
 
+		vector<vector<int>>::iterator itero_tuplas;
+		vector <int>::iterator itero_dentro_tuplas;
 
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
-		cout << "Tamaño de la lista: " << list.size() << endl;
-		displayList(list);
+		//cout << "Tamaño de la lista: " << list.size() << endl;
+		
 		
 		if(list.size()==0)
 		{
@@ -1371,7 +1487,10 @@ public:
 
 
 		if (list.size() == 1){
-			cout << "Variable Unaria: " << (list[0]->id) << endl;
+			cout << "Regla UNARIA:" << endl;
+			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+			
+			/* cout << "Variable Unaria: " << (list[0]->id) << endl;
 
 			indice0 = get_indice(*(list[0]));
 			indice1 = indice0;
@@ -1379,14 +1498,16 @@ public:
 			var_cero = get_nombre(list[0]->id);
 			var_uno = var_cero;
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, support);
+			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, support); */
 		
 		} 
 
 		
 		
 		if (list.size() == 2){
-			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout << "Regla BINARIA:" << endl;
+			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+			/* cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 
 			indice0 = get_indice(*(list[0]));
 			indice1 = get_indice(*(list[1]));
@@ -1398,20 +1519,45 @@ public:
 			
 			cout << "Escribo binaria" << endl;
 			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
-					support);
+					support); */
 		} 
 		
 		if (list.size() == 3)
 		{
+			cout << "Regla TERNARIA (AS): " << endl;
+			
+			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+			displayList(list);
+			cout << "Soy U[" << indice_var_ternarias << "]" << endl;
+			
 
+			lista_variables_ternarias.push_back(las_tuplas.size());
+			matriz_datos_ternaria[indice_var_ternarias]=puntero_ternario;
+			indice_var_ternarias++;
 
+			
+			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+			{
+				itero_dentro_tuplas = itero_tuplas->begin();
+				cout << "(";
+				for(int i=0; i<3; i++)
+				{
+					cout << *itero_dentro_tuplas << ",";
+					*puntero_ternario=*itero_dentro_tuplas;
+					puntero_ternario++;
+					itero_dentro_tuplas++;
+				}
+				cout <<")";
+			}
+			cout << endl;		  
 		}
 
 		if (list.size() > 3)
 		{
-			//displayList(list);
+			cout << "Regla N-ARIA:" << endl;
+			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
 			
-
+			/* displayList(list);
 			for (k=0;k<(list.size()-1);k++)
 			{
 				for(i=k,j=i+1; j<list.size();j++)
@@ -1429,7 +1575,7 @@ public:
 					calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
 					escribe_en_matriz_ternaria(coordenadas_base,las_tuplas, var_cero, var_uno,i,j,support);
 				}
-			}
+			} */
 			
 		} 
 		
@@ -1464,7 +1610,8 @@ public:
 		cout << "\n ** Fin buildConstraintExtensionAS ** " << id << endl;
 #endif */
 
-		
+		cout << "Prueba boba" << endl;
+
 	}
 
 
@@ -1702,8 +1849,10 @@ int main(int argc, char **argv) {
 
 	miparser.set_nombre_fichero(argv[1]);
 
+
 /////////////////
 //PARSING
+
 	try {
 		XCSP3CoreParser parser(&miparser);
 		parser.parse(argv[1]); // fileName is a string
@@ -1713,17 +1862,30 @@ int main(int argc, char **argv) {
 		cerr << "\t" << e.what() << endl;
 		exit(1);
 	}
+
+///////////////////
+//GENERACION DEL FICHERO .csp
+
+	miparser.escribe_fichero_csp_ternario();
+
+	ostream & terminal=cout;
+	miparser.imprime_matriz_ternaria(terminal);
+
+
+
+
 ///////////////////
 //GENERACION DE UGRAPH
 
+	cout << "- SEGUNDA FASE -" << endl;
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo y se resuelve
 	ugraph ug(miparser.dimension_matriz);
 
 	for (int i = 0; i < (miparser.dimension_matriz - 1); i++){
 		for (int j = i + 1; j < miparser.dimension_matriz; j++) {
-			if (miparser.matriz_datos[i][j] == 1) {
-				ug.add_edge(i, j);
-			}
+			/* if (miparser.matriz_datos[i][j] == 1) {
+				ug.add_edge(i, j); 
+			}*/
 		}
 	}
 
@@ -1742,10 +1904,9 @@ int main(int argc, char **argv) {
 	f.close();
 
 	//salida matriz de datos
-	ofstream fmat("log_mat.txt", ios::out);
-	miparser.imprime_matriz("datos", fmat);
+	/* ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.close();
+	fmat.close(); */
 
 	/* cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
 	ostream & terminal=cout;
