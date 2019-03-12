@@ -16,7 +16,7 @@
 //#define mipause
 #define midebug
 //#define mitest
-#define DIMENSION_BUFFER 1000*1024
+#define BUFFER_PUNTEROS 10*1024
 #define TERNARIA 3
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -35,8 +35,7 @@ private:
 
 	vector<string> 	lista_arrays;    			// Guarda la lista de arrays
 	vector<string> 	lista_variables; 			// Guarda la lista de variables
-	vector<int> 	lista_variables_ternarias;	// Guarda la lista de variables binarizadas, 
-												// en cada posición se guarda el "número" de tuplas.
+	
 	int indice_var_ternarias = 0;
 	map<string,int> mapa_indices;				// Guarda el índice de cada variable
 	
@@ -59,14 +58,14 @@ private:
 	vector<int> tuplas_unarias;			// Lo mismo, pero para variables unarias
 
 public:
-
+	vector<int> 	lista_variables_ternarias;	// Guarda la lista de variables binarizadas, 
+												// en cada posición se guarda el "número" de tuplas.
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada
 	int dimension_matriz_ternaria = 0;	//Guarda la dimension definitiva de la matriz ternaria
 	int **matriz_datos; 	// Matriz donde se almacena el resultado
 	int **matriz_shadow; 	// Matriz donde se almacenan las escrituras
-	int **matriz_datos_ternaria;  // Matriz donde se almacenan los datos ternarios
-	int *puntero_base_matriz;	// Puntero para guardar la base de la ubicación de la matriz ternaria
-	int *puntero_ternario; 		// Puntero para recorrer la matriz ternaria
+	int **matriz_punteros;  // Matriz donde se almacenan los datos punteros a los datos ternarios
+	
 #ifdef mitest
 	vector<vector<int>> matriz_check; 	// Matriz donde se almacena el resultado
 #endif
@@ -331,53 +330,11 @@ public:
 
 
 
-	void genera_matriz_ternaria()
+	void reserva_memoria_punteros()
 	{
-		int i=0,j,k;
-		std::vector<string>::iterator primer_nivel;
-		std::vector<string>::iterator segundo_nivel;
-		std::vector<string>::iterator tercer_nivel;
-
-		puntero_base_matriz = new int [DIMENSION_BUFFER];
-		cout << "Creada matriz con " << (DIMENSION_BUFFER) << " números enteros" << endl;
-		puntero_ternario = puntero_base_matriz;
-
-/* 
-		matriz_datos_ternaria = new int *[3];
-		dimension_matriz_ternaria=lista_variables.size()*3;
-
-		cout << "Dimensión matriz ternaria --> número de filas " << lista_variables.size() << " * 3 = "
-		 << dimension_matriz_ternaria << endl; 
-
-		for (i=0; i< dimension_matriz_ternaria;i++)
-			for (j=0;j<3; j++)
-			{	
-				matriz_datos_ternaria[i]=new int[3];
-				matriz_datos_ternaria[i][j]=1;
-			}
-		
-		
-		i=0;
- *//*
-		for (primer_nivel = lista_variables.begin() ; primer_nivel < lista_variables.end()-2; primer_nivel++)
-		{
-			for (segundo_nivel = primer_nivel+1 ; segundo_nivel < lista_variables.end()-1; segundo_nivel++)
-			{
-				for(tercer_nivel = segundo_nivel+1 ; tercer_nivel < lista_variables.end(); tercer_nivel++){
-					cout << "U[" << i << "]= " << *primer_nivel << " - " <<
-					*segundo_nivel << " - " << *tercer_nivel << endl;
-
-					//matriz_datos_ternaria[i]=new int[3];
-					 for (k=0;k<3;k++)
-						matriz_datos_ternaria[i][k]=1;
-					i++; 
-					
-				}
-			}
-		} */
-		
-
-		
+		matriz_punteros = new int *[BUFFER_PUNTEROS];
+		cout << "Creado buffer punteros con " << (BUFFER_PUNTEROS) << " posiciones." << endl;
+			
 	}
 
 
@@ -486,7 +443,7 @@ public:
 				{
 					for(int k=0; k < TERNARIA; k++)
 					{
-						cout << matriz_datos_ternaria[i][(TERNARIA*j)+k] << ",";
+						cout << matriz_punteros[i][(TERNARIA*j)+k] << ",";
 					}
 					cout << endl;
 				}
@@ -1054,9 +1011,16 @@ public:
 		ostream & terminal=cout;
 
 		cout <<"---------------------------------------------------"<<endl;
-		//imprime_matriz_ternaria(terminal);
+		imprime_matriz_ternaria(terminal);
 		cout <<"---------------------------------------------------"<<endl;
-		vector<string>::iterator itero;
+
+		for (int i=0;i<lista_variables_ternarias.size();i++)
+		{
+			dimension_matriz_ternaria += (lista_variables_ternarias[i]*TERNARIA);
+		}
+
+
+		/* vector<string>::iterator itero;
 		for (itero = lista_arrays.begin(); itero != lista_arrays.end();	itero++) {
 			cout << "Array: " << *itero << endl;
 			cout << "Numero variables: " << numero_variable[*itero] << endl;
@@ -1064,9 +1028,9 @@ public:
 			cout << "Primer valor: " << minimo_variable[*itero]<< endl;
 			cout << "Número de valores: " << rango_variable[*itero]<< endl;
 			cout << endl;
-		}
-
-		cout << "Dimension total matriz: " << dimension_matriz << endl;
+		}*/
+		
+		cout << "Dimension total datos Ternarios: " << dimension_matriz_ternaria << endl;
 		cout << endl;
 		cout << "FIN del parsing----------------" << endl;
 
@@ -1162,7 +1126,7 @@ public:
 
 		// Genero la matriz
 		//cout << "Genero la matriz Ternaria............." << endl;
-		genera_matriz_ternaria();
+		reserva_memoria_punteros();
 
 		//cout << "Genero la matriz Binaria............." << endl;
 		//genera_matriz();
@@ -1330,11 +1294,13 @@ public:
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
-		string var_cero, var_uno, var_ternaria;
+		/* string var_cero, var_uno, var_ternaria;
 		int indice0, indice1, i,j,k;
 		int coordenadas_base[2];
-		vector<vector<int>>::iterator itero_parejas;
-
+		vector<vector<int>>::iterator itero_parejas; */
+		
+		
+		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
 		vector<vector<int>>::iterator itero_tuplas;
 		vector <int>::iterator itero_dentro_tuplas;
 
@@ -1365,13 +1331,15 @@ public:
 			cout << "Regla TERNARIA:" << endl;
 			
 			
-			displayList(list);
+			
 			cout << "Soy U[" << indice_var_ternarias << "]" << endl;
+			displayList(list);
 			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
 			lista_variables_ternarias.push_back(las_tuplas.size());
-			matriz_datos_ternaria[indice_var_ternarias]=puntero_ternario;
-			indice_var_ternarias++;
+			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
+			puntero_ternario = matriz_punteros[indice_var_ternarias];
+			
 
 			
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
@@ -1387,9 +1355,9 @@ public:
 				}
 				cout <<")";
 			}
-			cout << endl;
 
-			//Creo la nueva variable y la añado
+			cout << endl;
+			indice_var_ternarias++;
 
 		}
 
@@ -1464,14 +1432,15 @@ public:
 	void buildConstraintExtensionAs(string id, vector<XVariable *> list,
 			bool support, bool hasStar) {
 		
-		int i,j,k;
+		/* int i,j,k;
 		string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int coordenadas_base[2];
-		
+	
 		vector<vector<int>>::iterator it;
 		vector<int>::iterator ite;
-
+ */
+		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
 		vector<vector<int>>::iterator itero_tuplas;
 		vector <int>::iterator itero_dentro_tuplas;
 
@@ -1526,21 +1495,22 @@ public:
 		{
 			cout << "Regla TERNARIA (AS): " << endl;
 			
-			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
-			displayList(list);
+					
 			cout << "Soy U[" << indice_var_ternarias << "]" << endl;
-			
+			displayList(list);
+			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
 			lista_variables_ternarias.push_back(las_tuplas.size());
-			matriz_datos_ternaria[indice_var_ternarias]=puntero_ternario;
-			indice_var_ternarias++;
+			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
+			puntero_ternario = matriz_punteros[indice_var_ternarias];
+			
 
 			
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
 			{
 				itero_dentro_tuplas = itero_tuplas->begin();
 				cout << "(";
-				for(int i=0; i<3; i++)
+				for(int i=0; i<itero_tuplas->size(); i++)
 				{
 					cout << *itero_dentro_tuplas << ",";
 					*puntero_ternario=*itero_dentro_tuplas;
@@ -1549,7 +1519,10 @@ public:
 				}
 				cout <<")";
 			}
-			cout << endl;		  
+
+			cout << endl;
+			indice_var_ternarias++;
+
 		}
 
 		if (list.size() > 3)
@@ -1609,8 +1582,6 @@ public:
 #ifdef midebug
 		cout << "\n ** Fin buildConstraintExtensionAS ** " << id << endl;
 #endif */
-
-		cout << "Prueba boba" << endl;
 
 	}
 
@@ -1868,8 +1839,8 @@ int main(int argc, char **argv) {
 
 	miparser.escribe_fichero_csp_ternario();
 
-	ostream & terminal=cout;
-	miparser.imprime_matriz_ternaria(terminal);
+	/* ostream & terminal=cout;
+	miparser.imprime_matriz_ternaria(terminal); */
 
 
 
@@ -1878,14 +1849,21 @@ int main(int argc, char **argv) {
 //GENERACION DE UGRAPH
 
 	cout << "- SEGUNDA FASE -" << endl;
+	cout << "Creando el fichero con el grafo ............" << endl;
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo y se resuelve
-	ugraph ug(miparser.dimension_matriz);
+	ugraph ug(miparser.dimension_matriz_ternaria);
 
-	for (int i = 0; i < (miparser.dimension_matriz - 1); i++){
-		for (int j = i + 1; j < miparser.dimension_matriz; j++) {
-			/* if (miparser.matriz_datos[i][j] == 1) {
+	//cout << "Número de variables ternarias: " << miparser.lista_variables_ternarias.size()
+	//	<< endl;
+
+	for (int i = 0; i < (miparser.lista_variables_ternarias.size()); i++){
+		for (int j = 0; j < (miparser.lista_variables_ternarias[j]*TERNARIA); j++) {
+			//cout << "Variable U[" << i << "]: "; 
+			if (miparser.matriz_punteros[i][j] == 1) {
+				//cout << "   Valores: " << i << "," << j;
 				ug.add_edge(i, j); 
-			}*/
+			}
+			//cout << endl;
 		}
 	}
 
