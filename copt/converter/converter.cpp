@@ -437,16 +437,15 @@ public:
 		
 		for (int i=0; i< lista_variables_ternarias.size();i++)
 			{
-				cout << "Número tuplas de U[" << i << "] -> " << lista_variables_ternarias[i] << endl;
+				cout << "U[" << i << "] -> " << lista_variables_ternarias[i] << endl;
 				
 				for (int j=0;j<lista_variables_ternarias[i]; j++)
 				{
-					for(int k=0; k < TERNARIA; k++)
-					{
-						cout << matriz_punteros[i][(TERNARIA*j)+k] << ",";
-					}
-					cout << endl;
+					cout << matriz_punteros[i][j];
+					if (j<lista_variables_ternarias[i]-1)
+						cout << ",";
 				}
+				cout << endl;
 				
 				
 			}
@@ -1016,7 +1015,7 @@ public:
 
 		for (int i=0;i<lista_variables_ternarias.size();i++)
 		{
-			dimension_matriz_ternaria += (lista_variables_ternarias[i]*TERNARIA);
+			dimension_matriz_ternaria += (lista_variables_ternarias[i]);
 		}
 
 
@@ -1336,7 +1335,7 @@ public:
 			displayList(list);
 			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
-			lista_variables_ternarias.push_back(las_tuplas.size());
+			lista_variables_ternarias.push_back(las_tuplas.size()*list.size());
 			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
 			puntero_ternario = matriz_punteros[indice_var_ternarias];
 			
@@ -1348,7 +1347,9 @@ public:
 				cout << "(";
 				for(int i=0; i<itero_tuplas->size(); i++)
 				{
-					cout << *itero_dentro_tuplas << ",";
+					cout << *itero_dentro_tuplas;
+					if (i<list.size()-1)
+						cout << ",";
 					*puntero_ternario=*itero_dentro_tuplas;
 					puntero_ternario++;
 					itero_dentro_tuplas++;
@@ -1500,7 +1501,7 @@ public:
 			displayList(list);
 			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
-			lista_variables_ternarias.push_back(las_tuplas.size());
+			lista_variables_ternarias.push_back(las_tuplas.size()*list.size());
 			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
 			puntero_ternario = matriz_punteros[indice_var_ternarias];
 			
@@ -1512,7 +1513,9 @@ public:
 				cout << "(";
 				for(int i=0; i<itero_tuplas->size(); i++)
 				{
-					cout << *itero_dentro_tuplas << ",";
+					cout << *itero_dentro_tuplas;
+					if (i<list.size()-1)
+						cout << ",";
 					*puntero_ternario=*itero_dentro_tuplas;
 					puntero_ternario++;
 					itero_dentro_tuplas++;
@@ -1522,6 +1525,7 @@ public:
 
 			cout << endl;
 			indice_var_ternarias++;
+
 
 		}
 
@@ -1857,7 +1861,7 @@ int main(int argc, char **argv) {
 	//	<< endl;
 
 	for (int i = 0; i < (miparser.lista_variables_ternarias.size()); i++){
-		for (int j = 0; j < (miparser.lista_variables_ternarias[j]*TERNARIA); j++) {
+		for (int j = 0; j < (miparser.lista_variables_ternarias[j]); j++) {
 			//cout << "Variable U[" << i << "]: "; 
 			if (miparser.matriz_punteros[i][j] == 1) {
 				//cout << "   Valores: " << i << "," << j;
