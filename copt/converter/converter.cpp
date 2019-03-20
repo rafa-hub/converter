@@ -41,11 +41,13 @@ private:
 	
 	bool is_array=false;					// PSS-determina si una varaible es un singleton o forma parte de un array
 
-	std::map<string, int> base_array; 		// Mapa de cada array con su coordenada base
-	std::map<string, int> minimo_variable; 	// Guarda el minimo del rango de las variables
-	std::map<string, int> rango_variable; 	// Mapa de cada array con el rango de valores de las variables
-	std::map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias
+	map<string, int> base_array; 		// Mapa de cada array con su coordenada base
+	map<string, int> minimo_variable; 	// Guarda el minimo del rango de las variables
+	map<string, int> rango_variable; 	// Mapa de cada array con el rango de valores de las variables
+	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias
 										    // de variables del array
+
+	map<int,vector<string>> nueva_variable;	// para procesar las reglas ternarias.
 
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
 	int base_siguiente_array = 0; 		// Guarda el valor para calcular la posicion en la matriz del siguiente array
@@ -382,6 +384,32 @@ public:
 		//imprime_matriz("shadow",fmatriz); 
 #endif
 	}
+
+
+
+	void genera_matriz_ternaria()
+	{
+		std::vector<string>::iterator lista;
+		int i,j,k;
+
+		for (lista = lista_arrays.begin(); lista != lista_arrays.end();lista++) 
+		{
+			dimension_matriz += numero_variable[*lista]
+					* rango_variable[*lista];
+		}
+
+		
+		for (k=0;k<(lista_arrays.size()-1);k++)
+		{
+			for(i=k,j=i+1; j<lista_arrays.size();j++)
+			{
+				dimension_matriz += 1;
+			}
+		}
+	
+	
+	}
+
 
 
 
@@ -840,6 +868,8 @@ public:
 
 
 
+
+
 	//Funcion que escribe en la matriz reglas ternarias
 	void escribe_en_matriz_ternaria(int *coordenadas_base, vector<vector<int> >& tuplas,
 			string var_cero, string var_uno, int orden0, int orden1, bool support) 
@@ -969,6 +999,71 @@ public:
 
 
 
+	void genero_grafo()
+	{
+		int i=0,j=0,k=0;
+		vector<string>::iterator itero_dentro_variables;
+
+		cout << "\nGenero directamente el fichero .clq ........." << endl;
+
+		cout << "\nLista variables: " << endl;
+		for (int l=0;l<lista_variables_ternarias.size();l++)
+		{
+			cout << "U[" << l << "]: ";
+			for(itero_dentro_variables=nueva_variable[l].begin();
+					itero_dentro_variables<nueva_variable[l].end();itero_dentro_variables++)
+					cout << *itero_dentro_variables << " ";
+			cout << endl;
+		}
+
+		cout << "\nTuplas para cada variable: " << endl;
+		for (k=0;k<lista_variables_ternarias.size();k++)
+		{
+			for(i=k,j=i+1; j<lista_variables_ternarias.size();j++)
+			{
+				cout << "U[" << i << "]: " << endl;
+
+				for(itero_dentro_variables=nueva_variable[i].begin();
+					itero_dentro_variables<nueva_variable[i].end();itero_dentro_variables++)
+					cout << *itero_dentro_variables << " ";
+				
+				cout << endl;
+				
+				for (int h=0;h<lista_variables_ternarias[i]; h++)
+				{
+					cout << matriz_punteros[i][h];
+					if (h<lista_variables_ternarias[i]-1)
+						cout << ",";
+				}
+				cout << endl;
+
+				cout << "U[" << j << "]: " << endl;
+
+				for(itero_dentro_variables=nueva_variable[j].begin();
+					itero_dentro_variables<nueva_variable[j].end();itero_dentro_variables++)
+					cout << *itero_dentro_variables << " ";
+				
+				cout << endl;
+
+				for (int h=0;h<lista_variables_ternarias[j]; h++)
+				{
+					cout << matriz_punteros[j][h];
+					if (h<lista_variables_ternarias[j]-1)
+						cout << ",";
+				}
+				cout << "\n" << endl;	
+				
+
+			}
+			cout <<endl;
+		}
+
+		
+	}
+
+
+
+
 
 
 
@@ -1018,6 +1113,7 @@ public:
 			dimension_matriz_ternaria += (lista_variables_ternarias[i]);
 		}
 
+		genero_grafo();
 
 		/* vector<string>::iterator itero;
 		for (itero = lista_arrays.begin(); itero != lista_arrays.end();	itero++) {
@@ -1122,10 +1218,11 @@ public:
 
 		//Escribo el fichero .csp
 		//escribe_nombre_fichero();
+		reserva_memoria_punteros();
 
 		// Genero la matriz
 		//cout << "Genero la matriz Ternaria............." << endl;
-		reserva_memoria_punteros();
+		genera_matriz_ternaria();
 
 		//cout << "Genero la matriz Binaria............." << endl;
 		//genera_matriz();
@@ -1300,8 +1397,11 @@ public:
 		
 		
 		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
+		vector<XVariable *>::iterator itero_variables;
+		vector<string>::iterator itero_dentro_variables;
 		vector<vector<int>>::iterator itero_tuplas;
 		vector <int>::iterator itero_dentro_tuplas;
+
 
 
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
@@ -1327,19 +1427,31 @@ public:
 
 		if(list.size() == 3)
 		{
+			
 			cout << "Regla TERNARIA:" << endl;
 			
 			
+			//cout << "Soy U[" << indice_var_ternarias << "]" << endl;
+			//displayList(list);
 			
-			cout << "Soy U[" << indice_var_ternarias << "]" << endl;
-			displayList(list);
+			for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+			{
+				//cout << (*itero_variables)->id << " - " ;
+				nueva_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+			}
+
+			cout << "U[" << indice_var_ternarias << "]: ";
+			for(itero_dentro_variables=nueva_variable[indice_var_ternarias].begin();
+					itero_dentro_variables<nueva_variable[indice_var_ternarias].end();itero_dentro_variables++)
+				cout << *itero_dentro_variables << " ";
+			
+			cout << endl;
+			
 			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
 			lista_variables_ternarias.push_back(las_tuplas.size()*list.size());
 			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
 			puntero_ternario = matriz_punteros[indice_var_ternarias];
-			
-
 			
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
 			{
@@ -1442,6 +1554,8 @@ public:
 		vector<int>::iterator ite;
  */
 		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
+		vector<XVariable *>::iterator itero_variables;
+		vector<string>::iterator itero_dentro_variables;
 		vector<vector<int>>::iterator itero_tuplas;
 		vector <int>::iterator itero_dentro_tuplas;
 
@@ -1497,15 +1611,28 @@ public:
 			cout << "Regla TERNARIA (AS): " << endl;
 			
 					
-			cout << "Soy U[" << indice_var_ternarias << "]" << endl;
-			displayList(list);
+
+			//cout << "Soy U[" << indice_var_ternarias << "]" << endl;
+			//displayList(list);
+			
+			for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+			{
+				//cout << (*itero_variables)->id << " - " ;
+				nueva_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+			}
+
+			cout << "U[" << indice_var_ternarias << "]: ";
+			for(itero_dentro_variables=nueva_variable[indice_var_ternarias].begin();
+					itero_dentro_variables<nueva_variable[indice_var_ternarias].end();itero_dentro_variables++)
+				cout << *itero_dentro_variables << " ";
+			
+			cout << endl;
+			
 			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
 			lista_variables_ternarias.push_back(las_tuplas.size()*list.size());
 			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
 			puntero_ternario = matriz_punteros[indice_var_ternarias];
-			
-
 			
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
 			{
@@ -1525,7 +1652,6 @@ public:
 
 			cout << endl;
 			indice_var_ternarias++;
-
 
 		}
 
