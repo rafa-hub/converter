@@ -58,16 +58,27 @@ private:
 	vector<vector<int>> las_tuplas;   	// Guarda las tuplas, puesto que en
 									  	// buildConstraintExtensionAs() no me las pasan como argumento
 	vector<int> tuplas_unarias;			// Lo mismo, pero para variables unarias
+	vector<int> tamano_tuplas;			// Vector que almacena el tamaño de las tuplas: (dimensión*número de tuplas)
 
+	
 public:
+
 	vector<int> 	lista_variables_ternarias;	// Guarda la lista de variables binarizadas, 
 												// en cada posición se guarda el "número" de tuplas.
+
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada
 	int dimension_matriz_ternaria = 0;	//Guarda la dimension definitiva de la matriz ternaria
+	
 	int **matriz_datos; 	// Matriz donde se almacena el resultado
 	int **matriz_shadow; 	// Matriz donde se almacenan las escrituras
 	int **matriz_punteros;  // Matriz donde se almacenan los datos punteros a los datos ternarios
+
+	map <int , vector <int>> grafo;		// Almacena el grafo que será volcado a fichero
+	int contador_aristas=0;				// Sirve para contar las aristas y poder generar el grafo,
+										// delimita el recorrido del mapa que almacena el grafo.
 	
+	
+
 #ifdef mitest
 	vector<vector<int>> matriz_check; 	// Matriz donde se almacena el resultado
 #endif
@@ -160,7 +171,7 @@ public:
 		int indice;
 
 		valor = variable.id;
-		indice=mapa_indices[valor];
+		indice = mapa_indices[valor];
 
 #ifdef midebug
 		cout << "En get_indice(), id variable: " << valor << " es: " << indice<< endl;
@@ -171,7 +182,21 @@ public:
 	}
 
 
+	int get_indice_ternario(string variable) {
 
+		int pos_uno,pos_dos;
+		string indice;
+
+		pos_uno = variable.find('[');
+		pos_dos = variable.find(']');
+
+		//cout << "pos uno: " << pos_uno << " - pos dos: " << pos_dos << endl;
+		indice = variable.substr(pos_uno+1,(pos_dos-pos_uno)-1);
+
+
+		//cout << "Variable:  " << var << endl;
+		return stoi(indice);
+	}
 
 
 
@@ -997,14 +1022,116 @@ public:
 
 
 
-
-
 	void genero_grafo()
 	{
-		int i=0,j=0,k=0;
-		vector<string>::iterator itero_dentro_variables;
+		int i=0,j=0,k=0,l=0;
+		int indice;
+		vector<string>::iterator itero_primera_variable,itero_segunda_variable;
+		int tamano_comparacion;
 
-		cout << "\nGenero directamente el fichero .clq ........." << endl;
+
+		contador_aristas=0;
+		cout << "\n\nGenero el ficheor DIMACS con el grafo......................\n" << endl;
+		
+		+/
+		for (k=0;k<lista_variables_ternarias.size()-1;k++)
+		{
+			for (i=k,j=i+1;j<lista_variables_ternarias.size();j++)
+			{
+				cout << "U[" << i << "] - U[" << j << "]" << endl ;
+		 		for(itero_primera_variable=nueva_variable[i].begin(); 
+					itero_primera_variable < nueva_variable[i].end(); itero_primera_variable++)
+					{
+						for(itero_segunda_variable=nueva_variable[j].begin(); 
+							itero_segunda_variable < nueva_variable[j].end();itero_segunda_variable++)
+						{
+							if(*itero_primera_variable == *itero_segunda_variable)
+							{
+								tamano_comparacion = (tamano_tuplas[i]<tamano_tuplas[j])?tamano_tuplas[i]:tamano_tuplas[j];
+								cout << "Tamaño tuplas a comparar: " << tamano_comparacion << endl;
+								cout << *itero_primera_variable << " : " << *itero_segunda_variable << endl;
+								indice = get_indice_ternario(*itero_primera_variable);
+								cout << "Índice: " << indice << endl;
+								
+								for (l=0; l<tamano_comparacion ;l++)
+								{
+									cout << matriz_punteros[i][l] << " - ";
+									cout << matriz_punteros[j][l];
+									if (matriz_punteros[i][l] == matriz_punteros[j][l])
+										{
+											// cout << "------> arista:  " ;
+											// cout << "e  " << i+l+indice  << " " << j+l+indice << endl;
+											grafo[contador_aristas] = {i+l+indice,j+l+indice};
+											contador_aristas++;
+										}
+									cout << endl;
+								}
+							}
+						}
+					}
+				cout << endl;
+			}
+		}
+
+		//escribe_grafo();
+
+		cout << "\n=========================================\n" << endl;
+
+		
+
+	}
+
+
+
+
+
+
+
+	void escribe_grafo()
+	{
+		string var;
+		char *nombre_fichero_csp;
+
+		nombre_fichero_csp = strrchr(nombre_fichero, '.');
+		strcpy(nombre_fichero_csp, ".clq");
+		cout << "Nombre fichero .CLQ: " << nombre_fichero << endl;
+		
+		ofstream fichero_salida(nombre_fichero);
+
+		
+		fichero_salida << "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
+		fichero_salida << "c " << nombre_fichero << endl;
+		fichero_salida << "p " << grafo.size() << endl;
+
+		for (unsigned int j = 0; j < lista_variables_ternarias.size(); j++)
+			fichero_salida << "e " << grafo[j][0] << " " << grafo[j][1] << endl;
+					
+		fichero_salida << endl;
+		
+
+		fichero_salida.close();
+
+
+
+
+	}
+
+
+
+
+
+
+
+
+
+	void imprimo_datos_grafo()
+	{
+		int i=0,j=0,k=0,l=0;
+		vector<string>::iterator itero_dentro_variables;
+		vector<string>::iterator itero_primera_variable,itero_segunda_variable;
+
+
+		cout << "\nImprimo las variables y sus tuplas ........." << endl;
 
 		cout << "\nLista variables: " << endl;
 		for (int l=0;l<lista_variables_ternarias.size();l++)
@@ -1040,7 +1167,7 @@ public:
 				cout << "U[" << j << "]: " << endl;
 
 				for(itero_dentro_variables=nueva_variable[j].begin();
-					itero_dentro_variables<nueva_variable[j].end();itero_dentro_variables++)
+					itero_dentro_variables < nueva_variable[j].end() ; itero_dentro_variables++)
 					cout << *itero_dentro_variables << " ";
 				
 				cout << endl;
@@ -1057,6 +1184,36 @@ public:
 			}
 			cout <<endl;
 		}
+
+		cout << "\n=========================================\n" << endl;
+
+		for (k=0;k<lista_variables_ternarias.size()-1;k++)
+		{
+			for (i=k,j=i+1;j<lista_variables_ternarias.size();j++)
+			{
+				cout << "U[" << i << "] - U[" << j << "]" << endl ;
+		 		for(itero_primera_variable=nueva_variable[i].begin(),itero_segunda_variable=nueva_variable[j].begin(); 
+					itero_primera_variable < nueva_variable[i].end();itero_primera_variable++,itero_segunda_variable++)
+					{
+						cout << *itero_primera_variable << ": " << endl;
+						for (l=0;l<tamano_tuplas[i]; l++)
+						{
+							cout << matriz_punteros[i][l] << " - "; 
+						}
+						cout << endl;
+						cout << *itero_segunda_variable << ": " << endl;
+						for (l=0;l<tamano_tuplas[j]; l++)
+						{
+							cout << matriz_punteros[j][l] << " - "; 
+						}
+						cout << endl;
+					}
+					
+				cout << endl;
+			}
+		}
+
+
 
 		
 	}
@@ -1104,9 +1261,9 @@ public:
 		//TODO-cambiar la l�gica y hacerlo aqui
 		ostream & terminal=cout;
 
-		cout <<"---------------------------------------------------"<<endl;
-		imprime_matriz_ternaria(terminal);
-		cout <<"---------------------------------------------------"<<endl;
+		// cout <<"---------------------------------------------------"<<endl;
+		// imprime_matriz_ternaria(terminal);
+		// cout <<"---------------------------------------------------"<<endl;
 
 		for (int i=0;i<lista_variables_ternarias.size();i++)
 		{
@@ -1114,6 +1271,8 @@ public:
 		}
 
 		genero_grafo();
+
+		//imprimo_datos_grafo();
 
 		/* vector<string>::iterator itero;
 		for (itero = lista_arrays.begin(); itero != lista_arrays.end();	itero++) {
@@ -1440,17 +1599,21 @@ public:
 				nueva_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 			}
 
+
 			cout << "U[" << indice_var_ternarias << "]: ";
 			for(itero_dentro_variables=nueva_variable[indice_var_ternarias].begin();
 					itero_dentro_variables<nueva_variable[indice_var_ternarias].end();itero_dentro_variables++)
+			{
 				cout << *itero_dentro_variables << " ";
-			
+			}
+
 			cout << endl;
 			
 			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
 			lista_variables_ternarias.push_back(las_tuplas.size()*list.size());
 			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
+			tamano_tuplas.push_back(las_tuplas.size()*list.size());
 			puntero_ternario = matriz_punteros[indice_var_ternarias];
 			
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
@@ -1610,9 +1773,7 @@ public:
 		{
 			cout << "Regla TERNARIA (AS): " << endl;
 			
-					
-
-			//cout << "Soy U[" << indice_var_ternarias << "]" << endl;
+						//cout << "Soy U[" << indice_var_ternarias << "]" << endl;
 			//displayList(list);
 			
 			for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
@@ -1621,17 +1782,21 @@ public:
 				nueva_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 			}
 
+
 			cout << "U[" << indice_var_ternarias << "]: ";
 			for(itero_dentro_variables=nueva_variable[indice_var_ternarias].begin();
 					itero_dentro_variables<nueva_variable[indice_var_ternarias].end();itero_dentro_variables++)
+			{
 				cout << *itero_dentro_variables << " ";
-			
+			}
+
 			cout << endl;
 			
 			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
 			lista_variables_ternarias.push_back(las_tuplas.size()*list.size());
 			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
+			tamano_tuplas.push_back(las_tuplas.size()*list.size());
 			puntero_ternario = matriz_punteros[indice_var_ternarias];
 			
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
@@ -1651,8 +1816,7 @@ public:
 			}
 
 			cout << endl;
-			indice_var_ternarias++;
-
+			indice_var_ternarias++;	
 		}
 
 		if (list.size() > 3)
@@ -1981,21 +2145,30 @@ int main(int argc, char **argv) {
 	cout << "- SEGUNDA FASE -" << endl;
 	cout << "Creando el fichero con el grafo ............" << endl;
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo y se resuelve
-	ugraph ug(miparser.dimension_matriz_ternaria);
+	ugraph ug(miparser.contador_aristas);
 
-	//cout << "Número de variables ternarias: " << miparser.lista_variables_ternarias.size()
-	//	<< endl;
+	cout << "Número de variables ternarias: " << miparser.lista_variables_ternarias.size()
+		<< endl;
 
-	for (int i = 0; i < (miparser.lista_variables_ternarias.size()); i++){
-		for (int j = 0; j < (miparser.lista_variables_ternarias[j]); j++) {
-			//cout << "Variable U[" << i << "]: "; 
-			if (miparser.matriz_punteros[i][j] == 1) {
-				//cout << "   Valores: " << i << "," << j;
-				ug.add_edge(i, j); 
-			}
-			//cout << endl;
+	
+	for (int i=0; i < miparser.contador_aristas;i++)
+		{
+			//cout <<  "e " << miparser.grafo[i][0] << " - " << miparser.grafo[i][1] << endl;
+			ug.add_edge(miparser.grafo[i][0],miparser.grafo[i][1]);
 		}
-	}
+	
+	/* for (int i = 0; i < (miparser.lista_variables_ternarias.size()); i++)
+	{
+	 	for (int j = 0; j < (miparser.lista_variables_ternarias[j]); j++)
+		{
+	 		cout << "Variable U[" << i << "]: "; 
+	 		if (miparser.matriz_punteros[i][j] == 1) {
+	 			cout << "   Valores: " << i << "," << j;
+	 			ug.add_edge(i, j); 
+	 		}
+	 		//cout << endl;
+	 	}
+	 } */
 
 	//removes incompatible edges between values of the same variable-  MUST BE!
 	//miparser.remove_edges_same_var(ug);
