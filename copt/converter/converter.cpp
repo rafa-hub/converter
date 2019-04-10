@@ -281,6 +281,40 @@ public:
 
 
 
+
+
+	void calcula_coordenadas_ternarias(int indice1, int indice2, int *coordenadas_base) 
+	{
+		int coord_X=0,coord_Y=0;
+		
+		coordenadas_base[0] = tamano_tuplas[indice1];
+		coordenadas_base[1] = tamano_tuplas[indice2];
+
+		for (int i=0; i < indice1; i++)
+			coord_X += tamano_tuplas[i];
+
+		coordenadas_base[0]=coord_X;
+
+		cout << "\nCalculando ..............."<< endl;
+		cout << "X: " << coordenadas_base[0] << " - Y: " << coordenadas_base[1] << endl;
+
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	//for testing: x[0], 3, y[0], 1 -> true/false
 	//assumes values are integers
 	bool is_conflicting(string name1, string value1, string name2, string value2){
@@ -482,6 +516,11 @@ public:
 		}
 		return o;
 	}
+
+
+
+
+
 
 	
 	//Vuelca en pantalla la matriz, solo útil para depuración, en casos reales
@@ -895,6 +934,10 @@ public:
 
 
 
+
+
+
+
 	//Funcion que escribe en la matriz reglas ternarias
 	void escribe_en_matriz_ternaria(int *coordenadas_base, vector<vector<int> >& tuplas,
 			string var_cero, string var_uno, int orden0, int orden1, bool support) 
@@ -1028,17 +1071,20 @@ public:
 		int indice;
 		vector<string>::iterator itero_primera_variable,itero_segunda_variable;
 		int tamano_comparacion;
+		int coordenadas_base[2];
+
 
 
 		contador_aristas=0;
 		cout << "\n\nGenero el ficheor DIMACS con el grafo......................\n" << endl;
 		
-		+/
+		
 		for (k=0;k<lista_variables_ternarias.size()-1;k++)
 		{
 			for (i=k,j=i+1;j<lista_variables_ternarias.size();j++)
 			{
 				cout << "U[" << i << "] - U[" << j << "]" << endl ;
+				cout << "Contador aristas: " << contador_aristas << endl;
 		 		for(itero_primera_variable=nueva_variable[i].begin(); 
 					itero_primera_variable < nueva_variable[i].end(); itero_primera_variable++)
 					{
@@ -1061,7 +1107,8 @@ public:
 										{
 											// cout << "------> arista:  " ;
 											// cout << "e  " << i+l+indice  << " " << j+l+indice << endl;
-											grafo[contador_aristas] = {i+l+indice,j+l+indice};
+											calcula_coordenadas_ternarias(i,j,coordenadas_base);
+											grafo[contador_aristas] = {coordenadas_base[0],l};
 											contador_aristas++;
 										}
 									cout << endl;
