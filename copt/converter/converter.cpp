@@ -33,13 +33,14 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 
 private:
 
-	vector<string> 	lista_arrays;    			// Guarda la lista de arrays
-	vector<string> 	lista_variables; 			// Guarda la lista de variables
+	vector<string> 	lista_arrays;    	// Guarda la lista de arrays
+	vector<string> 	lista_variables; 	// Guarda la lista de variables
 	
 	int indice_var_ternarias = 0;
-	map<string,int> mapa_indices;				// Guarda el índice de cada variable
 	
-	bool is_array=false;					// PSS-determina si una varaible es un singleton o forma parte de un array
+	map<string,int> mapa_indices;		// Guarda el índice de cada variable
+	
+	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
 
 	map<string, int> base_array; 		// Mapa de cada array con su coordenada base
 	map<string, int> minimo_variable; 	// Guarda el minimo del rango de las variables
@@ -47,7 +48,10 @@ private:
 	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias
 										    // de variables del array
 
-	map<int,vector<string>> nueva_variable;	// para procesar las reglas ternarias.
+	map<int,vector<string>> nueva_super_variable;	// Nueva Super-Variable para procesar las reglas ternarias.
+													// Contiene las variables como strings.
+	map<int,vector<string>> vertices_variable;		// Nueva Super-Variable para procesar las reglas ternarias.
+													// Contiene los índices de los vértices correspondientes a la variable.
 
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
 	int base_siguiente_array = 0; 		// Guarda el valor para calcular la posicion en la matriz del siguiente array
@@ -61,6 +65,10 @@ private:
 	vector<int> tamano_tuplas;			// Vector que almacena el tamaño de las tuplas: (número de tuplas)
 	vector<int> tamano_total_tuplas;	// Vector que almacena el tamaño total de los elementos de las tuplas: (dimensión*número de tuplas)
 
+	map <int,vector<int>> mapa_vertices;	// Lista de vértices.
+	int indice_vertices=0;				// Índice global para indexar los vértices del grafo.
+	stack <string> pila_comparacion;				// Pila para hacer la comparación de los datos.
+
 	
 public:
 
@@ -70,9 +78,11 @@ public:
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada
 	int dimension_matriz_ternaria = 0;	//Guarda la dimension definitiva de la matriz ternaria
 	
-	int **matriz_datos; 	// Matriz donde se almacena el resultado
-	int **matriz_shadow; 	// Matriz donde se almacenan las escrituras
-	int **matriz_punteros;  // Matriz donde se almacenan los datos punteros a los datos ternarios
+	int **matriz_datos; 	// Matriz donde se almacena el resultado.
+	int **matriz_shadow; 	// Matriz donde se almacenan las escrituras.
+	int **matriz_punteros;  // Matriz donde se almacenan los datos punteros a los datos ternarios.
+	int **matriz_vertices;  // Matriz donde se almacenan los punteros a los valores de las tuplas de los vértices.
+	
 
 	map <int , vector <int>> grafo;		// Almacena el grafo que será volcado a fichero
 	int contador_aristas=0;				// Sirve para contar las aristas y poder generar el grafo,
@@ -395,7 +405,8 @@ public:
 	void reserva_memoria_punteros()
 	{
 		matriz_punteros = new int *[BUFFER_PUNTEROS];
-		cout << "Creado buffer punteros con " << (BUFFER_PUNTEROS) << " posiciones." << endl;
+		matriz_vertices = new int *[BUFFER_PUNTEROS];
+		cout << "Creado buffer punteros y buffer de punteros a vértices con " << (BUFFER_PUNTEROS) << " posiciones." << endl;
 			
 	}
 
@@ -1064,12 +1075,89 @@ public:
 
 
 
+void imprimo_vertices()
+	{
+		cout << "Imprimo los vertices del grafo por cada nueva Nueva Variable. Número de vértices: " << indice_vertices << endl;
+		
+		
+				
+		for (int i=0; i<lista_variables_ternarias.size();i++)
+		{
+			
+			cout << "U[" << i << "]: " << endl;
+			cout << "Número de tuplas: " << tamano_tuplas[i] << endl;
+			
+			for (int j=0; j<lista_variables_ternarias[i]; j++)
+			{
+				cout << nueva_super_variable[i][j];
+				if (j<(lista_variables_ternarias[i]-1))
+					cout << ", ";
+			}
+			cout << endl;
+
+			for (int j=0; j<tamano_tuplas[i]; j++)
+			{
+				cout << "v[" << (mapa_vertices[i][j]+1) << "]" ;
+				if (j<(tamano_tuplas[i]-1))
+					cout <<", ";
+			}
+			
+			cout << "\n------------------------------\n";
+		}
+		
+
+	}
+
+
+
+	int posicion_variable(int nueva_var,string var)
+	{
+		int i=0;
+
+		for (i=0;i<lista_variables_ternarias[nueva_var];i++)
+			if(var==nueva_super_variable[nueva_var][i])
+			{
+				cout << "Encontrada "  << var << ", posición " << i << endl;
+				break;
+			}
+		return i;
+	}
+
+
+
+
+	int comparo_vertices(int nueva_var1,int vertice1,string var,int nueva_var2,int vertice2)
+	{
+		int pos1=0,pos2=0;
+
+		pos1 = posicion_variable(nueva_var1,var);
+		pos2 = posicion_variable(nueva_var2,var);
+
+		cout << "Posición en vértice " << vertice1 << " -> " << pos1 << "  Valor: " << matriz_vertices[vertice1][pos1] << endl;
+		cout << "Posición en vértice " << vertice2 << " -> " << pos2 << "  Valor: " << matriz_vertices[vertice1][pos2] << endl;
+		
+		if(matriz_vertices[vertice1][pos1] == matriz_vertices[vertice1][pos2])
+		{
+			cout << "Me corro: hay arista entre v" << vertice1 << " y v" << vertice2 << endl; 
+			return 1;
+		}
+
+		return 0;
+	}
+
+
+
+
+
+
+
 
 
 	void genero_grafo()
 	{
 		int i=0,j=0,k=0,l=0;
-		int indice;
+		int hay_arista=0;
+		int indice=0;
 		vector<string>::iterator itero_primera_variable,itero_segunda_variable;
 		int tamano_comparacion;
 		int coordenadas_base[2];
@@ -1087,15 +1175,38 @@ public:
 			{
 				cout << "Nuevas Variables a procesar U[" << i << "] - U[" << j << "]" << endl ;
 				cout << "Contador aristas: " << contador_aristas << endl;
-		 		for(itero_primera_variable=nueva_variable[i].begin(),pos_uno=1; 
-					itero_primera_variable < nueva_variable[i].end(); itero_primera_variable++,pos_uno++)
+
+		 		for(itero_primera_variable=nueva_super_variable[i].begin(),pos_uno=0; 
+					itero_primera_variable < nueva_super_variable[i].end(); itero_primera_variable++,pos_uno++)
 					{
-						for(itero_segunda_variable=nueva_variable[j].begin(),pos_dos=1; 
-							itero_segunda_variable < nueva_variable[j].end();itero_segunda_variable++,pos_dos++)
+						for(itero_segunda_variable=nueva_super_variable[j].begin(),pos_dos=0; 
+							itero_segunda_variable < nueva_super_variable[j].end();itero_segunda_variable++,pos_dos++)
 						{
+							cout << *itero_primera_variable << "-" << *itero_segunda_variable;
+							
 							if(*itero_primera_variable == *itero_segunda_variable)
+							{	
+								pila_comparacion.push(*itero_primera_variable);
+								tamano_comparacion = (tamano_tuplas[i]<tamano_tuplas[j])?tamano_tuplas[i]:tamano_tuplas[j];
+								cout << endl;
+
+								for(l=0; l < tamano_comparacion;l++)
+								{
+									cout << "v[" << mapa_vertices[i][l] << "] - ";
+									cout << "v[" << mapa_vertices[j][l] << "] " << endl;
+									hay_arista=comparo_vertices(i,mapa_vertices[i][l], *itero_primera_variable,j,mapa_vertices[j][l]);
+								}
+								
+
+							}
+							else 
+								cout << "  ";
+
+							
+
+							/* if(*itero_primera_variable == *itero_segunda_variable)
 							{
-								tamano_comparacion = (tamano_total_tuplas[i]<tamano_total_tuplas[j])?tamano_total_tuplas[i]:tamano_total_tuplas[j];
+								tamano_comparacion = (tamano_tuplas[i]<tamano_tuplas[j])?tamano_tuplas[i]:tamano_tuplas[j];
 								cout << "Tamaño tuplas a comparar: " << tamano_comparacion << endl;
 								cout << *itero_primera_variable <<  " posición: " << pos_uno <<  " : " << *itero_segunda_variable  <<  " posición: " << pos_dos << endl;
 								
@@ -1111,16 +1222,17 @@ public:
 									
 									if (matriz_punteros[i][pos_uno] == matriz_punteros[j][pos_dos])
 										{
-											cout << " me corro ------> arista:  " << tamano_tuplas[i] << " - " << tamano_tuplas[j];
-											// cout << "e  " << i+l+indice  << " " << j+l+indice << endl;
-											// calcula_coordenadas_ternarias(i,j,coordenadas_base);
+											//cout << " me corro ------> arista:  " << tamano_tuplas[i] << " - " << tamano_tuplas[j];
+											cout << "    ->   e  " << i+l+indice  << " " << j+l+indice << endl;
+											calcula_coordenadas_ternarias(i,j,coordenadas_base);
 											// grafo[contador_aristas] = {coordenadas_base[0],l};
 											contador_aristas++;
 										}
 									cout << endl;
 								} 
-							}
+							} */
 						}
+						cout << endl;
 					}
 				cout << endl;
 			}
@@ -1177,6 +1289,13 @@ public:
 
 
 
+	
+
+
+
+
+
+
 	void imprimo_datos_grafo()
 	{
 		int i=0,j=0,k=0,l=0;
@@ -1190,8 +1309,8 @@ public:
 		for (int l=0;l<lista_variables_ternarias.size();l++)
 		{
 			cout << "U[" << l << "]: ";
-			for(itero_dentro_variables=nueva_variable[l].begin();
-					itero_dentro_variables<nueva_variable[l].end();itero_dentro_variables++)
+			for(itero_dentro_variables=nueva_super_variable[l].begin();
+					itero_dentro_variables<nueva_super_variable[l].end();itero_dentro_variables++)
 					cout << *itero_dentro_variables << " ";
 			cout << endl;
 		}
@@ -1203,8 +1322,8 @@ public:
 			{
 				cout << "U[" << i << "]: " << endl;
 
-				for(itero_dentro_variables=nueva_variable[i].begin();
-					itero_dentro_variables<nueva_variable[i].end();itero_dentro_variables++)
+				for(itero_dentro_variables=nueva_super_variable[i].begin();
+					itero_dentro_variables<nueva_super_variable[i].end();itero_dentro_variables++)
 					cout << *itero_dentro_variables << " ";
 				
 				cout << endl;
@@ -1219,8 +1338,8 @@ public:
 
 				cout << "U[" << j << "]: " << endl;
 
-				for(itero_dentro_variables=nueva_variable[j].begin();
-					itero_dentro_variables < nueva_variable[j].end() ; itero_dentro_variables++)
+				for(itero_dentro_variables=nueva_super_variable[j].begin();
+					itero_dentro_variables < nueva_super_variable[j].end() ; itero_dentro_variables++)
 					cout << *itero_dentro_variables << " ";
 				
 				cout << endl;
@@ -1245,8 +1364,8 @@ public:
 			for (i=k,j=i+1;j<lista_variables_ternarias.size();j++)
 			{
 				cout << "U[" << i << "] - U[" << j << "]" << endl ;
-		 		for(itero_primera_variable=nueva_variable[i].begin(),itero_segunda_variable=nueva_variable[j].begin(); 
-					itero_primera_variable < nueva_variable[i].end();itero_primera_variable++,itero_segunda_variable++)
+		 		for(itero_primera_variable=nueva_super_variable[i].begin(),itero_segunda_variable=nueva_super_variable[j].begin(); 
+					itero_primera_variable < nueva_super_variable[i].end();itero_primera_variable++,itero_segunda_variable++)
 					{
 						cout << *itero_primera_variable << ": " << endl;
 						for (l=0;l<tamano_total_tuplas[i]; l++)
@@ -1318,12 +1437,16 @@ public:
 		// imprime_matriz_ternaria(terminal);
 		// cout <<"---------------------------------------------------"<<endl;
 
-		for (int i=0;i<lista_variables_ternarias.size();i++)
+		/* for (int i=0;i<lista_variables_ternarias.size();i++)
 		{
 			dimension_matriz_ternaria += (lista_variables_ternarias[i]);
-		}
+		} */
+
+		
+		imprimo_vertices();
 
 		genero_grafo();
+
 
 		//imprimo_datos_grafo();
 
@@ -1337,7 +1460,7 @@ public:
 			cout << endl;
 		}*/
 		
-		cout << "Dimension total datos Ternarios: " << dimension_matriz_ternaria << endl;
+		//cout << "Dimension total datos Ternarios: " << dimension_matriz_ternaria << endl;
 		cout << endl;
 		cout << "FIN del parsing----------------" << endl;
 
@@ -1598,10 +1721,11 @@ public:
 
 
 
-	//Versión para restricciones binarias
+	//Versión para restricciones binarias o superiores
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
+		int i=0,j=0;
 		/* string var_cero, var_uno, var_ternaria;
 		int indice0, indice1, i,j,k;
 		int coordenadas_base[2];
@@ -1609,6 +1733,10 @@ public:
 		
 		
 		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
+		int *puntero_vertice;	// Puntero auxiliar para recorrer la tupla de cada vértice.
+								// Se inicializa un nuevo puntero de la matriz y se asigna
+								// a este puntero auxiliar.
+
 		vector<XVariable *>::iterator itero_variables;
 		vector<string>::iterator itero_dentro_variables;
 		vector<vector<int>>::iterator itero_tuplas;
@@ -1642,48 +1770,54 @@ public:
 			
 			cout << "Regla TERNARIA:" << endl;
 			
-			
-			//cout << "Soy U[" << indice_var_ternarias << "]" << endl;
 			//displayList(list);
-			
 			for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 			{
 				//cout << (*itero_variables)->id << " - " ;
-				nueva_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 			}
 
 
 			cout << "U[" << indice_var_ternarias << "]: ";
-			for(itero_dentro_variables=nueva_variable[indice_var_ternarias].begin();
-					itero_dentro_variables<nueva_variable[indice_var_ternarias].end();itero_dentro_variables++)
+			for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
+					itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 			{
 				cout << *itero_dentro_variables << " ";
 			}
 
 			cout << endl;
 			
-			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+			cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
 
-			lista_variables_ternarias.push_back(las_tuplas.size()*list.size());
-			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
+			lista_variables_ternarias.push_back(list.size());
 			tamano_tuplas.push_back(las_tuplas.size());
 			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
-			puntero_ternario = matriz_punteros[indice_var_ternarias];
 			
+			j=0;
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
 			{
 				itero_dentro_tuplas = itero_tuplas->begin();
+				matriz_vertices[indice_vertices]=new int[list.size()];
+				puntero_vertice = matriz_vertices[indice_vertices];
+
+				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+				
+				cout << "Vértice[" << indice_vertices << "]: " ;
+				mapa_vertices[indice_var_ternarias][j]=indice_vertices;
 				cout << "(";
+				
 				for(int i=0; i<itero_tuplas->size(); i++)
 				{
 					cout << *itero_dentro_tuplas;
 					if (i<list.size()-1)
 						cout << ",";
-					*puntero_ternario=*itero_dentro_tuplas;
-					puntero_ternario++;
+					*puntero_vertice=*itero_dentro_tuplas;
+					puntero_vertice++;
 					itero_dentro_tuplas++;
 				}
-				cout <<")";
+				cout <<")" << endl;
+				indice_vertices++;
+				j++;
 			}
 
 			cout << endl;
@@ -1762,15 +1896,19 @@ public:
 	void buildConstraintExtensionAs(string id, vector<XVariable *> list,
 			bool support, bool hasStar) {
 		
-		/* int i,j,k;
-		string var_cero, var_uno, var_aux;
+		int i=0,j=0,k=0;
+		/*string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int coordenadas_base[2];
 	
 		vector<vector<int>>::iterator it;
 		vector<int>::iterator ite;
  */
-		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
+		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria.
+		int *puntero_vertice;	// Puntero auxiliar para recorrer la tupla de cada vértice.
+								// Se inicializa un nuevo puntero de la matriz y se asigna
+								// a este puntero auxiliar.
+		
 		vector<XVariable *>::iterator itero_variables;
 		vector<string>::iterator itero_dentro_variables;
 		vector<vector<int>>::iterator itero_tuplas;
@@ -1827,51 +1965,58 @@ public:
 		{
 			cout << "Regla TERNARIA (AS): " << endl;
 			
-			//cout << "Soy U[" << indice_var_ternarias << "]" << endl;
 			//displayList(list);
-			
 			for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 			{
 				//cout << (*itero_variables)->id << " - " ;
-				nueva_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 			}
 
 
 			cout << "U[" << indice_var_ternarias << "]: ";
-			for(itero_dentro_variables=nueva_variable[indice_var_ternarias].begin();
-					itero_dentro_variables<nueva_variable[indice_var_ternarias].end();itero_dentro_variables++)
+			for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
+					itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 			{
 				cout << *itero_dentro_variables << " ";
 			}
 
 			cout << endl;
 			
-			cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+			cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
 
-			lista_variables_ternarias.push_back(las_tuplas.size()*list.size());
-			matriz_punteros[indice_var_ternarias]=new int[(las_tuplas.size()*list.size())];
+			lista_variables_ternarias.push_back(list.size());
 			tamano_tuplas.push_back(las_tuplas.size());
 			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
-			puntero_ternario = matriz_punteros[indice_var_ternarias];
 			
+			j=0;
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
 			{
 				itero_dentro_tuplas = itero_tuplas->begin();
+				matriz_vertices[indice_vertices]=new int[list.size()];
+				puntero_vertice = matriz_vertices[indice_vertices];
+				mapa_vertices[indice_var_ternarias].push_back(list.size());
+				
+				cout << "Vértice[" << indice_vertices << "]: " ;
+				mapa_vertices[indice_var_ternarias][j]=indice_vertices;
 				cout << "(";
+				
 				for(int i=0; i<itero_tuplas->size(); i++)
 				{
 					cout << *itero_dentro_tuplas;
 					if (i<list.size()-1)
 						cout << ",";
-					*puntero_ternario=*itero_dentro_tuplas;
-					puntero_ternario++;
+					*puntero_vertice=*itero_dentro_tuplas;
+					puntero_vertice++;
 					itero_dentro_tuplas++;
 				}
-				cout <<")";
+				cout <<")" << endl;
+				indice_vertices++;
+				j++;
 			}
 
 			cout << endl;
 			indice_var_ternarias++;
+
 		}
 
 		if (list.size() > 3)
