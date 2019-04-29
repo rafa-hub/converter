@@ -12,6 +12,7 @@
 #include <iostream>
 #include <climits>
 #include <map>
+#include <math.h>
 
 //#define mipause
 #define midebug
@@ -72,7 +73,8 @@ private:
 public:
 
 	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
-												// en cada posición se guarda el "número" de tuplas.
+												// en cada posición se guarda el "número" de variables.
+	vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
 
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada
 	int dimension_matriz_ternaria = 0;	//Guarda la dimension definitiva de la matriz ternaria
@@ -154,12 +156,12 @@ public:
 		ofstream fichero_salida(nombre_fichero);
 
 		fichero_salida<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
-		fichero_salida << "x " << lista_vertices.size() << endl;
+		fichero_salida << "x " << lista_variables_ternarias.size() << endl;
 
 		
 
-		for (unsigned int j = 0; j < lista_vertices.size(); j++)
-			fichero_salida << "v " << (j + 1) << " " << lista_vertices[j]
+		for (unsigned int j = 0; j < lista_variables_ternarias.size(); j++)
+			fichero_salida << "v " << (j + 1) << " " << dimension_variables_ternarias[j]
 					<< endl;
 		
 
@@ -1171,7 +1173,7 @@ void imprimo_vertices()
 
 				cout << "\nEmpiezo la comparación ........................" << endl;
 				cout << "i: " << i << " - j: " << j << endl;
-				cout << "tamaño: " << tamano_comparacion << " Vertice1: " << vertice1 << " Vertice2: " << vertice2 << endl;
+				cout << "Número de variables a comparar: " << tamano_comparacion << " Vertice1: " << vertice1 << " Vertice2: " << vertice2 << endl;
 				
 				//pila_resultado.reset();
 				for (int k=0; k < tamano_comparacion ; k++)
@@ -1212,7 +1214,7 @@ void imprimo_vertices()
 				}
 				else
 					{
-						cout << "Sin arista entre " << vertice1 << " y " << vertice2 <<  " majete." << endl;
+						cout << "Sin arista entre " << vertice1 << " y " << vertice2 <<  endl;
 					}
 					
 			}
@@ -1813,6 +1815,7 @@ void imprimo_vertices()
 		int i=0,j=0;
 		int rango;
 		string var;
+		int dimension;
 		/* string var_cero, var_uno, var_ternaria;
 		int indice0, indice1, i,j,k;
 		int coordenadas_base[2];
@@ -1880,6 +1883,9 @@ void imprimo_vertices()
 			cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
 
 			lista_variables_ternarias.push_back(list.size());
+			dimension = pow(rango_variable[var],list.size());
+			cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
+			dimension_variables_ternarias.push_back(dimension);
 			tamano_tuplas.push_back(las_tuplas.size());
 			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
 			
@@ -1991,6 +1997,7 @@ void imprimo_vertices()
 		int i=0,j=0,k=0;
 		int rango;
 		string var;
+		int dimension;
 		/*string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int coordenadas_base[2];
@@ -2082,6 +2089,9 @@ void imprimo_vertices()
 			cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
 
 			lista_variables_ternarias.push_back(list.size());
+			dimension = pow(rango_variable[var],list.size());
+			cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
+			dimension_variables_ternarias.push_back(dimension);
 			tamano_tuplas.push_back(las_tuplas.size());
 			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
 			
