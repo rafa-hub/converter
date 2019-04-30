@@ -1885,7 +1885,7 @@ void imprimo_vertices()
 			lista_variables_ternarias.push_back(list.size());
 			dimension = pow(rango_variable[var],list.size());
 			cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
-			dimension_variables_ternarias.push_back(dimension);
+			dimension_variables_ternarias.push_back(las_tuplas.size());
 			tamano_tuplas.push_back(las_tuplas.size());
 			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
 			
@@ -2091,7 +2091,7 @@ void imprimo_vertices()
 			lista_variables_ternarias.push_back(list.size());
 			dimension = pow(rango_variable[var],list.size());
 			cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
-			dimension_variables_ternarias.push_back(dimension);
+			dimension_variables_ternarias.push_back(las_tuplas.size());
 			tamano_tuplas.push_back(las_tuplas.size());
 			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
 			
