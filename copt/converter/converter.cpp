@@ -84,7 +84,7 @@ public:
 	int **matriz_punteros;  // Matriz donde se almacenan los datos punteros a los datos ternarios.
 	int **matriz_vertices;  // Matriz donde se almacenan los punteros a los valores de las tuplas de los vértices.
 	int indice_vertices=0;	// Índice global para indexar los vértices del grafo.
-	vector<int> lista_vertices; // Contiene una relación entre los vértices y su ranto de valores posibles.
+	vector<int> lista_vertices; // Contiene una relación entre los vértices y su rango de valores posibles.
 
 	map <int , vector <int>> grafo;		// Almacena el grafo que será volcado a fichero
 	int contador_aristas=0;				// Sirve para contar las aristas y poder generar el grafo,
@@ -1103,7 +1103,7 @@ void imprimo_vertices()
 
 			for (int j=0; j<tamano_tuplas[i]; j++)
 			{
-				cout << "v[" << ((mapa_vertices[i][j])+1) << "]" ;
+				cout << "v(" << ((mapa_vertices[i][j])+1) << ")" ;
 				if (j<(tamano_tuplas[i]-1))
 					cout <<", ";
 			}
@@ -1116,7 +1116,26 @@ void imprimo_vertices()
 
 
 
+
+
+
 	
+
+	void relleno_aristas(int primera,int segunda)
+	{
+		cout << "Número de vértices U[" << primera << "]: " << mapa_vertices[primera].size() << endl;
+		cout << "Número de vértices U[" << segunda << "]: " << mapa_vertices[segunda].size() << endl;
+
+		for (int i=0;i<mapa_vertices[primera].size();i++)
+		{
+			for(int j=0;j<mapa_vertices[segunda].size();j++)
+			{
+				cout << "Arista ......... v(" << mapa_vertices[primera][i] << ") <-> v(" << mapa_vertices[segunda][j] << ")" << endl; 
+				grafo[contador_aristas]={mapa_vertices[primera][i],mapa_vertices[segunda][j]};
+				contador_aristas++;
+			}
+		} 
+	}
 
 
 
@@ -1314,6 +1333,11 @@ void imprimo_vertices()
 					}
 				if(!pila_comparacion.empty())
 							ejecuto_comparacion(i,j);
+				else 
+				{
+					cout << "\n¡ATENCIÓN!-> Pongo todas las aristas entre U[" << i << "] y U[" << j << "]" << endl;
+					relleno_aristas(i,j);
+				}
 				cout << endl;
 			}
 		}
@@ -1868,14 +1892,14 @@ void imprimo_vertices()
 			}
 
 
-			cout << "U[" << indice_var_ternarias << "]: ";
+			cout << "U[" << indice_var_ternarias << "]: \n";
 			for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
 					itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 			{
-				cout << *itero_dentro_variables << " ";
+				cout << "\t" << *itero_dentro_variables << " ";
 				var = get_nombre(*itero_dentro_variables);
 				rango = rango_variable[var];
-				cout << "Rango variable: " << rango_variable[var] << endl;
+				cout << "Dominio valores variable: " << rango_variable[var] << endl;
 			}
 
 			cout << endl;
@@ -1901,7 +1925,7 @@ void imprimo_vertices()
 
 				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
 				
-				cout << "Vértice[" << indice_vertices << "]: " ;
+				cout << "\tv(" << indice_vertices << "): " ;
 				cout << "(";
 				
 				for(int i=0; i<itero_tuplas->size(); i++)
@@ -2074,14 +2098,14 @@ void imprimo_vertices()
 			}
 
 
-			cout << "U[" << indice_var_ternarias << "]: ";
+			cout << "U[" << indice_var_ternarias << "]: \n";
 			for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
 					itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 			{
-				cout << *itero_dentro_variables << " ";
+				cout << "\t" << *itero_dentro_variables << " ";
 				var = get_nombre(*itero_dentro_variables);
 				rango = rango_variable[var];
-				cout << "Rango variable: " << rango_variable[var] << endl;
+				cout << "Dominio valores variable: " << rango_variable[var] << endl;
 			}
 
 			cout << endl;
@@ -2107,7 +2131,7 @@ void imprimo_vertices()
 
 				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
 				
-				cout << "Vértice[" << indice_vertices << "]: " ;
+				cout << "\tv(" << indice_vertices << "): " ;
 				cout << "(";
 				
 				for(int i=0; i<itero_tuplas->size(); i++)
