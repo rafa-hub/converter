@@ -6,6 +6,8 @@
 
 #include "XCSP3CoreParser.h"
 #include "XCSP3PrintCallbacks.h"
+#include "XCSP3Tree.h"
+#include "XCSP3TreeNode.h"
 
 #include <fstream>
 #include <string.h>
@@ -68,6 +70,7 @@ private:
 
 	map <int,vector<int>> mapa_vertices;	// Lista de vértices.
 	stack <string> pila_comparacion;				// Pila para hacer la comparación de los datos.
+	//Tree expresion;
 
 	
 public:
@@ -2374,6 +2377,76 @@ void imprimo_vertices()
 
 
 	}
+
+
+	////////////////////
+	//
+	// PROCESSING FORMULAS
+	//
+	///////////////////
+
+	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
+    	  cout << "\n   MI POLLA ESTÁ GORDA - id:   " << id << " : " << x->id << " - " 
+        	<< k << " op - " << y->id << " : Order Type: " << orden <<endl;
+
+			switch(orden)
+			{
+				case (LE):
+				cout << "less or equal: " << orden << endl;
+				break;
+				case (LT):
+				cout << "less than: " << orden << endl;
+				break;
+				case (GE):
+				cout << "Equal: " << orden << endl;
+				break;
+				case (GT):
+				cout << "less or equal: " << orden << endl;
+				break;
+				case (IN):
+				cout << "less than: " << orden << endl;
+				break;
+				case (EQ):
+				cout << "Equal: " << orden << endl;
+				break;
+				case (NE):
+				cout << "Not Equal: " << orden << endl;
+				break;
+			}
+
+        
+  		}
+
+
+
+
+
+
+
+  	void buildConstraintIntension(string id, Tree *tree) {
+    	cout << "\n    Mi Polla si que rula: " << id << " : ";
+    	tree->prefixe();
+
+    	std::map<string, int> tupla;
+    	tupla["x[0]"] = 16;
+   		tupla["x[1]"] = 4;
+
+    	//expresion=tree;
+   
+    
+    	std::cout << "\nresult: " << tree->evaluate(tupla) << std::endl;
+
+    	std::cout << "\n";
+	}
+
+
+
+
+
+
+
+
+
 
 
 
