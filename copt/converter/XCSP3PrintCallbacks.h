@@ -390,7 +390,7 @@ void XCSP3PrintCallbacks::buildConstraintExtensionAs(string id, vector<XVariable
 
 
 void XCSP3PrintCallbacks::buildConstraintIntension(string id, string expr) {
-    cout << "\n    intension constraint : " << id << " : " << expr << endl;
+    cout << "\n    intension constraint FUFU : " << id << " : " << expr << endl;
 }
 
 

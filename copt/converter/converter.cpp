@@ -2385,6 +2385,9 @@ void imprimo_vertices()
 	//
 	///////////////////
 
+
+
+
 	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
     	  cout << "\n   MI POLLA ESTÁ GORDA - id:   " << id << " : " << x->id << " - " 
         	<< k << " op - " << y->id << " : Order Type: " << orden <<endl;
