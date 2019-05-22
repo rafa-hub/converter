@@ -111,7 +111,7 @@ void Tables::init_masks(){
 		}
 	}
 	//mask_right[0]=ZERO;
-	mask_right[64]=ONE;
+	mask_right[64]=ONE_L;
 
 	////////////////////////////
 	//mask_left[64] (from mask_right)
@@ -121,7 +121,7 @@ void Tables::init_masks(){
 	}
 	
 	mask_left[64]=ZERO;
-	mask_left[MASK_LIM]=ONE;
+	mask_left[MASK_LIM]=ONE_L;
 
 	
 	////////////////////////////
@@ -139,7 +139,7 @@ void Tables::init_masks(){
 	/////////////////////////////
 	//máscara de 0s
 	
-	mask0_1W= ONE <<16;
+	mask0_1W= ONE_L <<16;
 	mask0_2W= (mask0_1W<<16) | (~mask0_1W);
 	mask0_3W= (mask0_2W<<16) | (~mask0_1W);
 	mask0_4W= (mask0_3W<<16) | (~mask0_1W);

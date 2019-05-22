@@ -92,7 +92,7 @@ int	 BitBoardS::set_bit	(int low, int high){
 		//append blocks at the end
 		m_aBB.push_back(elem(bbl,~Tables::mask_right[low-WMUL(bbl)]));
 		for(int i=low+1; i<bbh; ++i){
-				m_aBB.push_back(elem(i,ONE));
+				m_aBB.push_back(elem(i,ONE_L));
 		}
 		m_aBB.push_back(elem(bbh,~Tables::mask_left[high-WMUL(bbh)]));
 		return 0;
@@ -115,7 +115,7 @@ int	 BitBoardS::set_bit	(int low, int high){
 		if(p.second==m_aBB.end()){
 			//append blocks at the end
 			for(int i=block; i<bbh; ++i){
-				m_aBB.push_back(elem(i,ONE));
+				m_aBB.push_back(elem(i,ONE_L));
 			}
 			m_aBB.push_back(elem(bbh,~Tables::mask_left[high-WMUL(bbh)]));
 			req_sorting=true;
@@ -137,11 +137,11 @@ int	 BitBoardS::set_bit	(int low, int high){
 
 		//update before either of the bitstrings has reached its end
 		if(p.second->index==block){
-			p.second->bb=ONE;
+			p.second->bb=ONE_L;
 			++p.second; ++block; 
 		}else if(block<p.second->index){				//m_aBB[pos].index<block cannot occur
-			vapp.push_back(elem(block,ONE));			//not added in place to avoid loosing indexes
-		//	m_aBB.push_back(elem(block,ONE));
+			vapp.push_back(elem(block,ONE_L));			//not added in place to avoid loosing indexes
+		//	m_aBB.push_back(elem(block,ONE_L));
 			req_sorting=true;
 			++block;
 		}
@@ -177,7 +177,7 @@ int BitBoardS::init_bit (int low, int high){
 
 	//middle
 	for(int block=bbl+1; block<bbh; ++block){
-		m_aBB.push_back(elem(block,ONE));
+		m_aBB.push_back(elem(block,ONE_L));
 	}
 
 	//last

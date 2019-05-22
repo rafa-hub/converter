@@ -70,8 +70,7 @@ private:
 
 	map <int,vector<int>> mapa_vertices;	// Lista de vértices.
 	stack <string> pila_comparacion;				// Pila para hacer la comparación de los datos.
-	//Tree expresion;
-
+	
 	
 public:
 
@@ -1557,9 +1556,9 @@ void imprimo_vertices()
 		} */
 
 		
-		imprimo_vertices();
+		//imprimo_vertices();
 
-		genero_grafo();
+		//genero_grafo();
 
 
 		//imprimo_datos_grafo();
@@ -2429,12 +2428,16 @@ void imprimo_vertices()
   	void buildConstraintIntension(string id, Tree *tree) {
     	cout << "\n    Mi Polla si que rula: " << id << " : ";
     	tree->prefixe();
+		cout << "\nVariables: ";
 
     	std::map<string, int> tupla;
-    	tupla["x[0]"] = 16;
+    	tupla["x[0]"] = 8;
    		tupla["x[1]"] = 4;
 
-    	//expresion=tree;
+		for(unsigned int i=0;i<tree->listOfVariables.size();i++)
+    	{
+     		std::cout << tree->listOfVariables[i] << "  "; 
+    	}
    
     
     	std::cout << "\nresult: " << tree->evaluate(tupla) << std::endl;
@@ -2454,43 +2457,7 @@ void imprimo_vertices()
 
 
 
-	// string id, vector<XVariable *> &list, int startIndex
-	void buildConstraintChannel(string, vector<XVariable *> &list, int startIndex) {
-    	cout << "\n   1) channel constraint" << endl;
-    	cout << "        ";
-    	displayList(list);
-    	cout << "        Start index : " << startIndex << endl;
-	}
-
-
-	// string id, vector<XVariable *> &list1, int startIndex1, vector<XVariable *> &list2, int startIndex2
-	void buildConstraintChannel(string, vector<XVariable *> &list1, int, vector<XVariable *> &list2, int) {
-    	cout << "\n    2) channel constraint" << endl;
-    	cout << "        list1 ";
-    	displayList(list1);
-    	cout << "        list2 ";
-    	displayList(list2);
-	}
-
-
-	// string id, vector<XVariable *> &list, int startIndex, XVariable *value
-	void buildConstraintChannel(string, vector<XVariable *> &list, int, XVariable *value) {
-    	cout << "\n   3) channel constraint" << endl;
-    	cout << "        ";
-    	displayList(list);
-    	cout << "        value: " << *value << endl;
-	}
-
-
-	// string id, vector<XVariable *> &list, vector<int> &values
-	void buildConstraintInstantiation(string, vector<XVariable *> &list, vector<int> &values) {
-    	cout << "\n   Mi instantiation constraint" << endl;
-    	cout << "        list:";
-    	displayList(list);
-    	cout << "        values:";
-    	displayList(values);
-
-	}
+	
 
 
 	

@@ -364,7 +364,7 @@ inline int BitBoardN::init_bit(int low, int high){
 		m_aBB[bbh]=BitBoard::MASK_1(low-WMUL(bbl), high-WMUL(bbh));
 	}else{
 		for(int i=bbl+1; i<=bbh-1; i++)	
-			m_aBB[i]=ONE;
+			m_aBB[i]=ONE_L;
 
 		m_aBB[bbl]=~Tables::mask_right[low-WMUL(bbl)];
 		m_aBB[bbh]=~Tables::mask_left[high-WMUL(bbh)];	
@@ -529,7 +529,7 @@ inline int  BitBoardN::set_bit (int low, int high){
 	}
 	else{
 		for(int i=bbl+1; i<=bbh-1; i++)	
-			m_aBB[i]=ONE;
+			m_aBB[i]=ONE_L;
 
 		//lower
 		m_aBB[bbh]|=~Tables::mask_left[high-WMUL(bbh)];			
@@ -542,7 +542,7 @@ inline void	BitBoardN::set_bit (){
 ///////////////
 // sets all bit blocks to ONE
 	for(int i=0; i<m_nBB; i++)	
-				m_aBB[i]=ONE;
+				m_aBB[i]=ONE_L;
 }
 
 inline

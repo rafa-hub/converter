@@ -39,7 +39,10 @@
 namespace XCSP3Core {
 
 
+    class PrimitivePattern;
     class XCSP3Manager {
+
+    public :
         XCSP3CoreCallbacks *callback;
         std::map<std::string, XEntity *> &mapping;
         std::string blockClasses;
@@ -51,12 +54,10 @@ namespace XCSP3Core {
 
 
     private :
-
-        bool recognizeXopY(string expr, string &op, XVariable **x, XVariable **y);
-
-
-        bool recognizeXopKopY(string expr, string &op, XVariable **x, int &k, XVariable **y);
-
+        std::vector<XCSP3Core::PrimitivePattern*> patterns;
+        bool recognizePrimitives(std::string id, Tree *tree);
+        void createPrimitivePatterns();
+        void destroyPrimitivePatterns();
 
 
     public :
@@ -101,12 +102,16 @@ namespace XCSP3Core {
 
 
         void beginConstraints() {
+            if(callback->recognizeSpecialIntensionCases)
+                createPrimitivePatterns();
             callback->beginConstraints();
         }
 
 
         void endConstraints() {
             callback->endConstraints();
+            if(callback->recognizeSpecialIntensionCases)
+                destroyPrimitivePatterns();
         }
 
 
@@ -129,6 +134,15 @@ namespace XCSP3Core {
             callback->endObjectives();
         }
 
+
+        void beginAnnotations() {
+            callback->beginAnnotations();
+        }
+
+
+        void endAnnotations() {
+            callback->endAnnotations();
+        }
         //--------------------------------------------------------------------------------------
         // Basic constraints
         //--------------------------------------------------------------------------------------
@@ -232,6 +246,11 @@ namespace XCSP3Core {
         void newConstraintInstantiation(XConstraintInstantiation *constraint);
 
 
+        //--------------------------------------------------------------------------------------
+        // Clause  constraint
+        //--------------------------------------------------------------------------------------
+        void newConstraintClause(XConstraintClause *constraint);
+
 
         //--------------------------------------------------------------------------------------
         // Graph  constraints
@@ -279,6 +298,14 @@ namespace XCSP3Core {
         //--------------------------------------------------------------------------------------
 
         void addObjective(XObjective *objective);
+
+        //--------------------------------------------------------------------------------------
+        // Annotation : Decision variables
+        //--------------------------------------------------------------------------------------
+
+        void buildAnnotationDecision(vector<XVariable*> &list) {
+            callback->buildAnnotationDecision(list);
+        }
     };
 
 }

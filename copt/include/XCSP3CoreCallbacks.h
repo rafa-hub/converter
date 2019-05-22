@@ -28,6 +28,7 @@
 #include "XCSP3Constants.h"
 #include "XCSP3Variable.h"
 #include "XCSP3Constraint.h"
+#include "XCSP3Tree.h"
 #include <vector>
 #include <string>
 
@@ -40,6 +41,13 @@ namespace XCSP3Core {
     protected :
         vector<string> classesToDiscard;
     public :
+
+        /**
+         * If true, the intension constraint are retrieved with an expression (nothing is done in order to help you)
+         * (false by default)
+         * Otherwise, the callback that take a canonized tree of the expression is called
+         */
+        bool intensionUsingString;
 
         /**
          * If true, the parse recognizes special intensional constraints such as x + k op y and call a specific callback.
@@ -64,7 +72,9 @@ namespace XCSP3Core {
          */
         bool normalizeSum;
 
+
         XCSP3CoreCallbacks() {
+            intensionUsingString = false;
             recognizeSpecialIntensionCases = true;
             recognizeSpecialCountCases = true;
             recognizeNValuesCases = true;
@@ -102,14 +112,14 @@ namespace XCSP3Core {
          * See http://xcsp.org/specifications/skeleton
          * @param type COP or CSP
          */
-         virtual void beginInstance(InstanceType type) {}
+        virtual void beginInstance(InstanceType type) {}
 
 
-       /**
-        * End of parsing
-        * Related to tag </instance>
-        * See http://xcsp.org/specifications/skeleton
-        */
+        /**
+         * End of parsing
+         * Related to tag </instance>
+         * See http://xcsp.org/specifications/skeleton
+         */
         virtual void endInstance() {}
 
 
@@ -240,6 +250,19 @@ namespace XCSP3Core {
         virtual void endObjectives() {}
 
 
+        /**
+         * The start of parsing annotations
+         * Related to tag </annotations>
+         */
+        virtual void beginAnnotations() {}
+
+
+        /**
+         * The end of parsing annotations
+         * Related to tag </annotations>
+         */
+        virtual void endAnnotations() {}
+
         //--------------------------------------------------------------------------------------
         // Build Variable. Must be implemented.
         //--------------------------------------------------------------------------------------
@@ -275,6 +298,31 @@ namespace XCSP3Core {
          * (see XCSP3Variable.h)
          *
          */
+
+        //--------------------------------------------------------------------------------------
+        // Universal Constraints
+        //--------------------------------------------------------------------------------------
+
+        /**
+         * The special constraint always true
+         * Nothing to do
+         * @param id
+         * @param list
+         */
+        virtual void buildConstraintTrue(string id) {}
+
+
+        /**
+         * The special constraint always false
+         * The problem is unsatisfiable
+         * @param id
+         * @param list
+         */
+        virtual void buildConstraintFalse(string id) {
+            std::cout << "c constraint " + id + " is always false (see during parsing)\n";
+            std::cout << "s UNSATISFIABLE\n";
+        }
+
 
         //--------------------------------------------------------------------------------------
         // Basic constraints
@@ -341,17 +389,34 @@ namespace XCSP3Core {
 
         /**
          * The callback function related to a constraint in intension
+         * Only called if intensionUsingString is set to true (otherwise the next function is called
          * See http://xcsp.org/specifications/intension
          * Example:
          * <intension> eq(add(x,y),z) </intension>
          * If you need a class that is able to manage expressions you can use the class Tree (see includes/XCS3Tree.h)
          * And an example is given in samples/testTree.cc
+         * In such a case, set intensionUsingString to false and make a callback to the next function
          *
          * @param id the id (name) of the constraint
          * @param expr the expression
          */
         virtual void buildConstraintIntension(string id, string expr) {
             throw runtime_error("intension constraint is not yet supported");
+        }
+
+
+        /**
+         * The callback function related to a constraint in intension
+         * Only called if intensionUsingString is set to false (otherwise the previous function is called
+         * See http://xcsp.org/specifications/intension
+         * Example:
+         * <intension> eq(add(x,y),z) </intension>
+         *
+         * @param id the id (name) of the constraint
+         * @param tree the canonized form related to the tree
+         */
+        virtual void buildConstraintIntension(string id, Tree *tree) {
+            throw runtime_error("intension constraint using a tree is not yet supported (choose the right way)");
         }
 
 
@@ -367,9 +432,44 @@ namespace XCSP3Core {
          * @param y the other variable
          */
         virtual void buildConstraintPrimitive(string id, OrderType op, XVariable *x, int k, XVariable *y) {
-            throw runtime_error("primitive constraint x +-k op y constraint is not yet supported. "
+            throw runtime_error("primitive constraint x +-k op y  is not yet supported. "
                                         "You can use classical intension constrain by assigning recognizeSpecialIntensionCases to false ");
         }
+
+
+        /**
+         * If  #recognizeSpecialIntensionCases is enabled (this is the case by default)
+         * intensional constraint of the form : x op k  is recognized.
+         * If such a intensional constraint is recognized, a callback to this function is done and not to  #buildConstraintIntension
+         *
+         * @param id the id (name) of the constraint
+         * @param op the order LE or GE (EQ and NE are performed using #buildConstrantExtension)
+         * @param x the variable
+         * @param k the constant
+         */
+        virtual void buildConstraintPrimitive(string id, OrderType op, XVariable *x, int k) {
+            throw runtime_error("primitive constraint x op k  is not yet supported. "
+                                        "You can use classical intension constrain by assigning recognizeSpecialIntensionCases to false ");
+        }
+
+
+        /**
+         * If  #recognizeSpecialIntensionCases is enabled (this is the case by default)
+         * intensional constraint of the form : x in/notin [min max] are recognized
+         * If such a intensional constraint is recognized, a callback to this function is done and not to  #buildConstraintIntension
+         *
+         * @param id the id (name) of the constraint
+         * @param x the variable
+         * @param in true if x is in this interval
+         * @param min the constant
+         * @param max the constant
+         *
+         */
+        virtual void buildConstraintPrimitive(string id, XVariable *x, bool in, int min, int max) {
+            throw runtime_error("primitive constraint x in/notin [min,max]  is not yet supported. "
+                                        "You can use classical intension constrain by assigning recognizeSpecialIntensionCases to false ");
+        }
+
 
         //--------------------------------------------------------------------------------------
         // Language constraints
@@ -442,6 +542,23 @@ namespace XCSP3Core {
          */
         virtual void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
             throw runtime_error("AllDiff constraint is not yet supported");
+        }
+
+
+        /**
+         * The callback function related to a alldifferent constraint with expression
+         * See http://xcsp.org/specifications/alldifferent
+         *
+         * Example:
+         * <allDifferent>
+         *   add(q[0],0) add(q[1],1) add(q[2],2) add(q[3],3) add(q[4],4) add(q[5],5) add(q[6],6) add(q[7],7)
+         * </allDifferent>
+         *
+         * @param id the id (name) of the constraint
+         * @param list the trees of the constraint
+         */
+        virtual void buildConstraintAlldifferent(string id, vector<Tree *> &list) {
+            throw runtime_error("AllDiff constraint with expression is not yet supported");
         }
 
 
@@ -563,6 +680,27 @@ namespace XCSP3Core {
 
 
         /**
+         * The callback function related to an ordered constraint
+         * See http://xcsp.org/specifications/ordered
+         *
+         * Ordered is LE, LT, GE, GT... See OrderType in XCSPConstants.h
+         *
+         * Example:
+         * <ordered>
+         *   <list> x1 x2 x3 x4 </list>
+         *   <operator> lt </operator>
+         * </ordered>
+         *
+         * @param id the id (name) of the constraint
+         * @param list the scope of the constraint
+         * @param order the order LT, LE...
+         */
+        virtual void buildConstraintOrdered(string id, vector<XVariable *> &list, vector<int> &lengths, OrderType order) {
+            throw runtime_error("Ordered constraint with lengths is not yet supported");
+        }
+
+
+        /**
          * The callback function related to an ordered list constraint (this is a lex constraint)
          * See http://xcsp.org/specifications/ordered
          *
@@ -671,6 +809,44 @@ namespace XCSP3Core {
          */
         virtual void buildConstraintSum(string id, vector<XVariable *> &list, vector<XVariable *> &coeffs, XCondition &cond) {
             throw runtime_error("sum constraint with variables weights is not yet supported");
+        }
+
+
+        /**
+         * The callback function related to a sum constraint with trees in list
+         *
+         * Example:
+         * <sum>
+         *   <list>or(eq(x[5],0),eq(x[7],0)) or(eq(x[1],0),eq(x[2],0),eq(x[8],0)) or(eq(x[0],0),eq(x[3],0),eq(x[4],0),eq(x[6],0),eq(x[9],0))</list>
+         *   <condition> (gt,y) </condition>
+         * </sum>
+         *
+         * @param id the id (name) of the constraint
+         * @param list the different trees
+         * @param cond the condition (See XCondition object)
+         */
+        virtual void buildConstraintSum(string id, vector<Tree *> &trees, XCondition &cond) {
+            throw runtime_error("sum constraint with expressions not yet supported");
+        }
+
+
+        /**
+         * The callback function related to a sum constraint with trees in list
+         *
+         * Example:
+         * <sum>
+         *   <list>or(eq(x[5],0),eq(x[7],0)) or(eq(x[1],0),eq(x[2],0),eq(x[8],0)) or(eq(x[0],0),eq(x[3],0),eq(x[4],0),eq(x[6],0),eq(x[9],0))</list>
+         *   <coeffs>1 2 3</coeffs>
+         *   <condition> (gt,y) </condition>
+         * </sum>
+         *
+         * @param id the id (name) of the constraint
+         * @param list the different trees
+         * @param coefs the coefs.
+         * @param cond the condition (See XCondition object)
+         */
+        virtual void buildConstraintSum(string id, vector<Tree *> &trees, vector<int> &coefs, XCondition &cond) {
+            throw runtime_error("sum constraint with expressions and coefs not yet supported");
         }
 
 
@@ -1237,6 +1413,11 @@ namespace XCSP3Core {
          *     <list> y1 y2 y3 y4 </list>
          * </channel>
          *
+         * The size of the array {@code list1} must be less than or equal to the size of {@code list2}.
+         *
+         * If list1.size() == list2.size() then list1[i] = j <=> list2[j] = i
+         * If list1.size() <  list2.size() then list1[i] = j  => list2[j] = i
+         *
          * @param id the id (name) of the constraint
          * @param list1 the first list
          * @param startIndex1 the starting index for list1
@@ -1306,7 +1487,8 @@ namespace XCSP3Core {
          * @param patterns
          *
          */
-        virtual void buildConstraintStretch(string id, vector<XVariable *> &list, vector<int> &values, vector<XInterval> &widths, vector<vector<int>> &patterns) {
+        virtual void
+        buildConstraintStretch(string id, vector<XVariable *> &list, vector<int> &values, vector<XInterval> &widths, vector<vector<int>> &patterns) {
             throw runtime_error("stretch constraint is not yet supported");
         }
 
@@ -1478,7 +1660,8 @@ namespace XCSP3Core {
          * @param heights the vector of heights (here variables)
          * @param xc the condition (see XCondition)
          */
-        virtual void buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<XVariable *> &lengths, vector<XVariable *> &heights, XCondition &xc) {
+        virtual void
+        buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<XVariable *> &lengths, vector<XVariable *> &heights, XCondition &xc) {
             throw runtime_error("cumulative (var lengths, var heights) constraint is not yet supported");
         }
 
@@ -1503,7 +1686,8 @@ namespace XCSP3Core {
          * @param ends the vector of ends (here variables)
          * @param xc the condition (see XCondition)
          */
-        virtual void buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<int> &lengths, vector<int> &heights, vector<XVariable *> &ends, XCondition &xc) {
+        virtual void buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<int> &lengths, vector<int> &heights, vector<XVariable *> &ends,
+                                               XCondition &xc) {
             throw runtime_error("cumulative (int lengths, int heights) constraint is not yet supported");
         }
 
@@ -1529,7 +1713,8 @@ namespace XCSP3Core {
          * @param xc the condition (see XCondition)
          */
         virtual void
-        buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<int> &lengths, vector<XVariable *> &varHeights, vector<XVariable *> &ends, XCondition &xc) {
+        buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<int> &lengths, vector<XVariable *> &varHeights, vector<XVariable *> &ends,
+                                  XCondition &xc) {
             throw runtime_error("cumulative (int lengths, var heights, ends) constraint is not yet supported");
         }
 
@@ -1555,7 +1740,8 @@ namespace XCSP3Core {
          * @param xc the condition (see XCondition)
          */
         virtual void
-        buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<XVariable *> &lengths, vector<int> &heights, vector<XVariable *> &ends, XCondition &xc) {
+        buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<XVariable *> &lengths, vector<int> &heights, vector<XVariable *> &ends,
+                                  XCondition &xc) {
             throw runtime_error("cumulative (var lengths, int heights, ends) constraint is not yet supported");
         }
 
@@ -1581,7 +1767,8 @@ namespace XCSP3Core {
          * @param xc the condition (see XCondition)
          */
         virtual void
-        buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<XVariable *> &lengths, vector<XVariable *> &heights, vector<XVariable *> &ends, XCondition &xc) {
+        buildConstraintCumulative(string id, vector<XVariable *> &origins, vector<XVariable *> &lengths, vector<XVariable *> &heights,
+                                  vector<XVariable *> &ends, XCondition &xc) {
             throw runtime_error("cumulative (var lengths, var heights, ends) constraint is not yet supported");
         }
 
@@ -1606,6 +1793,27 @@ namespace XCSP3Core {
          */
         virtual void buildConstraintInstantiation(string id, vector<XVariable *> &list, vector<int> &values) {
             throw runtime_error("instantiation constraint not yet supported");
+        }
+
+//--------------------------------------------------------------------------------------
+// Clause constraints
+//--------------------------------------------------------------------------------------
+
+
+        /**
+         * The callback function related to an clause  constraint
+         *
+         * Example:
+         * <clause>
+         *   <list> x not(y) z </list>
+         * </clause>
+         *
+         * @param id the id (name) of the constraint
+         * @param positive the positive variables in the clause
+         * @param negative the negative variables in the clause
+         */
+        virtual void buildConstraintClause(string id, vector<XVariable *> &positive, vector<XVariable *> &negative) {
+            throw runtime_error("Clause constraint not yet supported");
         }
 
 //--------------------------------------------------------------------------------------
@@ -1817,6 +2025,14 @@ namespace XCSP3Core {
             throw runtime_error("maximize objective   not yet supported");
         }
 
+
+        /**
+         * The callback function related to annotations.
+         * It provides the set of decision variables related to the problem.
+         * @param list
+         */
+
+        virtual void buildAnnotationDecision(vector<XVariable *> &list) {}
     };
 
 }

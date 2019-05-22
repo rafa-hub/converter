@@ -63,6 +63,8 @@ set(LIB_HEADERS
         include/XCSP3utils.h
         include/XCSP3Variable.h
         include/XMLParser.h
+	include/XCSP3Tree.h
+        include/XCSP3TreeNode.h
         )
 
 set(LIB_SOURCES
@@ -72,6 +74,8 @@ set(LIB_SOURCES
         src/XCSP3Manager.cc
         src/XMLParser.cc
         src/XMLParserTags.cc
+	src/XCSP3Tree.cc
+        src/XCSP3TreeNode.cc
         )
 
 set(APP_HEADERS

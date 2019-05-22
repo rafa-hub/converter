@@ -29,7 +29,7 @@ typedef unsigned long long		BITBOARD;
 typedef unsigned char			BYTE;
 typedef int						BOOL;
 
-#define ONE		0xFFFFFFFFFFFFFFFF					//1 bit mask	
+#define ONE_L		0xFFFFFFFFFFFFFFFF					//1 bit mask	
 #define EVEN    0x5555555555555555					//1 bits in even positions: 64 bits
 #define EVEN_32 0x55555555							//1 bits in even positions: 32 bits
 #define EVEN_8  0x55						    	//1 bits in even positions: 8 bits

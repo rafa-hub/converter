@@ -201,6 +201,12 @@ void XMLParser::parseSequence(const UTF8String &txt, vector<XVariable *> &list, 
         string current, compactForm;
         token.to(current);
         current = trim(current);
+        size_t tree = current.find('(');
+        if(tree != string::npos) { // Tree expressions
+            list.push_back(new XTree(current));
+            continue;
+        }
+
         size_t percent = current.find('%');
         if(percent == string::npos) { // Normal variable
             size_t pos = current.find('[');
@@ -362,6 +368,8 @@ XMLParser::XMLParser(XCSP3CoreCallbacks *cb) {
     registerTagAction(tagList, new ArrayTagAction(this, "array"));
     registerTagAction(tagList, new DomainTagAction(this, "domain"));
 
+    registerTagAction(tagList, new AnnotationsTagAction(this,"annotations"));
+    registerTagAction(tagList, new DecisionTagAction(this,"decision"));
 
     registerTagAction(tagList, new ConstraintsTagAction(this, "constraints"));
 
@@ -428,6 +436,9 @@ XMLParser::XMLParser(XCSP3CoreCallbacks *cb) {
     registerTagAction(tagList, new StringTagAction(this, "final"));
     registerTagAction(tagList, new TransitionsTagAction(this, "transitions"));
     registerTagAction(tagList, new PatternsTagAction(this, "patterns"));
+
+    registerTagAction(tagList, new ClauseTagAction(this, "clause"));
+
 
     registerTagAction(tagList, new ObjectivesTagAction(this, "objectives"));
     registerTagAction(tagList, new MinimizeOrMaximizeTagAction(this, "minimize"));

@@ -337,6 +337,7 @@ void XMLParser::BasicConstraintTagAction::beginTag(const AttributeList &attribut
     this->parser->condition = "";
     this->parser->rank = ANY;
     this->parser->index = NULL;
+    this->parser->closed = true;
 }
 
 
@@ -603,6 +604,9 @@ void XMLParser::OrderedTagAction::endTag() {
     constraint->list.assign(this->parser->lists[0].begin(), this->parser->lists[0].end());
     constraint->op = this->parser->op;
     if(this->group == NULL) {
+        if(this->parser->lengths.size() > 0)
+            constraint->lengths.assign(this->parser->lengths.begin(), this->parser->lengths.end());
+
         this->parser->manager->newConstraintOrdered(constraint);
         delete constraint;
     }
@@ -769,7 +773,7 @@ void XMLParser::CardinalityTagAction::beginTag(const AttributeList &attributes) 
 
     // Must be called inside a constraint
     BasicConstraintTagAction::beginTag(attributes);
-
+    this->parser->closed = false;
     constraint = new XConstraintCardinality(this->id, this->parser->classes);
 
     // Link constraint to group
@@ -1187,8 +1191,7 @@ void XMLParser::ListOfVariablesOrIntegerTagAction::beginTag(const AttributeList 
         string tmp;
         attributes["closed"].to(tmp);
         this->parser->closed = (tmp == "true");
-    } else
-        this->parser->closed = true;
+    }
 }
 
 
@@ -1328,6 +1331,68 @@ void XMLParser::InstantiationTagAction::endTag() {
     }
     if(this->group == NULL) {
         this->parser->manager->newConstraintInstantiation(constraint);
+        delete constraint;
+    }
+}
+
+/***************************************************************************
+ * Actions performed on clause tag
+ ****************************************************************************/
+
+
+void XMLParser::ClauseTagAction::beginTag(const AttributeList &attributes) {
+    // Must be called inside a constraint
+    BasicConstraintTagAction::beginTag(attributes);
+    constraint = new XConstraintClause(this->id, this->parser->classes);
+    literals.clear();
+    // Link constraint to group
+    if(this->group != NULL) {
+        this->group->constraint = constraint;
+        this->group->type = CLAUSE;
+    }
+}
+
+void XMLParser::ClauseTagAction::text(const UTF8String txt, bool) {
+    literals.append(txt);
+}
+
+
+
+void XMLParser::ClauseTagAction::endTag() {
+    UTF8String::Tokenizer tokenizer(literals);
+
+    while(tokenizer.hasMoreTokens()) {
+
+        UTF8String token = tokenizer.nextToken();
+
+        string current;
+        token.to(current);
+        if(current == " ")
+            continue;
+        current = trim(current);
+        size_t p = current.find('(');
+
+        if(p == string::npos) {
+            if(this->parser->variablesList[current] != NULL)
+                constraint->positive.push_back((XVariable *) this->parser->variablesList[current]);
+            else
+                throw runtime_error("unknown variable: " + current);
+        } else {
+            assert(p == 3);
+            string v = current.substr(p + 1, current.size() - p - 2);
+
+            if(this->parser->variablesList[v] != NULL)
+                constraint->negative.push_back((XVariable *) this->parser->variablesList[v]);
+            else
+                throw runtime_error("unknown variable: " + v);
+        }
+
+    }
+    if(constraint->positive.size() == 0 && constraint->negative.size() == 0)
+        throw runtime_error("clause is empty (currently the tag list inside a clause is not supported...)");
+
+    if(this->group == NULL) {
+        this->parser->manager->newConstraintClause(constraint);
         delete constraint;
     }
 }
@@ -1702,3 +1767,34 @@ void XMLParser::PatternsTagAction::text(const UTF8String txt, bool) {
     }
 
 }
+
+
+/***************************************************************************
+  *                            ANNOTATIONS
+  ****************************************************************************/
+
+void XMLParser::AnnotationsTagAction::beginTag(const AttributeList &attributes) {
+    this->parser->manager->beginAnnotations();
+
+}
+
+
+void XMLParser::AnnotationsTagAction::endTag() {
+    this->parser->manager->endAnnotations();
+}
+
+
+void XMLParser::DecisionTagAction::beginTag(const AttributeList &attributes) {
+
+}
+
+
+
+void XMLParser::DecisionTagAction::text(const UTF8String txt, bool last) {
+    this->parser->parseSequence(txt, list);
+}
+
+void XMLParser::DecisionTagAction::endTag() {
+    this->parser->manager->buildAnnotationDecision(list);
+}
+

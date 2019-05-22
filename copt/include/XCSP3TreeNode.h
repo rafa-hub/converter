@@ -27,26 +27,124 @@
 #define XCSP3PARSER_XCSP3TREENODE_H
 
 #include<cmath>
+#include<iostream>
 #include <vector>
 #include <map>
-#include<iostream>
 #include<algorithm>
 #include<cassert>
 
 namespace XCSP3Core {
 
 
+    //
+
+
+
+    enum ExpressionType {
+        OUNDEF,
+        ONEG,
+        OABS,
+        OSQR,
+        OADD,
+        OSUB,
+        OMUL,
+        ODIV,
+        OMOD,
+        OPOW,
+        ODIST,
+        OMIN,
+        OMAX,
+        OLT,
+        OLE,
+        OGE,
+        OGT,
+        ONE,
+        OEQ,
+        OSET,
+        OIN,
+        ONOTIN,
+        ONOT,
+        OAND,
+        OOR,
+        OXOR,
+        OIFF,
+        OIMP,
+        OIF,
+        OCARD,
+        OUNION,
+        OINTER,
+        ODIFF,
+        OSDIFF,
+        OHULL,
+        ODJOINT,
+        OSUBSET,
+        OSUBSEQ,
+        OSUPSEQ,
+        OSUPSET,
+        OCONVEX,
+        OFDIV,
+        OFMOD,
+        OSQRT,
+        ONROOT,
+        OEXP,
+        OLN,
+        OLOG,
+        OSIN,
+        OCOS,
+        OTAN,
+        OASIN,
+        OACOS,
+        OATAN,
+        OSINH,
+        OCOSH,
+        OTANH,
+        OVAR,
+        OPAR,
+        OLONG,
+        ORATIONAL,
+        ODECIMAL,
+        OSYMBOL,
+        OFAKEOP   // Used only to match primitives
+    };
+
+    bool isSymmetricOperator(ExpressionType type);
+
+    bool isNonSymmetricRelationalOperator(ExpressionType type);
+
+    ExpressionType arithmeticInversion(ExpressionType type);
+
+    std::string operatorToString(ExpressionType op);
+
+    ExpressionType logicalInversion(ExpressionType type);
+
+    bool isRelationalOperator(ExpressionType type);
+
 
     //-------------------------------------
+
 
     class Node {
         friend class Intension;
 
     public:
+        ExpressionType type;
+
+        std::vector<Node *> parameters; // Useless for constant and variables, but avoid many casts!
+
+
+
+        Node(ExpressionType o) : type(o) {}
+
+
         virtual int evaluate(std::map<std::string, int> &tuple) = 0;
 
-        virtual void prefixe() = 0;
+        virtual Node *canonize() = 0;
+
+        virtual std::string toString() = 0;
+
+        static bool areSimilar(Node *canonized, Node *pattern, std::vector<ExpressionType> &operators, std::vector<int> &constants, std::vector<std::string> &variables);
     };
+
 
 
     //-------------------------------------
@@ -57,7 +155,7 @@ namespace XCSP3Core {
         int val;
 
 
-        NodeConstant(int v) : val(v) {}
+        NodeConstant(int v) : Node(ODECIMAL), val(v) {}
 
 
         // std::map<std::string, int> &tuple
@@ -66,19 +164,25 @@ namespace XCSP3Core {
         }
 
 
-        void prefixe() override {
-            std::cout << val;
+        Node *canonize() override {
+            return this;
+        }
+
+
+        std::string toString() override {
+            return std::to_string(val);
         }
     };
 
     //-------------------------------------
 
     class NodeVariable : public Node {
-    protected:
-        std::string var;
-    public:
 
-        NodeVariable(std::string v) : var(v) {}
+    public:
+        std::string var;
+
+
+        NodeVariable(std::string v) : Node(OVAR), var(v) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
@@ -86,43 +190,62 @@ namespace XCSP3Core {
         }
 
 
-        void prefixe() override {
-            std::cout << var;
+        Node *canonize() override {
+            return this;
+        }
+
+
+        std::string toString() override {
+            return var;
         }
     };
 
 
     //-------------------------------------
 
+
     class NodeOperator : public Node {
     public:
         std::string op;
 
 
-        NodeOperator(std::string o) : op(o) {}
+        NodeOperator(std::string o, ExpressionType _operator) : Node(_operator), op(o) {}
 
 
-        virtual void addParameter(Node *p) = 0;
+        NodeOperator *addParameter(Node *p) {
+            parameters.push_back(p);
+            return this;
+        }
+
+
+        NodeOperator *addParameters(std::vector<Node *> params) {
+            parameters.insert(parameters.end(), params.begin(), params.end());
+            return this;
+        }
+
+
+        std::string toString() override {
+            std::string tmp = op + "(";
+            for(unsigned int i = 0; i < parameters.size(); i++) {
+                if(i != 0) tmp = tmp + ",";
+                tmp = tmp + parameters[i]->toString();
+
+            }
+            tmp = tmp + ")";
+            return tmp;
+        }
+
+
+        Node *canonize() override;
+
+
     };
 
     class NodeUnary : public NodeOperator {
-    protected:
-        Node *parameter;
     public:
 
-        NodeUnary(std::string o) : NodeOperator(o) {}
+        NodeUnary(std::string o, ExpressionType _operator) : NodeOperator(o, _operator) {}
 
-
-        void addParameter(Node *p) override {
-            parameter = p;
-        }
-
-
-        void prefixe() override {
-            std::cout << op << "(";
-            parameter->prefixe();
-            std::cout << ")";
-        }
 
     };
 
@@ -130,27 +253,13 @@ namespace XCSP3Core {
 
     class NodeBinary : public NodeOperator {
     public:
-        Node *parameter1, *parameter2;
 
 
-        NodeBinary(std::string o) : NodeOperator(o), parameter1(NULL), parameter2(NULL) {}
+        NodeBinary(std::string o, ExpressionType _operator) : NodeOperator(o, _operator) {}
 
 
-        void addParameter(Node *p) override {
-            if(parameter1 == NULL)
-                parameter1 = p;
-            else parameter2 = p;
-        }
-
-
-        void prefixe() override {
-            std::cout << op << "(";
-            parameter1->prefixe();
-            std::cout << ",";
-            parameter2->prefixe();
-            std::cout << ")";
-        }
     };
+
 
 
     //-------------------------------------
@@ -158,29 +267,10 @@ namespace XCSP3Core {
     class NodeNAry : public NodeOperator {
         friend class NodeIn;
 
-    protected:
-        std::vector<Node *> parameters;
-    public:
-
-        NodeNAry(std::string o) : NodeOperator(o) {}
-
+        friend class NodeNotIn;
 
     public:
-
-        void addParameter(Node *p) override {
-            parameters.push_back(p);
-        }
-
-
-        void prefixe() override {
-            std::cout << op << "(";
-            for(unsigned int i = 0 ; i < parameters.size() ; i++) {
-                if(i != 0) std::cout << ",";
-                parameters[i]->prefixe();
-
-            }
-            std::cout << ")";
-        }
+        NodeNAry(std::string o, ExpressionType _operator) : NodeOperator(o, _operator) {}
     };
 
 
@@ -189,11 +279,11 @@ namespace XCSP3Core {
     class NodeNeg : public NodeUnary {
     public:
 
-        NodeNeg() : NodeUnary("-") {}
+        NodeNeg() : NodeUnary("neg", ONEG) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return -parameter->evaluate(tuple);
+            return -parameters[0]->evaluate(tuple);
         }
     };
 
@@ -202,11 +292,11 @@ namespace XCSP3Core {
     class NodeAbs : public NodeUnary {
     public:
 
-        NodeAbs() : NodeUnary("abs") {}
+        NodeAbs() : NodeUnary("abs", OABS) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            int v = parameter->evaluate(tuple);
+            int v = parameters[0]->evaluate(tuple);
             return v > 0 ? v : -v;
         }
     };
@@ -214,11 +304,11 @@ namespace XCSP3Core {
     class NodeSquare : public NodeUnary {
     public:
 
-        NodeSquare() : NodeUnary("sqr") {}
+        NodeSquare() : NodeUnary("sqr", OSQR) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            int v = parameter->evaluate(tuple);
+            int v = parameters[0]->evaluate(tuple);
             return v * v;
         }
     };
@@ -226,68 +316,69 @@ namespace XCSP3Core {
     class NodeNot : public NodeUnary {
     public:
 
-        NodeNot() : NodeUnary("not") {}
+        NodeNot() : NodeUnary("not", ONOT) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            int v = parameter->evaluate(tuple);
+            int v = parameters[0]->evaluate(tuple);
             return !v;//v ? 0 : v;
         }
+
     };
     // --------------------------------------------------------------------------
 
     class NodeSub : public NodeBinary {
     public:
 
-        NodeSub() : NodeBinary("sub") {}
+        NodeSub() : NodeBinary("sub", OSUB) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) - parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) - parameters[1]->evaluate(tuple);
         }
     };
 
     class NodeDiv : public NodeBinary {
     public:
 
-        NodeDiv() : NodeBinary("div") {}
+        NodeDiv() : NodeBinary("div", ODIV) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) / parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) / parameters[1]->evaluate(tuple);
         }
     };
 
     class NodeMod : public NodeBinary {
     public:
 
-        NodeMod() : NodeBinary("mod") {}
+        NodeMod() : NodeBinary("mod", OMOD) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) % parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) % parameters[1]->evaluate(tuple);
         }
     };
 
     class NodePow : public NodeBinary {
     public:
 
-        NodePow() : NodeBinary("pow") {}
+        NodePow() : NodeBinary("pow", OPOW) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return pow(parameter1->evaluate(tuple), parameter2->evaluate(tuple));
+            return pow(parameters[0]->evaluate(tuple), parameters[1]->evaluate(tuple));
         }
     };
 
     class NodeDist : public NodeBinary {
     public:
 
-        NodeDist() : NodeBinary("dist") {}
+        NodeDist() : NodeBinary("dist", ODIST) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            int v = parameter1->evaluate(tuple) - parameter2->evaluate(tuple);
+            int v = parameters[0]->evaluate(tuple) - parameters[1]->evaluate(tuple);
             return v > 0 ? v : -v;
         }
     };
@@ -295,66 +386,66 @@ namespace XCSP3Core {
     class NodeLE : public NodeBinary {
     public:
 
-        NodeLE() : NodeBinary("le") {}
+        NodeLE() : NodeBinary("le", OLE) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) <= parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) <= parameters[1]->evaluate(tuple);
         }
     };
 
     class NodeLT : public NodeBinary {
     public:
 
-        NodeLT() : NodeBinary("lt") {}
+        NodeLT() : NodeBinary("lt", OLT) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) < parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) < parameters[1]->evaluate(tuple);
         }
     };
 
     class NodeGE : public NodeBinary {
     public:
 
-        NodeGE() : NodeBinary("ge") {}
+        NodeGE() : NodeBinary("ge", OGE) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) >= parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) >= parameters[1]->evaluate(tuple);
         }
     };
 
     class NodeGT : public NodeBinary {
     public:
 
-        NodeGT() : NodeBinary("gt") {}
+        NodeGT() : NodeBinary("gt", OGT) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) > parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) > parameters[1]->evaluate(tuple);
         }
     };
 
     class NodeNE : public NodeBinary {
     public:
 
-        NodeNE() : NodeBinary("ne") {}
+        NodeNE() : NodeBinary("ne", ONE) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) != parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) != parameters[1]->evaluate(tuple);
         }
     };
 
     class NodeImp : public NodeBinary {
     public:
 
-        NodeImp() : NodeBinary("impl") {}
+        NodeImp() : NodeBinary("imp", OIMP) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            return parameter1->evaluate(tuple) == 0 || parameter2->evaluate(tuple);
+            return parameters[0]->evaluate(tuple) == 0 || parameters[1]->evaluate(tuple);
         }
     };
 
@@ -363,12 +454,12 @@ namespace XCSP3Core {
     class NodeAdd : public NodeNAry {
     public:
 
-        NodeAdd() : NodeNAry("add") {}
+        NodeAdd() : NodeNAry("add", OADD) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
             int nb = 0;
-            for(unsigned int i = 0 ; i < parameters.size() ; i++)
+            for(unsigned int i = 0; i < parameters.size(); i++)
                 nb += parameters[i]->evaluate(tuple);
             return nb;
         }
@@ -377,12 +468,12 @@ namespace XCSP3Core {
     class NodeMult : public NodeNAry {
     public:
 
-        NodeMult() : NodeNAry("mult") {}
+        NodeMult() : NodeNAry("mul", OMUL) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
             int nb = 1;
-            for(unsigned int i = 0 ; i < parameters.size() ; i++)
+            for(unsigned int i = 0; i < parameters.size(); i++)
                 nb *= parameters[i]->evaluate(tuple);
             return nb;
         }
@@ -391,12 +482,12 @@ namespace XCSP3Core {
     class NodeMin : public NodeNAry {
     public:
 
-        NodeMin() : NodeNAry("min") {}
+        NodeMin() : NodeNAry("min", OMIN) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
             int nb = parameters[0]->evaluate(tuple);
-            for(unsigned int i = 1 ; i < parameters.size() ; i++) {
+            for(unsigned int i = 1; i < parameters.size(); i++) {
                 int v = parameters[i]->evaluate(tuple);
                 if(v < nb) nb = v;
             }
@@ -407,12 +498,12 @@ namespace XCSP3Core {
     class NodeMax : public NodeNAry {
     public:
 
-        NodeMax() : NodeNAry("max") {}
+        NodeMax() : NodeNAry("max", OMAX) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
             int nb = parameters[0]->evaluate(tuple);
-            for(unsigned int i = 1 ; i < parameters.size() ; i++) {
+            for(unsigned int i = 1; i < parameters.size(); i++) {
                 int v = parameters[i]->evaluate(tuple);
                 if(v > nb) nb = v;
             }
@@ -423,12 +514,12 @@ namespace XCSP3Core {
     class NodeEQ : public NodeNAry {
     public:
 
-        NodeEQ() : NodeNAry("eq") {}
+        NodeEQ() : NodeNAry("eq", OEQ) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
             int nb = parameters[0]->evaluate(tuple);
-            for(unsigned int i = 1 ; i < parameters.size() ; i++) {
+            for(unsigned int i = 1; i < parameters.size(); i++) {
                 if(nb != parameters[i]->evaluate(tuple))
                     return 0;
             }
@@ -439,11 +530,11 @@ namespace XCSP3Core {
     class NodeAnd : public NodeNAry {
     public:
 
-        NodeAnd() : NodeNAry("and") {}
+        NodeAnd() : NodeNAry("and", OAND) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            for(unsigned int i = 0 ; i < parameters.size() ; i++)
+            for(unsigned int i = 0; i < parameters.size(); i++)
                 if(!parameters[i]->evaluate(tuple))
                     return 0;
             return 1;
@@ -453,11 +544,11 @@ namespace XCSP3Core {
     class NodeOr : public NodeNAry {
     public:
 
-        NodeOr() : NodeNAry("or") {}
+        NodeOr() : NodeNAry("or", OOR) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            for(unsigned int i = 0 ; i < parameters.size() ; i++)
+            for(unsigned int i = 0; i < parameters.size(); i++)
                 if(parameters[i]->evaluate(tuple)) {
                     return 1;
                 }
@@ -468,23 +559,22 @@ namespace XCSP3Core {
     class NodeXor : public NodeNAry {
     public:
 
-        NodeXor() : NodeNAry("xor") {}
+        NodeXor() : NodeNAry("xor", OXOR) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
 
-            int nb = !parameters[0]->evaluate(tuple) != !parameters[1]->evaluate(tuple);
-
-            for(unsigned int i = 2 ; i < parameters.size() ; i++)
-                nb = ((!nb) != parameters[i]->evaluate(tuple));
-            return nb;
+            int nb = 0;
+            for(unsigned int i = 0; i < parameters.size(); i++)
+                nb = nb + parameters[i]->evaluate(tuple);
+            return nb % 2 == 1;
         }
     };
 
     class NodeIf : public NodeNAry {
     public:
 
-        NodeIf() : NodeNAry("if") {}
+        NodeIf() : NodeNAry("if", OIF) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
@@ -498,8 +588,7 @@ namespace XCSP3Core {
     class NodeIff : public NodeNAry {
     public:
 
-        NodeIff() : NodeNAry("iff") {
-        }
+        NodeIff() : NodeNAry("iff", OIFF) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
@@ -511,7 +600,7 @@ namespace XCSP3Core {
 
     class NodeSet : public NodeNAry {
     public :
-        NodeSet() : NodeNAry("set") {}
+        NodeSet() : NodeNAry("set", OSET) {}
 
 
         // std::map<std::string, int> &tuple
@@ -526,19 +615,40 @@ namespace XCSP3Core {
 
         std::vector<int> set;
     public :
-        NodeIn() : NodeBinary("in") {}
+        NodeIn() : NodeBinary("in", OIN) {}
 
 
         int evaluate(std::map<std::string, int> &tuple) override {
-            int nb = parameter1->evaluate(tuple);
+            int nb = parameters[0]->evaluate(tuple);
             set.clear();
             NodeSet *nodeSet;
-            if((nodeSet = dynamic_cast<NodeSet *>(parameter2)) == NULL)
+            if((nodeSet = dynamic_cast<NodeSet *>(parameters[1])) == NULL)
                 throw std::runtime_error("intension constraint : in requires a set as second parameter");
-            for(unsigned int i = 0 ; i < nodeSet->parameters.size() ; i++)
+            for(unsigned int i = 0; i < nodeSet->parameters.size(); i++)
                 set.push_back(nodeSet->parameters[i]->evaluate(tuple));
             return find(set.begin(), set.end(), nb) != set.end();
         }
     };
+
+    class NodeNotIn : public NodeBinary {
+    protected :
+
+        std::vector<int> set;
+    public :
+        NodeNotIn() : NodeBinary("notin", ONOTIN) {}
+
+
+        int evaluate(std::map<std::string, int> &tuple) override {
+            int nb = parameters[0]->evaluate(tuple);
+            set.clear();
+            NodeSet *nodeSet;
+            if((nodeSet = dynamic_cast<NodeSet *>(parameters[1])) == NULL)
+                throw std::runtime_error("intension constraint : in requires a set as second parameter");
+            for(unsigned int i = 0; i < nodeSet->parameters.size(); i++)
+                set.push_back(nodeSet->parameters[i]->evaluate(tuple));
+            return find(set.begin(), set.end(), nb) == set.end();
+        }
+    };
+
 }
 #endif //XCSP3PARSER_XCSP3TREENODE_H
