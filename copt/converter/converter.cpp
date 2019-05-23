@@ -2378,6 +2378,11 @@ void imprimo_vertices()
 	}
 
 
+
+
+
+
+
 	////////////////////
 	//
 	// PROCESSING FORMULAS
@@ -2387,37 +2392,73 @@ void imprimo_vertices()
 
 
 
+
+
+
 	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
-    	  cout << "\n   MI POLLA ESTÁ GORDA - id:   " << id << " : " << x->id << " - " 
-        	<< k << " op - " << y->id << " : Order Type: " << orden <<endl;
+    	string var1,var2;
+		int rango1,rango2;
+    	int dimension=2; 
+    	cout << "\nFórmula simple..............   ";
+    	cout << endl;
+		cout << "\n   Funciones binarias:  "  << x->id << " - op: " 
+        	<< k << " - " << y->id << " : Order Type: " << orden <<endl;
 
-			switch(orden)
+		var1=x->id;
+		var2=y->id;
+		rango1=rango_variable[get_nombre(var1)];
+		rango2=rango_variable[get_nombre(var2)];
+
+		cout << "Var uno: " << var1 << " Rango: " << rango1 << 
+			" - Var dos: " << var2 << " Rango: " << rango2 << endl;
+
+		for (int i=0; i<rango1;i++)
+		{
+			for (int j=0;j<rango2;j++)
 			{
-				case (LE):
-				cout << "less or equal: " << orden << endl;
-				break;
-				case (LT):
-				cout << "less than: " << orden << endl;
-				break;
-				case (GE):
-				cout << "Equal: " << orden << endl;
-				break;
-				case (GT):
-				cout << "less or equal: " << orden << endl;
-				break;
-				case (IN):
-				cout << "less than: " << orden << endl;
-				break;
-				case (EQ):
-				cout << "Equal: " << orden << endl;
-				break;
-				case (NE):
-				cout << "Not Equal: " << orden << endl;
-				break;
+				switch(orden)
+				{
+					case (LE):
+						cout << "less or equal. Operación: " << orden << endl;
+						if (i<=j)
+						{
+							cout << var1 << ": " << i << " - " << var2 << ": " << j << endl;
+							cout << "Resultado: 1" << endl;
+						}
+						else
+						{
+							cout << "Resultado: 0" << endl;
+						}
+						
+					break;
+					case (LT):
+						cout << "less than: " << orden << endl;
+					break;
+					case (GE):
+						cout << "Equal: " << orden << endl;
+					break;
+					case (GT):
+						cout << "less or equal: " << orden << endl;
+					break;
+					case (IN):
+						cout << "less than: " << orden << endl;
+					break;
+					case (EQ):
+						cout << "Equal: " << orden << endl;
+					break;
+					case (NE):
+						cout << "Not Equal: " << orden << endl;
+					break;
+				}
 			}
+		}    
 
-        
-  		}
+  	}
+
+
+
+
+
 
 
 
@@ -2426,23 +2467,48 @@ void imprimo_vertices()
 
 
   	void buildConstraintIntension(string id, Tree *tree) {
-    	cout << "\n    Mi Polla si que rula: " << id << " : ";
-    	tree->prefixe();
-		cout << "\nVariables: ";
-
+		vector<string> variable;
+		vector<int> rango;
     	std::map<string, int> tupla;
-    	tupla["x[0]"] = 8;
-   		tupla["x[1]"] = 4;
+		int dimension=0; 
+    	cout << "\nFórmula compleja..............   ";
+    	tree->prefixe();
+		cout << endl;
+		
+		dimension=tree->listOfVariables.size();
 
-		for(unsigned int i=0;i<tree->listOfVariables.size();i++)
+		for(int i=0;i<dimension;i++)
     	{
-     		std::cout << tree->listOfVariables[i] << "  "; 
+     		variable.push_back(tree->listOfVariables[i]);
+			rango.push_back(rango_variable[get_nombre(tree->listOfVariables[i])]);
     	}
-   
-    
-    	std::cout << "\nresult: " << tree->evaluate(tupla) << std::endl;
+		
 
-    	std::cout << "\n";
+		for(int i=0;i<dimension;i++)
+		{	
+			cout << "Variable: " << variable[i] << " - Rango de valores: " << rango[i] << endl;
+		}
+
+		cout << endl;
+
+		if (dimension==2)
+		{
+			for (int i=0; i<rango[0];i++)
+			{
+				for(int j=0;j<rango[1];j++)
+				{
+					cout << variable[0] << ": " << i << " - " << variable[1] << ": " << j << endl;
+					tupla[variable[0]]=i;
+					tupla[variable[1]]=j;
+					tree->prefixe();
+					cout << "=  " << tree->evaluate(tupla) << endl << endl;
+				}
+			}
+		}
+    
+    	
+
+    	cout << "\n";
 	}
 
 
