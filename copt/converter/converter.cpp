@@ -2396,64 +2396,86 @@ void imprimo_vertices()
 
 
 	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
-    	string var1,var2;
-		int rango1,rango2;
+    	string var_cero,var_uno;
+		int rango_cero,rango_uno;
     	int dimension=2; 
     	cout << "\nFórmula simple..............   ";
     	cout << endl;
-		cout << "\n   Funciones binarias:  "  << x->id << " - op: " 
-        	<< k << " - " << y->id << " : Order Type: " << orden <<endl;
+		cout << "\n   Funciones binarias:  "  << x->id << " - " << y->id << " : Order Type: " << orden <<endl;
 
-		var1=x->id;
-		var2=y->id;
-		rango1=rango_variable[get_nombre(var1)];
-		rango2=rango_variable[get_nombre(var2)];
+		var_cero=x->id;
+		var_uno=y->id;
+		rango_cero=rango_variable[get_nombre(var_cero)];
+		rango_uno=rango_variable[get_nombre(var_uno)];
 
-		cout << "Var uno: " << var1 << " Rango: " << rango1 << 
-			" - Var dos: " << var2 << " Rango: " << rango2 << endl;
+		cout << "Var uno: " << var_cero << " Rango: " << rango_cero << 
+			" - Var dos: " << var_uno << " Rango: " << rango_uno << endl;
 
-		for (int i=0; i<rango1;i++)
+		
+		switch(orden)
 		{
-			for (int j=0;j<rango2;j++)
-			{
-				switch(orden)
-				{
-					case (LE):
-						cout << "less or equal. Operación: " << orden << endl;
+			case (LE):
+				cout << "Less or Equal (" << orden << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
 						if (i<=j)
 						{
-							cout << var1 << ": " << i << " - " << var2 << ": " << j << endl;
-							cout << "Resultado: 1" << endl;
+							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+							//calcula_coordenadas_base(var_cero, var_uno, i, j,coordenadas_base);
+							//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
 						}
-						else
+				break;
+			case (LT):
+				cout << "Less Than (" << orden << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i<j)
 						{
-							cout << "Resultado: 0" << endl;
+							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
 						}
-						
-					break;
-					case (LT):
-						cout << "less than: " << orden << endl;
-					break;
-					case (GE):
-						cout << "Equal: " << orden << endl;
-					break;
-					case (GT):
-						cout << "less or equal: " << orden << endl;
-					break;
-					case (IN):
-						cout << "less than: " << orden << endl;
-					break;
-					case (EQ):
-						cout << "Equal: " << orden << endl;
-					break;
-					case (NE):
-						cout << "Not Equal: " << orden << endl;
-					break;
-				}
-			}
-		}    
-
-  	}
+				break;
+			case (GE):
+				cout << "Greater or Equal (" << orden << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i>=j)
+						{
+							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+						}
+				break;
+			case (GT):
+				cout << "Greater Than (" << orden << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i>j)
+						{
+							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+						}
+				break;
+			case (IN):
+				cout << "Contenido en (" << orden << ")" << endl;
+				cout << "Pendiente de implementar\n";
+				break;
+			case (EQ):
+				cout << "Equal (" << orden << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i==j)
+						{
+							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+						}
+				break;
+			case (NE):
+				cout << "Not Equal (" << orden << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i!=j)
+						{
+							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+						}					
+				break;
+			} 
+		}
 
 
 
