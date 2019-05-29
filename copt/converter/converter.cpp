@@ -37,7 +37,7 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 private:
 
 	vector<string> 	lista_arrays;    	// Guarda la lista de arrays
-	vector<string> 	lista_variables; 	// Guarda la lista de variables
+	
 	
 	int indice_var_ternarias = 0;
 	
@@ -74,6 +74,7 @@ private:
 	
 public:
 
+	vector<string> 	lista_variables; 	// Guarda la lista de variables
 	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
 												// en cada posición se guarda el "número" de variables.
 	vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
@@ -110,7 +111,7 @@ public:
 
 
 	// Escribe los resultados en un fichero
-	void escribe_nombre_fichero() {
+	void escribe_fichero_csp() {
 		string var;
 		char *nombre_fichero_csp;
 
@@ -957,6 +958,36 @@ public:
 
 
 
+	void escribe_en_matriz_intensional(int *coordenadas_base, string var_cero, string var_uno,int i, int j)
+	{
+		int coordenada_final[2];
+
+	#ifdef midebug
+			cout << "Coordenadas_base: " << coordenadas_base[0] << " - " << coordenadas_base[1] << endl;
+			cout << "Variables: " << var_cero << " - " << var_uno << endl;
+			cout << "Índices: " << i << " - " << j << endl; 
+	#endif
+
+
+		coordenada_final[0] = coordenadas_base[0]+i;
+		coordenada_final[1] = coordenadas_base[1]+j;
+		//cout << "coordenadas finales: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;
+		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 	//Funcion que escribe en la matriz reglas ternarias
 	void escribe_en_matriz_ternaria(int *coordenadas_base, vector<vector<int> >& tuplas,
@@ -993,6 +1024,10 @@ public:
 		}
 
 	}
+
+
+
+
 
 
 
@@ -1083,6 +1118,14 @@ public:
 
 
 
+
+
+
+
+
+
+
+
 void imprimo_vertices()
 	{
 		cout << "Imprimo los vertices del grafo por cada nueva Nueva Variable. Número de vértices: " << indice_vertices << endl;
@@ -1121,6 +1164,10 @@ void imprimo_vertices()
 
 
 
+
+
+
+
 	
 
 	void relleno_aristas(int primera,int segunda)
@@ -1151,6 +1198,8 @@ void imprimo_vertices()
 
 
 
+
+
 	int posicion_variable(int nueva_var,string var)
 	{
 		int i=0;
@@ -1163,6 +1212,10 @@ void imprimo_vertices()
 			}
 		return i;
 	}
+
+
+
+
 
 
 
@@ -1252,6 +1305,11 @@ void imprimo_vertices()
 
 
 
+
+
+
+
+
 	void ejecuto_comparacion(int indice_nueva_variable1, int indice_nueva_variable2)
 	{
 		int tamano_pila = pila_comparacion.size();
@@ -1291,6 +1349,9 @@ void imprimo_vertices()
 
 
 
+
+
+
 	void genero_grafo()
 	{
 		int i=0,j=0,k=0,l=0;
@@ -1304,7 +1365,7 @@ void imprimo_vertices()
 
 
 		contador_aristas=0;
-		cout << "\n\nGenero el ficheor DIMACS con el grafo......................\n" << endl;
+		cout << "\n\nGenero el fichero DIMACS con el grafo......................\n" << endl;
 		
 		
 		for (k=0;k<lista_variables_ternarias.size()-1;k++)
@@ -1344,8 +1405,7 @@ void imprimo_vertices()
 			}
 		}
 
-		//escribe_grafo();
-
+		
 		cout << "\n=========================================\n" << endl;
 
 		
@@ -1539,7 +1599,7 @@ void imprimo_vertices()
 
 
 	void endInstance() {
-		//pongo_diagonal_matriz_a_cero();
+		pongo_diagonal_matriz_a_cero();
 
 		//I/O: Nota-la matriz de datos no est� terminada todavia
 		//Hay que eliminar las relaciones entra valores de la misma variable
@@ -1665,7 +1725,7 @@ void imprimo_vertices()
 	void endVariables() {
 
 		//Escribo el fichero .csp
-		//escribe_nombre_fichero();
+		//escribe_fichero_csp();
 		reserva_memoria_punteros();
 
 		// Genero la matriz
@@ -1673,9 +1733,10 @@ void imprimo_vertices()
 		//genera_matriz_ternaria();
 
 		//cout << "Genero la matriz Binaria............." << endl;
-		//genera_matriz();
-		
-		//cout << "Matriz generada .............." << endl;
+		genera_matriz();
+
+		cout << "Dimensión de la matriz: " << dimension_matriz << endl;		
+		cout << "Matriz generada .............." << endl;
 #ifdef midebug
 		print_coordenadas_base();
 		cout << " - FIN declaracion variables - " << endl << endl;
@@ -2016,6 +2077,10 @@ void imprimo_vertices()
 
 
 
+
+
+
+
 	//Versión para restricciones Unarias y Binarias.
 	void buildConstraintExtensionAs(string id, vector<XVariable *> list,
 			bool support, bool hasStar) {
@@ -2306,6 +2371,9 @@ void imprimo_vertices()
 
 
 
+
+
+
 	void buildConstraintAlldifferentMatrix(string id, vector<vector<XVariable *>> &matrix) {
   		cout << "\n  ¡Mi!  allDiff matrix constraint" << id << endl;
    		for(unsigned int i = 0 ; i < matrix.size() ; i++) {
@@ -2319,6 +2387,12 @@ void imprimo_vertices()
 
 
 
+
+
+
+
+
+
 	void buildConstraintAlldifferentList(string id, vector<vector<XVariable *>> &lists) {
     	cout << "\n  ¡Mi!  allDiff list constraint" << id << endl;
     	for(unsigned int i = 0 ; i < (lists.size() < 4 ? lists.size() : 3) ; i++) {
@@ -2326,6 +2400,10 @@ void imprimo_vertices()
         	displayList(lists[i]);
     	}
 	}
+
+
+
+
 
 
 
@@ -2383,6 +2461,11 @@ void imprimo_vertices()
 
 
 
+
+
+
+
+
 	////////////////////
 	//
 	// PROCESSING FORMULAS
@@ -2392,64 +2475,70 @@ void imprimo_vertices()
 
 
 
-
-
-
 	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
     	string var_cero,var_uno;
-		int rango_cero,rango_uno;
+		int rango_cero,rango_uno,indice0,indice1;
     	int dimension=2; 
-    	cout << "\nFórmula simple..............   ";
-    	cout << endl;
-		cout << "\n   Funciones binarias:  "  << x->id << " - " << y->id << " : Order Type: " << orden <<endl;
+		int coordenadas_base[2];
 
-		var_cero=x->id;
-		var_uno=y->id;
-		rango_cero=rango_variable[get_nombre(var_cero)];
-		rango_uno=rango_variable[get_nombre(var_uno)];
+	#ifdef midebug
+			cout << "\nFórmula simple..............   " << id;
+			cout << endl;
+			cout << "\n   OPERACIONES BINARIAS............... Order Type: " << orden <<endl;
+	#endif
 
-		cout << "Var uno: " << var_cero << " Rango: " << rango_cero << 
-			" - Var dos: " << var_uno << " Rango: " << rango_uno << endl;
-
+		var_cero=get_nombre(x->id);
+		var_uno=get_nombre(y->id);
+		indice0=get_indice_ternario(x->id);
+		indice1=get_indice_ternario(y->id);
+		rango_cero=rango_variable[var_cero];
+		rango_uno=rango_variable[var_uno];
+		
+	#ifdef midebug
+			cout << "Var uno: " << var_cero << "- Índice: " << indice0 << " - Rango: " << rango_cero << 
+				" - Var dos: " << var_uno << "- Índice: " << indice1 << " Rango: " << rango_uno << endl;
+	#endif
 		
 		switch(orden)
 		{
 			case (LE):
-				cout << "Less or Equal (" << orden << ")" << endl;
+				//cout << "Less or Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i<=j)
 						{
-							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
-							//calcula_coordenadas_base(var_cero, var_uno, i, j,coordenadas_base);
-							//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
+							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 						}
 				break;
 			case (LT):
-				cout << "Less Than (" << orden << ")" << endl;
+				//cout << "Less Than (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i<j)
 						{
-							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 						}
 				break;
 			case (GE):
-				cout << "Greater or Equal (" << orden << ")" << endl;
+				//cout << "Greater or Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i>=j)
 						{
-							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 						}
 				break;
 			case (GT):
-				cout << "Greater Than (" << orden << ")" << endl;
+				//cout << "Greater Than (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i>j)
 						{
-							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 						}
 				break;
 			case (IN):
@@ -2457,21 +2546,23 @@ void imprimo_vertices()
 				cout << "Pendiente de implementar\n";
 				break;
 			case (EQ):
-				cout << "Equal (" << orden << ")" << endl;
+				//cout << "Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i==j)
 						{
-							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 						}
 				break;
 			case (NE):
-				cout << "Not Equal (" << orden << ")" << endl;
+				//cout << "Not Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i!=j)
 						{
-							cout << var_cero << ": " << i << " - " << var_uno << ": " << j << endl;
+							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 						}					
 				break;
 			} 
@@ -2596,7 +2687,8 @@ int main(int argc, char **argv) {
 ///////////////////
 //GENERACION DEL FICHERO .csp
 
-	miparser.escribe_fichero_csp_ternario();
+	miparser.escribe_fichero_csp();
+	//miparser.escribe_fichero_csp_ternario();
 
 	/* ostream & terminal=cout;
 	miparser.imprime_matriz_ternaria(terminal); */
@@ -2610,23 +2702,20 @@ int main(int argc, char **argv) {
 	cout << "- SEGUNDA FASE -" << endl;
 	cout << "Creando el fichero con el grafo ............" << endl;
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo y se resuelve
-	ugraph ug(miparser.indice_vertices);
-
-	cout << "Número de vérices: " << miparser.indice_vertices << " Número aristas: "
-			<< miparser.contador_aristas << endl;
-
-	
-	for (int i=0; i < miparser.contador_aristas;i++)
+	//ugraph ug(miparser.indice_vertices);
+	/* cout << "Número de vérices: " << miparser.indice_vertices << " Número aristas: "
+			<< miparser.contador_aristas << endl; */
+	/* for (int i=0; i < miparser.contador_aristas;i++)
 		{
 			//cout <<  "e " << miparser.grafo[i][0] << " - " << miparser.grafo[i][1] << endl;
 			ug.add_edge(miparser.grafo[i][0],miparser.grafo[i][1]);
-		}
-	
-	/* for (int i = 0; i < (miparser.lista_variables_ternarias.size()); i++)
+		} */
+	//Escribir datos n-arios
+	/* for (int i = 0; i < (miparser.lista_variables.size()); i++)
 	{
-	 	for (int j = 0; j < (miparser.lista_variables_ternarias[j]); j++)
+	 	for (int j = 0; j < (miparser.lista_variables[j]); j++)
 		{
-	 		cout << "Variable U[" << i << "]: "; 
+	 		cout << "Variable  i: "; 
 	 		if (miparser.matriz_punteros[i][j] == 1) {
 	 			cout << "   Valores: " << i << "," << j;
 	 			ug.add_edge(i, j); 
@@ -2635,8 +2724,24 @@ int main(int argc, char **argv) {
 	 	}
 	 } */
 
+
+	// Escribir matriz intensional
+	ugraph ug(miparser.dimension_matriz);
+	for (int i=0;i< miparser.dimension_matriz;i++)
+	{
+		for (int j=0;j<miparser.dimension_matriz;j++)
+		{
+			if (miparser.matriz_datos[i][j]==1)
+				ug.add_edge(i,j);
+		}
+	}
+
+
+
+
+ 
 	//removes incompatible edges between values of the same variable-  MUST BE!
-	//miparser.remove_edges_same_var(ug);
+	miparser.remove_edges_same_var(ug);
 	////////////////////
 
 	ug.set_name(miparser.nombre_fichero, false);
@@ -2650,15 +2755,15 @@ int main(int argc, char **argv) {
 	f.close();
 
 	//salida matriz de datos
-	/* ofstream fmat("log_mat.txt", ios::out);
+	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.close(); */
+	fmat.close();
 
 	/* cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
 	ostream & terminal=cout;
-	miparser.imprime_matriz("datos", terminal);
+	miparser.imprime_matriz("datos", terminal); */
 
-	cout << "\n\nEl resultado de la matriz SHADOW ......................\n " << endl;
+	/*cout << "\n\nEl resultado de la matriz SHADOW ......................\n " << endl;
 	miparser.imprime_matriz("shadow", terminal); */
 
 
