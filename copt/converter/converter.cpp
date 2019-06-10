@@ -17,7 +17,7 @@
 #include <math.h>
 
 //#define mipause
-#define midebug
+//#define midebug
 //#define mitest
 #define BUFFER_PUNTEROS 10*1024
 #define TERNARIA 3
@@ -44,6 +44,7 @@ private:
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable
 	
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
+	map<string, vector<int>> single_var;	// Guarda los valores discretos de una variable
 
 	map<string, int> base_array; 		// Mapa de cada array con su coordenada base
 	map<string, int> minimo_variable; 	// Guarda el minimo del rango de las variables
@@ -104,9 +105,16 @@ public:
 
 
 
+
+
 	void set_nombre_fichero(char *nombre) {
 		strcpy(nombre_fichero, nombre);
 	}
+
+
+
+
+
 
 
 
@@ -140,6 +148,10 @@ public:
 
 		fichero_salida.close();
 	}
+
+
+
+
 
 
 
@@ -202,21 +214,36 @@ public:
 	}
 
 
+
+
+
+
+
+
+
 	int get_indice_ternario(string variable) {
 
 		int pos_uno,pos_dos;
 		string indice;
+		
+		if (variable.find(']') != std::string::npos)
+		{
+			pos_uno = variable.find('[');
+			pos_dos = variable.find(']');
 
-		pos_uno = variable.find('[');
-		pos_dos = variable.find(']');
+			//cout << "pos uno: " << pos_uno << " - pos dos: " << pos_dos << endl;
+			indice = variable.substr(pos_uno+1,(pos_dos-pos_uno)-1);
 
-		//cout << "pos uno: " << pos_uno << " - pos dos: " << pos_dos << endl;
-		indice = variable.substr(pos_uno+1,(pos_dos-pos_uno)-1);
-
-
-		//cout << "Variable:  " << var << endl;
-		return stoi(indice);
+			return stoi(indice);
+		}
+		else{
+			throw runtime_error("Variable singleton, todavía no implementado.");
+		}
 	}
+
+
+
+
 
 
 
@@ -240,6 +267,10 @@ public:
 
 		return vector;
 	}
+
+
+
+
 
 
 
@@ -271,6 +302,11 @@ public:
 
 
 
+
+
+
+
+
 	// Calcula las coordenadas base de la variable. A esto habra que sumar el orden de la
 	// instancia de la variable y el valor de la coordenada de la restriccion
 	// Hay que restar el minimo del rango de valores para el caso en el que no sea cero
@@ -283,13 +319,13 @@ public:
 		*coordenadas_base = base_array[var_uno] + (indice1 * rango_variable[var_uno]);
 		
 #ifdef midebug
-		coordenadas_base--;
+		/* coordenadas_base--;
 		cout << "Var cero: " << var_cero << " - indice: " << indice0 << " - Coordenada Base X: " 
 		<< *coordenadas_base << endl;
 		
 		coordenadas_base++;
 		cout << "Var uno: " << var_uno << " - indice: " << indice1 << " - Coordenada Base Y: " 
-		<< *coordenadas_base << endl;
+		<< *coordenadas_base << endl; */
 #endif
 
 		return;
@@ -411,6 +447,16 @@ public:
 
 
 
+
+
+
+
+
+
+
+
+
+
 	void reserva_memoria_punteros()
 	{
 		matriz_punteros = new int *[BUFFER_PUNTEROS];
@@ -421,22 +467,33 @@ public:
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 	// Genera la matriz
 	void genera_matriz() {
-		std::vector<string>::iterator lista;
+		vector<string>::iterator lista;
 
 		for (lista = lista_arrays.begin(); lista != lista_arrays.end();
 				lista++) {
 			dimension_matriz += numero_variable[*lista]
 					* rango_variable[*lista];
 
-#ifdef midebug
+//#ifdef midebug
 			cout << "array: " << *lista << endl;
 			cout << "numero variables: " << numero_variable[*lista] << endl;
 			cout << "rango variable: " << rango_variable[*lista] << endl;
 			cout << "dimension variable: "<< numero_variable[*lista] * rango_variable[*lista] << endl;
 			cout << "dimension acumulada: " << dimension_matriz << endl;
-#endif
+//#endif
 		}
 
 		matriz_datos = new int *[dimension_matriz];
@@ -446,7 +503,7 @@ public:
       		matriz_datos[i] = new int[dimension_matriz];
 			//cout << i << " " ;
     	}
-		//cout << endl;
+		cout << endl;
 
 
 		matriz_shadow = new int *[dimension_matriz];
@@ -464,6 +521,18 @@ public:
 		//imprime_matriz("shadow",fmatriz); 
 #endif
 	}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -497,12 +566,23 @@ public:
 
 
 
+
+
+
+
+
 	// Certificacion de que la matriz tiene la diagonal principal a cero
 	void pongo_diagonal_matriz_a_cero() {
 		for (int x = 0; x < dimension_matriz; x++) {
 			matriz_datos[x][x] = 0;
 		}
 	}
+
+
+
+
+
+
 
 
 
@@ -956,7 +1036,8 @@ public:
 
 
 
-
+	// Para el caso de reglas intensionales binarias, escribe en la matriz que fue creada
+	// para reglas extensionales binarias.
 
 	void escribe_en_matriz_intensional(int *coordenadas_base, string var_cero, string var_uno,int i, int j)
 	{
@@ -966,15 +1047,17 @@ public:
 			cout << "Coordenadas_base: " << coordenadas_base[0] << " - " << coordenadas_base[1] << endl;
 			cout << "Variables: " << var_cero << " - " << var_uno << endl;
 			cout << "Índices: " << i << " - " << j << endl; 
+			cout << "Valores donde escribo: " << i+coordenadas_base[0] << " - " << j+coordenadas_base[1] << endl;
 	#endif
 
 
 		coordenada_final[0] = coordenadas_base[0]+i;
 		coordenada_final[1] = coordenadas_base[1]+j;
-		//cout << "coordenadas finales: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;
+		
+		//cout << "Es aquíiiii ..................\n";
 		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
 		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-
+		//cout << "Síiiii ..................\n";
 	}
 
 
@@ -1581,14 +1664,17 @@ void imprimo_vertices()
 
 
 
+
+
 	void beginInstance(InstanceType type) {
 
 #ifdef midebug
-		cout << "Empieza Instancia tipo: " << type << " ............" << endl;
+		cout << "Empieza Instancia tipo: " << type << endl;
 #endif
 
 		//XCSP3PrintCallbacks::beginInstance(type);
 	}
+
 
 
 
@@ -1604,7 +1690,7 @@ void imprimo_vertices()
 		//I/O: Nota-la matriz de datos no est� terminada todavia
 		//Hay que eliminar las relaciones entra valores de la misma variable
 		//TODO-cambiar la l�gica y hacerlo aqui
-		ostream & terminal=cout;
+		//ostream & terminal=cout;
 
 		// cout <<"---------------------------------------------------"<<endl;
 		// imprime_matriz_ternaria(terminal);
@@ -1705,7 +1791,7 @@ void imprimo_vertices()
 
 
 #ifdef midebug
-		cout << " - Comienza la declaracion de variables - " << endl;
+		cout << "Comienza la declaracion de variables............. " << endl;
 #endif
 
 	}
@@ -1726,7 +1812,7 @@ void imprimo_vertices()
 
 		//Escribo el fichero .csp
 		//escribe_fichero_csp();
-		reserva_memoria_punteros();
+		//reserva_memoria_punteros();
 
 		// Genero la matriz
 		//cout << "Genero la matriz Ternaria............." << endl;
@@ -1745,6 +1831,8 @@ void imprimo_vertices()
 #endif
 #endif
 	}
+
+
 
 
 
@@ -1798,6 +1886,8 @@ void imprimo_vertices()
 	//called for stand-alone values independent of a range: we assume they DO belong to a range
 	void buildVariableInteger(string id, vector<int> &values) override {
 
+		vector<int>::iterator itero_values;
+
 		lista_variables.push_back(id);
 		rango_variables = values.size();
 		minimo_variables = values.front(); 		/*TODO-extend to non-index values */
@@ -1812,6 +1902,15 @@ void imprimo_vertices()
 		if (!is_array) { /* variable extension to arrays: dirty */
 			cout << "¡¡¡ Soy Singelton !!!" << endl;
 			lista_arrays.push_back(id);
+
+			itero_values=values.begin();
+			
+			for(int i=0;i<values.size();i++)
+			{
+				single_var[id].push_back(*itero_values);
+				itero_values++;
+			}
+			
 			base_array[id] = base_siguiente_array;
 			numero_variables = 1;
 
@@ -1889,6 +1988,8 @@ void imprimo_vertices()
 #endif */
 
 	}
+
+
 
 
 
@@ -2332,6 +2433,8 @@ void imprimo_vertices()
 //
 ///////////////////
 
+
+
 	void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
     	
 		int indice0,indice1;
@@ -2473,14 +2576,18 @@ void imprimo_vertices()
 	///////////////////
 
 
-
-
 	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
     	string var_cero,var_uno;
 		int rango_cero,rango_uno,indice0,indice1;
     	int dimension=2; 
-		int coordenadas_base[2];
+		int coordenadas_base[2]={0,0};
+		int *punt_auxiliar;
+		int coordenadas_final[2]={0,0};
 
+		punt_auxiliar=coordenadas_base;
+
+	//cout << "\nFórmula simple.............. \n  " << id;
+			
 	#ifdef midebug
 			cout << "\nFórmula simple..............   " << id;
 			cout << endl;
@@ -2493,22 +2600,34 @@ void imprimo_vertices()
 		indice1=get_indice_ternario(y->id);
 		rango_cero=rango_variable[var_cero];
 		rango_uno=rango_variable[var_uno];
-		
-	#ifdef midebug
+
+		//calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+		*punt_auxiliar = base_array[var_cero] + (indice0 * rango_variable[var_cero]);
+		punt_auxiliar++;
+		*punt_auxiliar = base_array[var_uno] + (indice1 * rango_variable[var_uno]);
+
+		//cout << var_cero << "[" << indice0 << "] - " << var_uno << "[" << indice1 << "]\n" ; 
+
+
+	//#ifdef midebug
 			cout << "Var uno: " << var_cero << "- Índice: " << indice0 << " - Rango: " << rango_cero << 
 				" - Var dos: " << var_uno << "- Índice: " << indice1 << " Rango: " << rango_uno << endl;
-	#endif
+	//#endif
 		
 		switch(orden)
 		{
 			case (LE):
-				//cout << "Less or Equal (" << orden << ")" << endl;
+				cout << "Less or Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i<=j)
 						{
-							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;					
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
+
 						}
 				break;
 			case (LT):
@@ -2561,8 +2680,13 @@ void imprimo_vertices()
 					for (int j=0;j<rango_uno;j++)
 						if (i!=j)
 						{
-							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							//cout << "i: " << i << " - " << "j: " << j << endl;
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;
+							
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
 						}					
 				break;
 			} 
@@ -2582,39 +2706,76 @@ void imprimo_vertices()
   	void buildConstraintIntension(string id, Tree *tree) {
 		vector<string> variable;
 		vector<int> rango;
-    	std::map<string, int> tupla;
-		int dimension=0; 
-    	cout << "\nFórmula compleja..............   ";
-    	tree->prefixe();
-		cout << endl;
-		
-		dimension=tree->listOfVariables.size();
+    	map<string, int> tupla;
+		string var_cero,var_uno;
+		int indice0,indice1;
+		int resultado=0; 
+		int coordenadas_base[2];
+		int *punt_auxiliar;
+		int coordenadas_final[2];
 
-		for(int i=0;i<dimension;i++)
+		punt_auxiliar=coordenadas_base;
+		
+
+    	//cout << "\nFórmula compleja..............   \n";
+    	//tree->prefixe();
+				
+
+		for(int i=0;i<tree->arity();i++)
     	{
      		variable.push_back(tree->listOfVariables[i]);
 			rango.push_back(rango_variable[get_nombre(tree->listOfVariables[i])]);
     	}
+
 		
 
-		for(int i=0;i<dimension;i++)
+		/* for(int i=0;i<tree->arity();i++)
 		{	
 			cout << "Variable: " << variable[i] << " - Rango de valores: " << rango[i] << endl;
-		}
+		} 
 
-		cout << endl;
+		cout << endl; */
 
-		if (dimension==2)
+		
+
+
+		if (tree->arity()==2)
 		{
+			var_cero=get_nombre(variable[0]);
+			var_uno=get_nombre(variable[1]);
+			
+			indice0=get_indice_ternario(variable[0]);
+			indice1=get_indice_ternario(variable[1]);
+
+			cout << variable[0] <<  " - " << variable[1] << endl;
+			//cout << var_cero << ": " << indice0 << " - " << var_uno << ": " << indice1 << endl;
+			//calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+			
+			*punt_auxiliar = base_array[var_cero] + (indice0 * rango_variable[var_cero]);
+			punt_auxiliar++;
+			*punt_auxiliar = base_array[var_uno] + (indice1 * rango_variable[var_uno]);	
+			
+		
 			for (int i=0; i<rango[0];i++)
 			{
 				for(int j=0;j<rango[1];j++)
 				{
-					cout << variable[0] << ": " << i << " - " << variable[1] << ": " << j << endl;
+					//cout << variable[0] << ": " << i << " - " << variable[1] << ": " << j << endl;
+					//cout << var_cero << ": " << indice0 << " - " << var_uno << ": " << indice1 << endl;
 					tupla[variable[0]]=i;
 					tupla[variable[1]]=j;
-					tree->prefixe();
-					cout << "=  " << tree->evaluate(tupla) << endl << endl;
+					//tree->prefixe();
+					resultado = tree->evaluate(tupla);
+					//cout << "=  " << resultado << endl << endl;
+					if (resultado)
+					{		
+						//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+						coordenadas_final[0] = coordenadas_base[0]+i;
+						coordenadas_final[1] = coordenadas_base[1]+j;	
+						
+						matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+						matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
+					}
 				}
 			}
 		}
@@ -2700,7 +2861,7 @@ int main(int argc, char **argv) {
 //GENERACION DE UGRAPH
 
 	cout << "- SEGUNDA FASE -" << endl;
-	cout << "Creando el fichero con el grafo ............" << endl;
+	cout << "Creando el fichero desde la matriz generada ............" << endl;
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo y se resuelve
 	//ugraph ug(miparser.indice_vertices);
 	/* cout << "Número de vérices: " << miparser.indice_vertices << " Número aristas: "
@@ -2737,7 +2898,7 @@ int main(int argc, char **argv) {
 	}
 
 
-
+	cout << "Grafo escrito.............\n";
 
  
 	//removes incompatible edges between values of the same variable-  MUST BE!
@@ -2745,7 +2906,7 @@ int main(int argc, char **argv) {
 	////////////////////
 
 	ug.set_name(miparser.nombre_fichero, false);
-	ug.print_data(false /* from scratch*/, cout);
+	//ug.print_data(false /* from scratch*/, cout);
 
 	nombre_fichero_dimacs = strrchr(miparser.nombre_fichero, '.');
 	strcpy(nombre_fichero_dimacs, ".clq");
@@ -2755,9 +2916,9 @@ int main(int argc, char **argv) {
 	f.close();
 
 	//salida matriz de datos
-	ofstream fmat("log_mat.txt", ios::out);
+	/* ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.close();
+	fmat.close(); */
 
 	/* cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
 	ostream & terminal=cout;
