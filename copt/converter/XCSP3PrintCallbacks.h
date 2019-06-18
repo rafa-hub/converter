@@ -594,7 +594,7 @@ void XCSP3PrintCallbacks::buildConstraintLexMatrix(string, vector<vector<XVariab
 
 // string id, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond
 void XCSP3PrintCallbacks::buildConstraintSum(string, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond) {
-    cout << "\n        sum constraint:";
+    cout << "\n\tEn PrintCallbacks sum constraint:   ";
     if(list.size() > 8) {
         for(int i = 0; i < 3; i++)
             cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << "*" << *(list[i]) << " ";
@@ -603,7 +603,7 @@ void XCSP3PrintCallbacks::buildConstraintSum(string, vector<XVariable *> &list, 
             cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << "*" << *(list[i]) << " ";
     } else {
         for(unsigned int i = 0; i < list.size(); i++)
-            cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << "*" << *(list[i]) << " ";
+            cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << " * " << *(list[i]) << " ";
     }
     cout << cond << endl;
 }

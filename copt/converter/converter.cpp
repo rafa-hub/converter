@@ -19,6 +19,7 @@
 //#define mipause
 //#define midebug
 //#define mitest
+
 #define BUFFER_PUNTEROS 10*1024
 #define TERNARIA 3
 #define RESTRICCION 0
@@ -1168,7 +1169,7 @@ public:
 		{	
 			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
 			{
-				cout << "i: " << i << " - j: " << j;
+				//cout << "i: " << i << " - j: " << j;
 
 					if(i==j)
 					{
@@ -1655,11 +1656,10 @@ void imprimo_vertices()
 
 
 /////////////////////////////////////////////
-	/* ==========Fin de mis funciones============================================================
-
-	 =========Comienzo de las funciones que invoca el parser ===================================== */
+//	 ==========Fin de mis funciones=============================
+//
+//	 =========Comienzo de las funciones que invoca el parser ===
 ////////////////////////////////////////////
-
 
 
 
@@ -2291,6 +2291,7 @@ void imprimo_vertices()
 			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
 			{
 				itero_dentro_tuplas = itero_tuplas->begin();
+				cout << "Soy new \n";
 				matriz_vertices[indice_vertices]=new int[list.size()];
 				
 			 
@@ -2444,8 +2445,8 @@ void imprimo_vertices()
 		int REGLA;
 
 		REGLA=DIFERENTE;		
-		cout << "\n   Mi allDiff constraint " << id << "Tamaño de la tupla: "<< list.size() << endl;
-		displayList(list);
+		//cout << "\n   Mi allDiff constraint " << id << "Tamaño de la tupla: "<< list.size() << endl;
+		//displayList(list);
 		
 		for (k=0;k<(list.size()-1);k++)
 		{
@@ -2539,7 +2540,9 @@ void imprimo_vertices()
 		{
 			for(i=k,j=i+1; j<list.size();j++)
 			{
+	#ifdef midebug
 				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
+	#endif
 
 				indice0 = get_indice(*(list[i]));
 				indice1 = get_indice(*(list[j]));
@@ -2606,13 +2609,13 @@ void imprimo_vertices()
 		punt_auxiliar++;
 		*punt_auxiliar = base_array[var_uno] + (indice1 * rango_variable[var_uno]);
 
-		//cout << var_cero << "[" << indice0 << "] - " << var_uno << "[" << indice1 << "]\n" ; 
+		cout << var_cero << "[" << indice0 << "] - " << var_uno << "[" << indice1 << "] : Operación: " << orden << endl; 
 
 
-	//#ifdef midebug
+	#ifdef midebug
 			cout << "Var uno: " << var_cero << "- Índice: " << indice0 << " - Rango: " << rango_cero << 
 				" - Var dos: " << var_uno << "- Índice: " << indice1 << " Rango: " << rango_uno << endl;
-	//#endif
+	#endif
 		
 		switch(orden)
 		{
@@ -2622,7 +2625,7 @@ void imprimo_vertices()
 					for (int j=0;j<rango_uno;j++)
 						if (i<=j)
 						{
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j)
 							coordenadas_final[0] = coordenadas_base[0]+i;
 							coordenadas_final[1] = coordenadas_base[1]+j;					
 							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
@@ -2631,33 +2634,45 @@ void imprimo_vertices()
 						}
 				break;
 			case (LT):
-				//cout << "Less Than (" << orden << ")" << endl;
+				cout << "Less Than (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i<j)
 						{
-							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;
+							
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
 						}
 				break;
 			case (GE):
-				//cout << "Greater or Equal (" << orden << ")" << endl;
+				cout << "Greater or Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i>=j)
 						{
-							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;
+							
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
 						}
 				break;
 			case (GT):
-				//cout << "Greater Than (" << orden << ")" << endl;
+				cout << "Greater Than (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i>j)
 						{
-							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;
+							
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
 						}
 				break;
 			case (IN):
@@ -2665,17 +2680,21 @@ void imprimo_vertices()
 				cout << "Pendiente de implementar\n";
 				break;
 			case (EQ):
-				//cout << "Equal (" << orden << ")" << endl;
+				cout << "Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i==j)
 						{
-							calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;
+							
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
 						}
 				break;
 			case (NE):
-				//cout << "Not Equal (" << orden << ")" << endl;
+				cout << "Not Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i!=j)
@@ -2684,6 +2703,7 @@ void imprimo_vertices()
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 							coordenadas_final[0] = coordenadas_base[0]+i;
 							coordenadas_final[1] = coordenadas_base[1]+j;
+							//cout << "Escribo en coordenadas: " << coordenadas_final[0] << " - " << coordenadas_final[1] << endl;
 							
 							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
 							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
@@ -2790,7 +2810,17 @@ void imprimo_vertices()
 
 
 
+//////////////////////////////////
+//
+// 	MÁS INTENSIONAL
+//
+//////////////////////////////////
 
+void buildConstraintSum(string feo, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond)
+{
+
+	XCSP3PrintCallbacks::buildConstraintSum(feo,list,coeffs,cond);
+}
 
 
 
@@ -2886,14 +2916,20 @@ int main(int argc, char **argv) {
 	 } */
 
 
+	cout << "La dimensión de la Matriz: " << miparser.dimension_matriz << endl;
 	// Escribir matriz intensional
 	ugraph ug(miparser.dimension_matriz);
 	for (int i=0;i< miparser.dimension_matriz;i++)
 	{
 		for (int j=0;j<miparser.dimension_matriz;j++)
 		{
+			
 			if (miparser.matriz_datos[i][j]==1)
+			{
+				cout << miparser.matriz_datos[i][j] << " ";
 				ug.add_edge(i,j);
+			}
+				
 		}
 	}
 
@@ -2927,7 +2963,22 @@ int main(int argc, char **argv) {
 	/*cout << "\n\nEl resultado de la matriz SHADOW ......................\n " << endl;
 	miparser.imprime_matriz("shadow", terminal); */
 
+	
+    
+    for(int i = 0; i<miparser.dimension_matriz;i++)
+    {
+    	delete [] miparser.matriz_datos[i];
+	
+    }
 
+	for(int i = 0; i<miparser.dimension_matriz;i++)
+    {
+    	delete [] miparser.matriz_shadow[i];
+	
+    }
+
+	//delete miparser.matriz_punteros;
+	//delete miparser.matriz_vertices;
 
 	return 0;
 }
