@@ -401,6 +401,11 @@ public:
 
 
 
+
+
+
+
+
 	//removes edges corresponding to values of the same variable, from ug and matriz_datos
 	//(all incompatible since a variable may only have one value)
 	int remove_edges_same_var(ugraph& ug) {
@@ -497,22 +502,29 @@ public:
 //#endif
 		}
 
-		matriz_datos = new int *[dimension_matriz];
+		matriz_datos = new int* [dimension_matriz];
+		matriz_datos[0]= new int[dimension_matriz*dimension_matriz];
     
-    	for(int i = 0; i<dimension_matriz;i++)
-    	{
-      		matriz_datos[i] = new int[dimension_matriz];
-			//cout << i << " " ;
-    	}
-		cout << endl;
-
-
 		matriz_shadow = new int *[dimension_matriz];
-    
-    	for(int i = 0; i<dimension_matriz;i++)
+		matriz_shadow[0]= new int[dimension_matriz*dimension_matriz];
+
+
+    	for(int i = 1; i<dimension_matriz;i++)
     	{
-      		matriz_shadow[i] = new int[dimension_matriz];
+      		matriz_datos[i] = matriz_datos[i-1]+dimension_matriz;
+			matriz_shadow[i] = matriz_shadow[i-1]+dimension_matriz;
     	}
+		
+	
+
+		for (int i=0; i< dimension_matriz;i++)
+		{
+			for (int j=0;j<dimension_matriz;j++)
+			{
+				matriz_datos[i][j]=0;
+				matriz_shadow[i][j]=0;
+			}
+		}
 
 
 
@@ -1791,7 +1803,7 @@ void imprimo_vertices()
 
 
 #ifdef midebug
-		cout << "Comienza la declaracion de variables............. " << endl;
+		cout << "COMIENZA la declaracion de variables............. " << endl;
 #endif
 
 	}
@@ -1852,9 +1864,10 @@ void imprimo_vertices()
 		cout << "Variable: " << id << " indice var: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
 				<< maxValue << endl;
 
+		
 		//PSS-treats the case of singleton variables
 		if(!is_array){						/* variable extension to arrays: dirty */
-			cout << "¡¡¡ Soy Singelton !!!" << endl;
+			cout << "¡¡¡ Soy Singelton con rango de valores !!!" << endl;
 			lista_arrays.push_back(id);
 			base_array[id] = base_siguiente_array;
 			numero_variables=1;
@@ -1900,7 +1913,7 @@ void imprimo_vertices()
 
 		//treats the case of singleton variables
 		if (!is_array) { /* variable extension to arrays: dirty */
-			cout << "¡¡¡ Soy Singelton !!!" << endl;
+			cout << "¡¡¡ Soy Singeltron valores discretos !!!" << endl;
 			lista_arrays.push_back(id);
 
 			itero_values=values.begin();
@@ -2926,7 +2939,6 @@ int main(int argc, char **argv) {
 			
 			if (miparser.matriz_datos[i][j]==1)
 			{
-				cout << miparser.matriz_datos[i][j] << " ";
 				ug.add_edge(i,j);
 			}
 				
@@ -2952,9 +2964,9 @@ int main(int argc, char **argv) {
 	f.close();
 
 	//salida matriz de datos
-	/* ofstream fmat("log_mat.txt", ios::out);
+	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.close(); */
+	fmat.close();
 
 	/* cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
 	ostream & terminal=cout;
@@ -2965,17 +2977,9 @@ int main(int argc, char **argv) {
 
 	
     
-    for(int i = 0; i<miparser.dimension_matriz;i++)
-    {
-    	delete [] miparser.matriz_datos[i];
-	
-    }
+    delete [] miparser.matriz_datos;
+	delete [] miparser.matriz_shadow;
 
-	for(int i = 0; i<miparser.dimension_matriz;i++)
-    {
-    	delete [] miparser.matriz_shadow[i];
-	
-    }
 
 	//delete miparser.matriz_punteros;
 	//delete miparser.matriz_vertices;
