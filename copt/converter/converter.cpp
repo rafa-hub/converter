@@ -17,7 +17,7 @@
 #include <math.h>
 
 //#define mipause
-//#define midebug
+#define midebug
 //#define mitest
 
 #define BUFFER_PUNTEROS 10*1024
@@ -38,6 +38,7 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 private:
 
 	vector<string> 	lista_arrays;    	// Guarda la lista de arrays
+	vector<string>	lista_variables_singleton;	// Guarda la lista de variables singleton
 	
 	
 	int indice_var_ternarias = 0;
@@ -45,7 +46,7 @@ private:
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable
 	
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
-	map<string, vector<int>> single_var;	// Guarda los valores discretos de una variable
+	map<string, vector<int>> variables_singleton;	// Guarda los valores discretos de una variable
 
 	map<string, int> base_array; 		// Mapa de cada array con su coordenada base
 	map<string, int> minimo_variable; 	// Guarda el minimo del rango de las variables
@@ -196,6 +197,26 @@ public:
 
 
 
+	int es_singleton(string variable)
+	{
+		if(lista_variables_singleton.size()>0)
+		{
+			for (int i=0;i<lista_variables_singleton.size();i++)
+			{
+				if (lista_variables_singleton[i]==variable)
+					return 1;
+			}
+		}
+		return 0;
+	}
+
+
+
+
+
+
+
+
 
 	// Extrae y devuelve el indice de una variable
 
@@ -204,6 +225,10 @@ public:
 		int indice;
 
 		valor = variable.id;
+		if (es_singleton(valor))
+		{
+			return 1;
+		}
 		indice = mapa_indices[valor];
 
 #ifdef midebug
@@ -238,9 +263,16 @@ public:
 			return stoi(indice);
 		}
 		else{
-			throw runtime_error("Variable singleton, todavía no implementado.");
+			// Es singleton:
+			return 1;
+			//cout << "Variable porculera: " << variable << endl;
+			//throw runtime_error("Variable singleton, todavía no implementado.");
 		}
 	}
+
+
+
+
 
 
 
@@ -256,6 +288,10 @@ public:
 
 		nombre = variable;
 
+		if (es_singleton(nombre))
+		{
+			return nombre;
+		}
 
 		aux1 = nombre.find_first_of('[', 0);
 		if(aux1!=string::npos)
@@ -503,17 +539,21 @@ public:
 		}
 
 		matriz_datos = new int* [dimension_matriz];
+		for (int i=0;i<dimension_matriz;i++)
+		{
+			matriz_datos[i]=new int[dimension_matriz];
+		}
 		matriz_datos[0]= new int[dimension_matriz*dimension_matriz];
     
-		matriz_shadow = new int *[dimension_matriz];
-		matriz_shadow[0]= new int[dimension_matriz*dimension_matriz];
+		//matriz_shadow = new int *[dimension_matriz];
+		//matriz_shadow[0]= new int[dimension_matriz*dimension_matriz];
 
 
-    	for(int i = 1; i<dimension_matriz;i++)
-    	{
-      		matriz_datos[i] = matriz_datos[i-1]+dimension_matriz;
-			matriz_shadow[i] = matriz_shadow[i-1]+dimension_matriz;
-    	}
+    	// for(int i = 1; i<dimension_matriz;i++)
+    	// {
+      	// 	matriz_datos[i] = matriz_datos[i-1]+dimension_matriz;
+		// 	//matriz_shadow[i] = matriz_shadow[i-1]+dimension_matriz;
+    	// }
 		
 	
 
@@ -521,8 +561,8 @@ public:
 		{
 			for (int j=0;j<dimension_matriz;j++)
 			{
-				matriz_datos[i][j]=0;
-				matriz_shadow[i][j]=0;
+				matriz_datos[i][j]=1;
+				//matriz_shadow[i][j]=1;
 			}
 		}
 
@@ -618,7 +658,7 @@ public:
 			}
 			o << "\n\n" << endl;
 		}
-		if (matriz == "shadow") {
+		/* if (matriz == "shadow") {
 			//cout<<"MATRIZ SHADOW----------------"<<endl;
 			for (int x = 0; x < dimension_matriz; x++){
 				for (int y = 0; y < dimension_matriz; y++){
@@ -627,7 +667,7 @@ public:
 				o << endl;
 			}
 			o << "\n\n" << endl;
-		}
+		} */
 		return o;
 	}
 
@@ -700,14 +740,14 @@ public:
 					for (int j = 0; j < rango_variable[var_cero]; j++) {
 						coordenada_final[0] = coordenadas_base[0] + i;
 						coordenada_final[1] = coordenadas_base[1] + j;
-						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+						//if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
 #ifdef midebug
 							cout << "writing-0-S en:(" << coordenada_final[0] << ","
 								<< coordenada_final[1] << ")" << endl;
 #endif
 							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
 							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-						}
+						//}
 					}
 			} else {
 
@@ -731,9 +771,9 @@ public:
 							coordenada_final[1] =i;
 
 							matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-							matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
+							//matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
 							matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-							matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
+							//matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
 						}
 
 
@@ -773,22 +813,22 @@ public:
 									<< coordenada_final[1] << ")" << endl;
 #endif
 
-							if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+							//if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
 	
 								matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
 								matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-							}
+							//}
 
 #ifdef midebug
 							cout << "writing-0-S en:(" << coordenada_final[1] << ","
 										<< coordenada_final[0] << ")" << endl;
 #endif
 
-							if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
+							//if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
 
 								matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
 								matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-							}
+							//}
 				}
 			}
 
@@ -899,14 +939,14 @@ public:
 					for (int j = 0; j < rango_variable[var_uno]; j++) {
 						coordenada_final[0] = coordenadas_base[0] + i;
 						coordenada_final[1] = coordenadas_base[1] + j;
-						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+						//if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
 #ifdef midebug
 							cout << "writing-0-S en:(" << coordenada_final[0] << ","
 								<< coordenada_final[1] << ")" << endl;
 #endif
 							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
 							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-						}
+						//}
 					}
 			} else {
 					for (itero_parejas = tuplas.begin(); itero_parejas != tuplas.end();
@@ -932,9 +972,9 @@ public:
 							- minimo_variable[var_uno];
 
 						//matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
+						//matriz_shadow[coordenada_final[0]][coordenada_final[1]] = 1;
 						//matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-						matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
+						//matriz_shadow[coordenada_final[1]][coordenada_final[0]] = 1;
 #ifdef midebug
 						cout << "Tupla support leida-coord:(" << coordenada_final[0]
 							<< "," << coordenada_final[1] << ")" << endl;
@@ -946,7 +986,7 @@ public:
 						for (int j = 0; j < rango_variable[var_uno]; j++) {
 							coordenada_final[0] = coordenadas_base[0] + i;
 							coordenada_final[1] = coordenadas_base[1] + j;
-						if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
+					//	if (!matriz_shadow[coordenada_final[0]][coordenada_final[1]]) {
 #ifdef midebug
 							cout << "writing-0-S en:(" << coordenada_final[0] << ","
 								<< coordenada_final[1] << ")" << endl;
@@ -963,9 +1003,9 @@ public:
 							matriz_check[coordenada_final[0]][coordenada_final[1]] =1;
 							}
 #endif
-					}
+					//}
 
-					if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
+					//if (!matriz_shadow[coordenada_final[1]][coordenada_final[0]] ) {
 #ifdef midebug
 						cout << "writing-0-S en:(" << coordenada_final[1] << ","
 								<< coordenada_final[0] << ")" << endl;
@@ -982,7 +1022,7 @@ public:
 							matriz_check[coordenada_final[1]][coordenada_final[0]] =1;
 						}
 #endif
-					}
+					//}
 				}
 			}
 
@@ -1914,13 +1954,15 @@ void imprimo_vertices()
 		//treats the case of singleton variables
 		if (!is_array) { /* variable extension to arrays: dirty */
 			cout << "¡¡¡ Soy Singeltron valores discretos !!!" << endl;
-			lista_arrays.push_back(id);
-
-			itero_values=values.begin();
 			
+			lista_arrays.push_back(id);
+			lista_variables_singleton.push_back(id);			
+			
+			itero_values=values.begin();
+	
 			for(int i=0;i<values.size();i++)
 			{
-				single_var[id].push_back(*itero_values);
+				variables_singleton[id].push_back(*itero_values);
 				itero_values++;
 			}
 			
@@ -1938,6 +1980,12 @@ void imprimo_vertices()
 //    	cout << "        ";
 //    	displayList(values);
 	}
+
+
+
+
+
+
 
 
 
@@ -2013,14 +2061,14 @@ void imprimo_vertices()
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
-		int i=0,j=0;
+		int i=0,j=0,k=0;
 		int rango;
 		string var;
 		int dimension;
-		/* string var_cero, var_uno, var_ternaria;
-		int indice0, indice1, i,j,k;
+		string var_cero, var_uno, var_ternaria;
+		int indice0, indice1;
 		int coordenadas_base[2];
-		vector<vector<int>>::iterator itero_parejas; */
+		vector<vector<int>>::iterator itero_parejas;
 		
 		
 		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
@@ -2045,15 +2093,15 @@ void imprimo_vertices()
 
 		if (list.size() == 2){
 			cout << "Regla BINARIA:" << endl;
-			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl;
-			/* cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			//cout << "¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........" << endl;
+			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 
 			indice0 = get_indice(*(list[0]));
 			indice1 = get_indice(*(list[1]));
 			var_cero = get_nombre(list[0]->id);
 			var_uno = get_nombre(list[1]->id);
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); */
+			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); 
 		}
 
 		if(list.size() == 3)
@@ -2203,13 +2251,13 @@ void imprimo_vertices()
 		int rango;
 		string var;
 		int dimension;
-		/*string var_cero, var_uno, var_aux;
+		string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int coordenadas_base[2];
 	
 		vector<vector<int>>::iterator it;
 		vector<int>::iterator ite;
- */
+ 
 		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria.
 		int *puntero_vertice;	// Puntero auxiliar para recorrer la tupla de cada vértice.
 								// Se inicializa un nuevo puntero de la matriz y se asigna
@@ -2233,9 +2281,9 @@ void imprimo_vertices()
 
 		if (list.size() == 1){
 			cout << "Regla UNARIA:" << endl;
-			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+			//cout << "¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........" << endl; 
 			
-			/* cout << "Variable Unaria: " << (list[0]->id) << endl;
+			cout << "Variable Unaria: " << (list[0]->id) << endl;
 
 			indice0 = get_indice(*(list[0]));
 			indice1 = indice0;
@@ -2243,7 +2291,7 @@ void imprimo_vertices()
 			var_cero = get_nombre(list[0]->id);
 			var_uno = var_cero;
 			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, support); */
+			escribe_en_matriz_unaria(coordenadas_base, tuplas_unarias, var_cero, support);
 		
 		} 
 
@@ -2252,7 +2300,7 @@ void imprimo_vertices()
 		if (list.size() == 2){
 			cout << "Regla BINARIA:" << endl;
 			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
-			/* cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 
 			indice0 = get_indice(*(list[0]));
 			indice1 = get_indice(*(list[1]));
@@ -2264,7 +2312,7 @@ void imprimo_vertices()
 			
 			cout << "Escribo binaria" << endl;
 			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
-					support); */
+					support);
 		} 
 		
 		if (list.size() == 3)
@@ -2636,32 +2684,18 @@ void imprimo_vertices()
 				cout << "Less or Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
-						if (i<=j)
+						if (i>j)
 						{
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j)
 							coordenadas_final[0] = coordenadas_base[0]+i;
 							coordenadas_final[1] = coordenadas_base[1]+j;					
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
 
 						}
 				break;
 			case (LT):
 				cout << "Less Than (" << orden << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i<j)
-						{
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;
-							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
-						}
-				break;
-			case (GE):
-				cout << "Greater or Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
 						if (i>=j)
@@ -2670,22 +2704,36 @@ void imprimo_vertices()
 							coordenadas_final[0] = coordenadas_base[0]+i;
 							coordenadas_final[1] = coordenadas_base[1]+j;
 							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
+						}
+				break;
+			case (GE):
+				cout << "Greater or Equal (" << orden << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i<j)
+						{
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;
+							
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
 						}
 				break;
 			case (GT):
 				cout << "Greater Than (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
-						if (i>j)
+						if (i<=j)
 						{
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 							coordenadas_final[0] = coordenadas_base[0]+i;
 							coordenadas_final[1] = coordenadas_base[1]+j;
 							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
 						}
 				break;
 			case (IN):
@@ -2696,21 +2744,21 @@ void imprimo_vertices()
 				cout << "Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
-						if (i==j)
+						if (i!=j)
 						{
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 							coordenadas_final[0] = coordenadas_base[0]+i;
 							coordenadas_final[1] = coordenadas_base[1]+j;
 							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
 						}
 				break;
 			case (NE):
 				cout << "Not Equal (" << orden << ")" << endl;
 				for (int i=0; i<rango_cero;i++)
 					for (int j=0;j<rango_uno;j++)
-						if (i!=j)
+						if (i==j)
 						{
 							//cout << "i: " << i << " - " << "j: " << j << endl;
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
@@ -2718,8 +2766,8 @@ void imprimo_vertices()
 							coordenadas_final[1] = coordenadas_base[1]+j;
 							//cout << "Escribo en coordenadas: " << coordenadas_final[0] << " - " << coordenadas_final[1] << endl;
 							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
 						}					
 				break;
 			} 
@@ -2797,17 +2845,22 @@ void imprimo_vertices()
 					//cout << var_cero << ": " << indice0 << " - " << var_uno << ": " << indice1 << endl;
 					tupla[variable[0]]=i;
 					tupla[variable[1]]=j;
-					//tree->prefixe();
+					
 					resultado = tree->evaluate(tupla);
-					//cout << "=  " << resultado << endl << endl;
-					if (resultado)
+					
+		#ifdef midebug
+					tree->prefixe();
+					cout << "=  " << resultado << endl << endl;
+		#endif
+
+					if (!resultado)
 					{		
 						//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
 						coordenadas_final[0] = coordenadas_base[0]+i;
 						coordenadas_final[1] = coordenadas_base[1]+j;	
 						
-						matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-						matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1;
+						matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
+						matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
 					}
 				}
 			}
@@ -2932,9 +2985,9 @@ int main(int argc, char **argv) {
 	cout << "La dimensión de la Matriz: " << miparser.dimension_matriz << endl;
 	// Escribir matriz intensional
 	ugraph ug(miparser.dimension_matriz);
-	for (int i=0;i< miparser.dimension_matriz;i++)
+	for (int i=0;i< miparser.dimension_matriz-1;i++)
 	{
-		for (int j=0;j<miparser.dimension_matriz;j++)
+		for (int j=i+1;j<miparser.dimension_matriz;j++)
 		{
 			
 			if (miparser.matriz_datos[i][j]==1)
@@ -2953,6 +3006,9 @@ int main(int argc, char **argv) {
 	miparser.remove_edges_same_var(ug);
 	////////////////////
 
+	
+	
+	cout << "Escribiendo el fichero con el grafo ......................\n";
 	ug.set_name(miparser.nombre_fichero, false);
 	//ug.print_data(false /* from scratch*/, cout);
 
@@ -2978,11 +3034,11 @@ int main(int argc, char **argv) {
 	
     
     delete [] miparser.matriz_datos;
-	delete [] miparser.matriz_shadow;
+	//delete [] miparser.matriz_shadow;
 
 
-	//delete miparser.matriz_punteros;
-	//delete miparser.matriz_vertices;
+	//delete [] miparser.matriz_punteros;
+	//delete [] miparser.matriz_vertices;
 
 	return 0;
 }

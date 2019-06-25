@@ -594,7 +594,7 @@ void XCSP3PrintCallbacks::buildConstraintLexMatrix(string, vector<vector<XVariab
 
 // string id, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond
 void XCSP3PrintCallbacks::buildConstraintSum(string, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond) {
-    cout << "\n\tEn PrintCallbacks sum constraint:   ";
+    cout << "\n\tEn PrintCallbacks CON SALERO sum constraint:   ";
     if(list.size() > 8) {
         for(int i = 0; i < 3; i++)
             cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << "*" << *(list[i]) << " ";
@@ -764,7 +764,7 @@ void XCSP3PrintCallbacks::buildConstraintNValues(string, vector<XVariable *> &li
 
 // string id, vector<XVariable *> &list, vector<int> values, vector<int> &occurs, bool closed
 void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *> &list, vector<int> values, vector<int> &occurs, bool closed) {
-    cout << "\n    Cardinality constraint (int values, int occurs)  constraint closed: " << closed << endl;
+    cout << "\n    Cardinality constraint 0 (int values, int occurs)  constraint closed: " << closed << endl;
     cout << "        ";
     displayList(list);
     cout << "        values:";
@@ -776,7 +776,7 @@ void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *>
 
 // string id, vector<XVariable *> &list, vector<int> values, vector<XVariable *> &occurs, bool closed
 void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *> &list, vector<int> values, vector<XVariable *> &occurs, bool closed) {
-    cout << "\n    Cardinality constraint (int values, var occurs)  constraint closed: " << closed << endl;
+    cout << "\n    Cardinality constraint 1 (int values, var occurs)  constraint closed: " << closed << endl;
     cout << "        ";
     displayList(list);
     cout << "        values:";
@@ -788,7 +788,7 @@ void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *>
 
 // string id, vector<XVariable *> &list, vector<int> values, vector<XInterval> &occurs, bool closed
 void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *> &list, vector<int> values, vector<XInterval> &occurs, bool closed) {
-    cout << "\n    Cardinality constraint (int values, interval occurs)  constraint closed: " << closed << endl;
+    cout << "\n    Cardinality constraint 2 (int values, interval occurs)  constraint closed: " << closed << endl;
     cout << "        ";
     displayList(list);
     cout << "        values:";
@@ -800,7 +800,7 @@ void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *>
 
 // string id, vector<XVariable *> &list, vector<XVariable *> values, vector<int> &occurs, bool closed
 void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *> &list, vector<XVariable *> values, vector<int> &occurs, bool closed) {
-    cout << "\n    Cardinality constraint (var values, int occurs)  constraint closed: " << closed << endl;
+    cout << "\n    Cardinality constraint 3 (var values, int occurs)  constraint closed: " << closed << endl;
     cout << "        ";
     displayList(list);
     cout << "        values:";
@@ -812,7 +812,7 @@ void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *>
 
 // string id, vector<XVariable *> &list, vector<XVariable *> values, vector<XVariable *> &occurs, bool closed
 void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *> &list, vector<XVariable *> values, vector<XVariable *> &occurs, bool closed) {
-    cout << "\n    Cardinality constraint (var values, var occurs)  constraint closed: " << closed << endl;
+    cout << "\n    Cardinality constraint 4 (var values, var occurs)  constraint closed: " << closed << endl;
     cout << "        ";
     displayList(list);
     cout << "        values:";
@@ -824,7 +824,7 @@ void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *>
 
 // string id, vector<XVariable *> &list, vector<XVariable *> values, vector<XInterval> &occurs, bool closed
 void XCSP3PrintCallbacks::buildConstraintCardinality(string, vector<XVariable *> &list, vector<XVariable *> values, vector<XInterval> &occurs, bool closed) {
-    cout << "\n    Cardinality constraint (var values, interval occurs)  constraint closed: " << closed << endl;
+    cout << "\n    Cardinality constraint 5 (var values, interval occurs)  constraint closed: " << closed << endl;
     cout << "        ";
     displayList(list);
     cout << "        values:";
