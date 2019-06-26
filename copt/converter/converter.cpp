@@ -17,7 +17,7 @@
 #include <math.h>
 
 //#define mipause
-#define midebug
+//#define midebug
 //#define mitest
 
 #define BUFFER_PUNTEROS 10*1024
@@ -49,7 +49,9 @@ private:
 	map<string, vector<int>> variables_singleton;	// Guarda los valores discretos de una variable
 
 	map<string, int> base_array; 		// Mapa de cada array con su coordenada base
-	map<string, int> minimo_variable; 	// Guarda el minimo del rango de las variables
+	map<string, int> base_variable;		// Mapa de cada Variable con su coordenada base, debe sustituir a base_array
+	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables
+	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables
 	map<string, int> rango_variable; 	// Mapa de cada array con el rango de valores de las variables
 	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias
 										    // de variables del array
@@ -1790,6 +1792,7 @@ void imprimo_vertices()
 		cout << "Empiezo con el Array, reseteo los valores para el array:  " << id << endl;
 
 		lista_arrays.push_back(id);
+		lista_variables.push_back(id);
 		array_actual = id;
 		base_array[id] = base_siguiente_array;
 		rango_variable[id] = 0;
@@ -1842,9 +1845,9 @@ void imprimo_vertices()
 	void beginVariables() {
 
 
-#ifdef midebug
+//#ifdef midebug
 		cout << "COMIENZA la declaracion de variables............. " << endl;
-#endif
+//#endif
 
 	}
 
@@ -1897,25 +1900,35 @@ void imprimo_vertices()
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 
 		lista_variables.push_back(id);
+		
 		mapa_indices[id]=numero_variables;
 		rango_variables = (maxValue - minValue) + 1;
 		minimo_variables = minValue;					/*TODO-hay variables (singleton) con valor -1!!*/
 		numero_variables++;
-		cout << "Variable: " << id << " indice var: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
-				<< maxValue << endl;
+		
+		rango_variable[id] = (maxValue - minValue) + 1;
+		maximo_variable[id] = maxValue;
+		minimo_variable[id] = minValue;
+
+		cout << "Variable: " << id << " indice BAR: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
+				<< maxValue << " - Rango: " << rango_variable[id] << endl;
 
 		
 		//PSS-treats the case of singleton variables
 		if(!is_array){						/* variable extension to arrays: dirty */
 			cout << "¡¡¡ Soy Singelton con rango de valores !!!" << endl;
 			lista_arrays.push_back(id);
+			lista_variables.push_back(id);
 			base_array[id] = base_siguiente_array;
 			numero_variables=1;
 
-			base_siguiente_array += rango_variables;
+			rango_variable[id]=rango_variables;
+			maximo_variable[id]=maxValue;
+			minimo_variable[id]=minValue;
+
+			base_siguiente_array += rango_variable[id];
 			numero_variable[id] = 1;
-			rango_variable[id] = rango_variables;
-			minimo_variable[id] = minimo_variables;
+			
 		}
 
 
@@ -2299,7 +2312,7 @@ void imprimo_vertices()
 		
 		if (list.size() == 2){
 			cout << "Regla BINARIA:" << endl;
-			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+			//cout << "¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........" << endl; 
 			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 
 			indice0 = get_indice(*(list[0]));
@@ -3005,10 +3018,9 @@ int main(int argc, char **argv) {
 	//removes incompatible edges between values of the same variable-  MUST BE!
 	miparser.remove_edges_same_var(ug);
 	////////////////////
-
 	
 	
-	cout << "Escribiendo el fichero con el grafo ......................\n";
+	cout << "ESCRIBIENDO EL GRAFO RESULTANTE AL FICHERO .clq .......................\n";
 	ug.set_name(miparser.nombre_fichero, false);
 	//ug.print_data(false /* from scratch*/, cout);
 
