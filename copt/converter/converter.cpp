@@ -48,11 +48,14 @@ private:
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
 	map<string, vector<int>> variables_singleton;	// Guarda los valores discretos de una variable
 
+	string primera_variable = "Si";
+	string variable_anterior="Vacia";
 	map<string, int> base_array; 		// Mapa de cada array con su coordenada base
 	map<string, int> base_variable;		// Mapa de cada Variable con su coordenada base, debe sustituir a base_array
 	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables
 	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables
-	map<string, int> rango_variable; 	// Mapa de cada array con el rango de valores de las variables
+	map<string, int> rango_array;	 	// Mapa de cada array con el rango de valores de las variables
+	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables
 	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias
 										    // de variables del array
 
@@ -63,7 +66,7 @@ private:
 
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
 	int base_siguiente_array = 0; 		// Guarda el valor para calcular la posicion en la matriz del siguiente array
-	int minimo_variables = 0;        	// Guarda el minimo valor de cada variable
+	int minimo_variables = 0;        	// Guarda el minimo valor de cada array
 	int rango_variables = 0; 			// Guarda el rango de valores de las variables de un array
 	int numero_variables = 0;      		// Guarda el numero de variables de un array
 
@@ -140,9 +143,7 @@ public:
 		fichero_salida << "x " << lista_variables.size() << endl;
 
 		for (unsigned int j = 0; j < lista_variables.size(); j++) {
-			var = get_nombre(lista_variables[j]);
-			fichero_salida << "v " << (j + 1) << " " << rango_variable[var]
-					<< endl;
+			fichero_salida << "v " << (j + 1) << " " << rango_variable[lista_variables[j]]	<< endl;
 
 #ifdef midebug
 			cout << var << endl;
@@ -339,6 +340,17 @@ public:
 
 
 
+	void nueva_coordenadas_base(string var_cero,string var_uno, int *coordenadas_base)
+	{
+		/* iterator
+		while()
+		{
+
+		}
+		*coordenadas_base = ;
+		coordenadas_base++;
+		*coordenadas_base = ; */
+	}
 
 
 
@@ -526,7 +538,8 @@ public:
 	void genera_matriz() {
 		vector<string>::iterator lista;
 
-		for (lista = lista_arrays.begin(); lista != lista_arrays.end();
+		/*Código basado en array
+		 for (lista = lista_arrays.begin(); lista != lista_arrays.end();
 				lista++) {
 			dimension_matriz += numero_variable[*lista]
 					* rango_variable[*lista];
@@ -538,7 +551,17 @@ public:
 			cout << "dimension variable: "<< numero_variable[*lista] * rango_variable[*lista] << endl;
 			cout << "dimension acumulada: " << dimension_matriz << endl;
 //#endif
-		}
+		} */
+
+		for (lista = lista_variables.begin(); lista != lista_variables.end(); lista++)
+				{
+					dimension_matriz += rango_variable[*lista];
+					cout << "Variable: " << *lista << endl;
+					cout << "rango variable: " << rango_variable[*lista] << endl;
+					cout << "dimension acumulada: " << dimension_matriz << endl;
+				}		
+
+			
 
 		matriz_datos = new int* [dimension_matriz];
 		for (int i=0;i<dimension_matriz;i++)
@@ -556,8 +579,6 @@ public:
       	// 	matriz_datos[i] = matriz_datos[i-1]+dimension_matriz;
 		// 	//matriz_shadow[i] = matriz_shadow[i-1]+dimension_matriz;
     	// }
-		
-	
 
 		for (int i=0; i< dimension_matriz;i++)
 		{
@@ -567,7 +588,6 @@ public:
 				//matriz_shadow[i][j]=1;
 			}
 		}
-
 
 
 #ifdef midebug
@@ -904,6 +924,130 @@ public:
 
 
 
+void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, string var_uno, bool support) 
+{
+		vector<vector<int>>::iterator itero_parejas;
+		vector<int>::iterator itero_dentro_de_la_pareja;
+		int coordenada_final[2];
+
+		//support
+
+		if (support)
+		{
+			if (tuplas.size()==0)
+			{
+				cout << "CONJUNTO DE TUPLAS VACIO: TODO A CEROS" << endl;
+				for (int i = 0; i < rango_variable[var_cero]; i++)
+					for (int j = 0; j < rango_variable[var_uno]; j++) 
+					{
+						coordenada_final[0] = base_variable[var_cero] + i;
+						coordenada_final[1] = base_variable[var_uno] + j;
+						
+#ifdef midebug
+							cout << "writing-0-S en:(" << coordenada_final[0] << ","
+								<< coordenada_final[1] << ")" << endl;
+#endif
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;	
+					}
+			
+		
+			} else {
+					// Borro el resto de restricciones
+					for (int i = 0; i < rango_variable[var_cero]; i++)
+						for (int j = 0; j < rango_variable[var_uno]; j++) 
+						{
+							coordenada_final[0] = base_variable[var_cero] + i;
+							coordenada_final[1] = base_variable[var_uno] + j;
+#ifdef midebug
+							cout << "writing-0-S en:(" << coordenada_final[0] << ","
+								<< coordenada_final[1] << ")" << endl;
+#endif
+							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
+							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
+
+#ifdef midebug
+						cout << "writing-0-S en:(" << coordenada_final[1] << ","
+								<< coordenada_final[0] << ")" << endl;
+#endif
+						}
+
+				// Y escribo las reglas support
+				for (itero_parejas = tuplas.begin(); itero_parejas != tuplas.end();++itero_parejas) 
+				{
+						itero_dentro_de_la_pareja = itero_parejas->begin();
+
+#ifdef midebug
+						cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
+							<< endl;
+#endif
+
+						coordenada_final[0] = base_variable[var_cero]
+							+ (*itero_dentro_de_la_pareja)
+							- minimo_variable[var_cero];
+
+						itero_dentro_de_la_pareja++;
+#ifdef midebug
+						cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
+							<< endl;
+#endif
+						coordenada_final[1] = base_variable[var_uno]
+							+ (*itero_dentro_de_la_pareja)
+							- minimo_variable[var_uno];
+
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;					
+#ifdef midebug
+						cout << "Tupla support leida-coord:(" << coordenada_final[0]
+							<< "," << coordenada_final[1] << ")" << endl;
+#endif			
+				}
+		
+			}
+		} else {
+
+#ifdef midebug
+			cout << "Regla Conflict ......" << endl;
+#endif
+
+			// Escribo las tuplas correspondientes a cero.
+				for (itero_parejas = las_tuplas.begin();
+						itero_parejas != las_tuplas.end(); ++itero_parejas) {
+				
+					itero_dentro_de_la_pareja = itero_parejas->begin();
+
+#ifdef midebug
+				cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
+						<< endl;
+#endif
+
+					coordenada_final[0] = base_variable[var_cero]
+							+ (*itero_dentro_de_la_pareja)
+							- minimo_variable[var_cero];
+
+					itero_dentro_de_la_pareja++;
+#ifdef midebug
+				cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
+						<< endl;
+#endif
+
+					coordenada_final[1] = base_variable[var_uno]
+							+ (*itero_dentro_de_la_pareja)
+							- minimo_variable[var_uno];
+
+#ifdef midebug
+				cout << "writing-0-C en:(" << coordenada_final[0] << ","
+						<< coordenada_final[1] << ")" << endl;
+#endif
+					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+					matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+
+			}
+		}
+}
+
+
+
 
 
 
@@ -916,7 +1060,7 @@ public:
 			string var_cero, string var_uno, bool support) {
 		//vector<vector<int>>::iterator it;
 
-		std::vector<vector<int>>::iterator itero_parejas;
+		vector<vector<int>>::iterator itero_parejas;
 		vector<int>::iterator itero_dentro_de_la_pareja;
 		int coordenada_final[2];
 
@@ -1792,10 +1936,11 @@ void imprimo_vertices()
 		cout << "Empiezo con el Array, reseteo los valores para el array:  " << id << endl;
 
 		lista_arrays.push_back(id);
-		lista_variables.push_back(id);
+		
+
 		array_actual = id;
 		base_array[id] = base_siguiente_array;
-		rango_variable[id] = 0;
+		rango_array[id] = 0;
 
 		numero_variables = 0;
 		rango_variables = 0;
@@ -1821,7 +1966,7 @@ void imprimo_vertices()
 
 		base_siguiente_array += (numero_variables * rango_variables);
 		numero_variable[array_actual] = numero_variables;
-		rango_variable[array_actual] = rango_variables;
+		rango_array[array_actual] = rango_variables;
 		minimo_variable[array_actual] = minimo_variables;
 
 		is_array=false;
@@ -1829,7 +1974,7 @@ void imprimo_vertices()
 #ifdef midebug
 		cout << "Base siguiente array: " << base_siguiente_array << endl;
 		cout << "Numero variables: " << numero_variables << " - Rango: "
-				<< rango_variables << endl;
+				<< rango_array << endl;
 #endif
 
 	}
@@ -1898,49 +2043,43 @@ void imprimo_vertices()
 
 	//PSS calls here alsp for variables with singleton values (<var id="x0"> -1 <\var> )
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
-
-		lista_variables.push_back(id);
 		
+		if (primera_variable == "Si")
+		{
+			
+			base_variable[id] = 0;
+			primera_variable = "No";
+		}
+		else
+		{
+			variable_anterior = lista_variables.back();
+		}
+		
+		lista_variables.push_back(id);
+				
 		mapa_indices[id]=numero_variables;
+
+		// Para tratar los arrays
 		rango_variables = (maxValue - minValue) + 1;
 		minimo_variables = minValue;					/*TODO-hay variables (singleton) con valor -1!!*/
 		numero_variables++;
 		
+		// Para tratar cada variable de manera individual
 		rango_variable[id] = (maxValue - minValue) + 1;
 		maximo_variable[id] = maxValue;
 		minimo_variable[id] = minValue;
 
-		cout << "Variable: " << id << " indice BAR: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
-				<< maxValue << " - Rango: " << rango_variable[id] << endl;
+
+		if (primera_variable == "No")	
+			base_variable[id] = base_variable[variable_anterior] + rango_variable[variable_anterior];
+		
+		cout << "Primera Variable: " << primera_variable << " - Variable anterior: " << variable_anterior << endl;
+
+		cout << "Variable: " << id << " indice: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
+				<< maxValue << " - Base variable en la matriz: " << base_variable[id] << " - Rango: " << rango_variable[id] << endl;
 
 		
-		//PSS-treats the case of singleton variables
-		if(!is_array){						/* variable extension to arrays: dirty */
-			cout << "¡¡¡ Soy Singelton con rango de valores !!!" << endl;
-			lista_arrays.push_back(id);
-			lista_variables.push_back(id);
-			base_array[id] = base_siguiente_array;
-			numero_variables=1;
-
-			rango_variable[id]=rango_variables;
-			maximo_variable[id]=maxValue;
-			minimo_variable[id]=minValue;
-
-			base_siguiente_array += rango_variable[id];
-			numero_variable[id] = 1;
-			
-		}
-
-
-#ifdef midebug
-		cout << "Array actual " << array_actual << endl;
-		cout << "Rango valores: " << rango_variables
-				<< " - Instancia Variable: " << (numero_variables-1)
-				<< " - Minimo valor Variable: " << minimo_variables << endl;
-#endif
-
 	}
-
 
 
 
@@ -2008,7 +2147,7 @@ void imprimo_vertices()
 	//Versión para Restricciones UNARIAS
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
 		cout << "Regla UNARIA:" << endl;
-		cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+		cout << "¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........" << endl; 
 		/* string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int direccion;
@@ -2106,16 +2245,13 @@ void imprimo_vertices()
 
 		if (list.size() == 2){
 			cout << "Regla BINARIA:" << endl;
-			//cout << "¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........" << endl;
 			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 
-			indice0 = get_indice(*(list[0]));
-			indice1 = get_indice(*(list[1]));
-			var_cero = get_nombre(list[0]->id);
-			var_uno = get_nombre(list[1]->id);
-			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); 
+			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
+			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); 
 		}
+
 
 		if(list.size() == 3)
 		{
@@ -2312,20 +2448,11 @@ void imprimo_vertices()
 		
 		if (list.size() == 2){
 			cout << "Regla BINARIA:" << endl;
-			//cout << "¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........" << endl; 
 			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 
-			indice0 = get_indice(*(list[0]));
-			indice1 = get_indice(*(list[1]));
-
-			var_cero = get_nombre(list[0]->id);
-			var_uno = get_nombre(list[1]->id);
-
-			calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-			
-			cout << "Escribo binaria" << endl;
-			escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno,
-					support);
+			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
+			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); 
 		} 
 		
 		if (list.size() == 3)
@@ -2903,12 +3030,10 @@ void buildConstraintSum(string feo, vector<XVariable *> &list, vector<int> &coef
 
 
 
-
-
-
 	
-
-
+//////////////////////////
+//// Fin de la clase MiParser
+//////////////////////////
 	
 };
 
@@ -3020,12 +3145,14 @@ int main(int argc, char **argv) {
 	////////////////////
 	
 	
-	cout << "ESCRIBIENDO EL GRAFO RESULTANTE AL FICHERO .clq .......................\n";
+	
 	ug.set_name(miparser.nombre_fichero, false);
 	//ug.print_data(false /* from scratch*/, cout);
 
 	nombre_fichero_dimacs = strrchr(miparser.nombre_fichero, '.');
 	strcpy(nombre_fichero_dimacs, ".clq");
+
+	cout << "ESCRIBIENDO EL GRAFO RESULTANTE AL FICHERO " << miparser.nombre_fichero <<  " .......................\n";
 
 	std::fstream f(miparser.nombre_fichero, ios::out);
 	ug.write_dimacs(f);
