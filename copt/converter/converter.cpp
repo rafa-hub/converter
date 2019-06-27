@@ -417,37 +417,7 @@ public:
 
 
 
-
-
-
-
-
-	//for testing: x[0], 3, y[0], 1 -> true/false
-	//assumes values are integers
-	bool is_conflicting(string name1, string value1, string name2, string value2){
-		bool res=false;
-		int vindex_1, vindex_2;
-		string avn_1, avn_2;
-		size_t pos1, pos2;
-
-		//data for first (var, val)
-		avn_1=get_nombre(name1);
-		pos1 = name1.find_first_of('[', 0);
-		pos2 = name1.find_first_of(']', pos1);
-		vindex_1 = std::stoi(name1.substr(pos1 + 1, pos2 - 2));
-		int row_1=base_array[avn_1]+ (vindex_1 * rango_variable[avn_1]) + std::stoi(value1) -minimo_variable[avn_1];
-
-		//data for second (var, val)
-		avn_2 = get_nombre(name2);
-		pos1 = name2.find_first_of('[', 0);
-		pos2 = name2.find_first_of(']', pos1);
-		vindex_2 = std::stoi(name2.substr(pos1 + 1, pos2 - 2));
-		int row_2 = base_array[avn_2] + (vindex_2 * rango_variable[avn_2]) + std::stoi(value2) -minimo_variable[avn_2];
-
-		return !((bool) matriz_datos[row_1][row_2]);
-	}
-
-
+	
 
 
 
@@ -461,14 +431,13 @@ public:
 	int remove_edges_same_var(ugraph& ug) {
 //		com::stl::print_collection(miparser.lista_arrays, cout); cout<<endl;
 		cout<<"REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
-		for (vector<string>::iterator it = lista_arrays.begin();
-				it != lista_arrays.end(); it++) {
-			string array_var_name = get_nombre(*it);
-			int row = base_array[array_var_name];
+		for (vector<string>::iterator it = lista_variables.begin();
+				it != lista_variables.end(); it++) {
+			
+			int row = base_variable[*it];
 
-			const int NUM_VAL = rango_variable[array_var_name];
-			const int MAX_ROWS_ARRAY_VAR = row
-					+ (numero_variable[array_var_name] * NUM_VAL);
+			const int NUM_VAL = rango_variable[*it];
+			const int MAX_ROWS_ARRAY_VAR = row + NUM_VAL;
 #ifdef midebug
 			cout << array_var_name << " row:" << row << " range:" << NUM_VAL
 					<< " nb_var:" << numero_variable[array_var_name]
@@ -1883,41 +1852,9 @@ void imprimo_vertices()
 
 
 	void endInstance() {
-		pongo_diagonal_matriz_a_cero();
-
-		//I/O: Nota-la matriz de datos no est� terminada todavia
-		//Hay que eliminar las relaciones entra valores de la misma variable
-		//TODO-cambiar la l�gica y hacerlo aqui
-		//ostream & terminal=cout;
-
-		// cout <<"---------------------------------------------------"<<endl;
-		// imprime_matriz_ternaria(terminal);
-		// cout <<"---------------------------------------------------"<<endl;
-
-		/* for (int i=0;i<lista_variables_ternarias.size();i++)
-		{
-			dimension_matriz_ternaria += (lista_variables_ternarias[i]);
-		} */
+		
 
 		
-		//imprimo_vertices();
-
-		//genero_grafo();
-
-
-		//imprimo_datos_grafo();
-
-		/* vector<string>::iterator itero;
-		for (itero = lista_arrays.begin(); itero != lista_arrays.end();	itero++) {
-			cout << "Array: " << *itero << endl;
-			cout << "Numero variables: " << numero_variable[*itero] << endl;
-			cout << "Fila base de la matriz: " << base_array[*itero] << endl;
-			cout << "Primer valor: " << minimo_variable[*itero]<< endl;
-			cout << "Número de valores: " << rango_variable[*itero]<< endl;
-			cout << endl;
-		}*/
-		
-		//cout << "Dimension total datos Ternarios: " << dimension_matriz_ternaria << endl;
 		cout << endl;
 		cout << "FIN del parsing----------------" << endl;
 
@@ -2244,9 +2181,9 @@ void imprimo_vertices()
 
 
 		if (list.size() == 2){
-			cout << "Regla BINARIA:" << endl;
+			//cout << "Regla BINARIA:" << endl;
 			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
+			//cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 
 			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
 			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); 
@@ -2447,9 +2384,9 @@ void imprimo_vertices()
 		
 		
 		if (list.size() == 2){
-			cout << "Regla BINARIA:" << endl;
+			//cout << "Regla BINARIA:" << endl;
 			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
+			//cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 
 			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
 			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); 
@@ -3141,6 +3078,7 @@ int main(int argc, char **argv) {
 
  
 	//removes incompatible edges between values of the same variable-  MUST BE!
+	miparser.pongo_diagonal_matriz_a_cero();
 	miparser.remove_edges_same_var(ug);
 	////////////////////
 	
@@ -3159,9 +3097,9 @@ int main(int argc, char **argv) {
 	f.close();
 
 	//salida matriz de datos
-	ofstream fmat("log_mat.txt", ios::out);
+	/* ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.close();
+	fmat.close(); */
 
 	/* cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
 	ostream & terminal=cout;
