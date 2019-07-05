@@ -42,7 +42,7 @@ private:
 	map<string, vector<int>> variables_singleton;	// Guarda los valores discretos de una variable
 	map<string, vector<int>> valores_variable_discreta;	// Guarda los valores discretos de una variable
 		
-	int indice_var_ternarias = 0;		// Va indexando las variables ternarias. (a substituir)
+	
 	
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable (Va a quedar deprecated)
 	
@@ -62,8 +62,7 @@ private:
 
 	map<int,vector<string>> nueva_super_variable;		// Nueva Super-Variable para procesar las reglas ternarias.
 														// Contiene las variables como strings.
-	map<int,vector<string>> vertices_nueva_variable;	// Nueva Super-Variable para procesar las reglas ternarias.
-														// Contiene los índices de los vértices correspondientes a la variable.
+	
 
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
 	int base_siguiente_array = 0; 		// Guarda el valor para calcular la posicion en la matriz del siguiente array
@@ -93,6 +92,7 @@ public:
 	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
 												// en cada posición se guarda el "número" de variables.
 												// Sirve para generar el fichero CSP
+	int indice_var_ternarias = 0;		// Va indexando las variables ternarias. (a substituir por algo más consistente)
 	vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
 
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada.
@@ -104,12 +104,9 @@ public:
 	int **matriz_vertices;  // Matriz donde se almacenan los punteros a los valores de las tuplas 
 							// de los vértices a procesar.
 	int indice_vertices=0;	// Índice global para indexar los vértices del grafo. (a quitar)
-	vector<int> cardinal_vertices; 	// Contiene una relación entre los vértices de cada variable nueva.
-	vector<int> lista_vertices;		// Guarda la lista de los vertices 
-
+	
 	map <int , vector <int>> grafo;		// Almacena el grafo que será volcado a fichero. DEPRECATED.
-	int contador_aristas=0;				// Sirve para contar las aristas y poder generar el grafo,
-										// delimita el recorrido del mapa que almacena el grafo.
+	
 	
 	
 
@@ -1312,344 +1309,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-
-
-
-
-void imprimo_vertices()
-	{
-		cout << "Imprimo los vertices del grafo por cada Nueva Variable. \nNúmero de vértices: " << indice_vertices << endl;
-		
-		
-				
-		for (int i=0; i<lista_variables_ternarias.size();i++)
-		{
-			
-			cout << "U[" << i << "]: " << endl;
-			cout << "Número de tuplas: " << tamano_tuplas[i] << endl;
-			
-			for (int j=0; j<lista_variables_ternarias[i]; j++)
-			{
-				cout << nueva_super_variable[i][j];
-				if (j<(lista_variables_ternarias[i]-1))
-					cout << ", ";
-			}
-			cout << endl;
-
-			for (int j=0; j<tamano_tuplas[i]; j++)
-			{
-				cout << "v(" << ((mapa_vertices[i][j])+1) << ")" ;
-				if (j<(tamano_tuplas[i]-1))
-					cout <<", ";
-			}
-			
-			cout << "\n------------------------------\n";
-		}
-		
-
-	}
-
-
-
-
-
-
-
-
-
-
-	
-
-	void relleno_aristas(int primera,int segunda)
-	{
-		cout << "Número de vértices U[" << primera << "]: " << mapa_vertices[primera].size() << endl;
-		cout << "Número de vértices U[" << segunda << "]: " << mapa_vertices[segunda].size() << endl;
-
-		for (int i=0;i<mapa_vertices[primera].size();i++)
-		{
-			for(int j=0;j<mapa_vertices[segunda].size();j++)
-			{
-				cout << "Arista ......... v(" << mapa_vertices[primera][i] << ") <-> v(" << mapa_vertices[segunda][j] << ")" << endl; 
-				grafo[contador_aristas] = {mapa_vertices[primera][i],mapa_vertices[segunda][j]};
-				contador_aristas++;
-				cout << "Número de aristas: " << contador_aristas << endl;
-			}
-		} 
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	int posicion_variable(int nueva_var,string var)
-	{
-		int i=0;
-
-		for (i=0;i<lista_variables_ternarias[nueva_var];i++)
-			if(var == nueva_super_variable[nueva_var][i])
-			{
-				cout << "Encontrada "  << var << ", posición " << i << endl;
-				break;
-			}
-		return i;
-	}
-
-
-
-
-
-
-
-	void traslacion_vertices(int *vertice1,int *vertice2)
-	{
-		// Esta función calcula el índice de cada vértice en la matriz_genaral_vertices[][]
-
-		int *v;
-
-		v = matriz_vertices[*vertice1];
-
-		for (int i=0; i<lista_variables.size(); i++)
-		{
-
-		}
-
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	void comparo_vertices(int indice_nueva_variable1, vector<int>pos_var_uno, int indice_nueva_variable2,vector<int>pos_var_dos)
-	{
-		stack <int> pila_resultado;
-		int vertice1,vertice2;
-		int bucle=0;
-		int hay_arista=0;
-		int tamano_comparacion = pos_var_uno.size();
-
-		
-		
-		for (int i=0; i < tamano_tuplas[indice_nueva_variable1]; i++)
-		{
-			for(int j=0; j < tamano_tuplas[indice_nueva_variable2]; j++)
-			{
-				// Comparación de cada uno de los vértices
-				vertice1 = mapa_vertices[indice_nueva_variable1][i];
-				vertice2 = mapa_vertices[indice_nueva_variable2][j];
-
-				cout << "\nEmpiezo la comparación ........................" << endl;
-				cout << "i: " << i << " - j: " << j << endl;
-				cout << "Número de variables a comparar: " << tamano_comparacion << " Vertice1: " << vertice1 << " Vertice2: " << vertice2 << endl;
-				
-				//pila_resultado.reset();
-				for (int k=0; k < tamano_comparacion ; k++)
-				{
-					// cout << "posición_uno: " << pos_var_uno[k] << " valor: " << matriz_vertices[vertice1][pos_var_uno[k]] 
-					// 		<< " posición_dos: " <<  pos_var_dos[k] << " valor: "<< matriz_vertices[vertice2][pos_var_dos[k]] << endl;
-					cout << " valor: " << matriz_vertices[vertice1][pos_var_uno[k]] 
-					 		<< " valor: "<< matriz_vertices[vertice2][pos_var_dos[k]] << endl;
-					
-					if(matriz_vertices[vertice1][pos_var_uno[k]] == matriz_vertices[vertice2][pos_var_dos[k]])
-					{
-						cout << "comparación " << k << " con exito" << endl;
-						pila_resultado.push(1);
-					}
-					else
-					{
-						cout << "comparación " << k << " SIN exito" << endl;
-						pila_resultado.push(0);
-					}					
-				}
-
-				hay_arista = pila_resultado.top();
-				bucle = pila_resultado.size();
-
-				for (int l=0; l< bucle;l++)
-				{	
-					if (pila_resultado.top() == 0)
-						hay_arista=0;
-					pila_resultado.pop();
-				}
-
-				if(hay_arista)
-				{	cout << "Hay conflicto entre los vertices " << vertice1 << " y " << vertice2 << endl;
-
-					traslacion_vertices(&vertice1,&vertice2);
-					//Escribo en el grafo
-					matriz_aristas[vertice1][vertice2] = 0;
-					matriz_aristas[vertice2][vertice1] = 0;
-					grafo[contador_aristas] = {vertice1,vertice2};
-					contador_aristas++;
-				}
-				else
-					{
-						cout << "Sin conflicto entre " << vertice1 << " y " << vertice2 <<  endl;
-					}
-					
-			}
-
-		}
-
-
-		
-		
-	}
-
-
-
-
-
-
-
-
-
-
-
-	void ejecuto_comparacion(int indice_nueva_variable1, int indice_nueva_variable2)
-	{
-		int tamano_pila = pila_comparacion.size();
-		int tamano_comparacion = 0;
-		int hay_arista=0;
-		string var;
-		vector<int> pos_var_uno (tamano_pila);
-		vector<int> pos_var_dos (tamano_pila);
-
-		
-
-		for (int i=0; i< tamano_pila ;i++)
-		{
-			cout << "\nTamaño pila: " << pila_comparacion.size() << endl;
-			var = pila_comparacion.top();
-			cout << "Variable a procesar: " << var << endl;
-			pos_var_uno[i] = posicion_variable(indice_nueva_variable1,var);
-			pos_var_dos[i] = posicion_variable(indice_nueva_variable2,var);
-			cout << "Sacamos variable de la pila: " << pila_comparacion.top();
-			pila_comparacion.pop();
-		}
-
-
-		
-		comparo_vertices(indice_nueva_variable1,pos_var_uno,indice_nueva_variable2,pos_var_dos);
-
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	void genera_grafo_ternario()
-	{
-		int i=0,j=0,k=0,l=0;
-		
-		int indice=0;
-		vector<string>::iterator itero_primera_variable,itero_segunda_variable;
-		
-	
-		
-		// Genero la matriz ternaria con todos las posibles aristas.
-		matriz_aristas = new int* [dimension_ternaria];
-		for (int i=0;i<dimension_ternaria;i++)
-		{
-			matriz_aristas[i]=new int[dimension_ternaria];
-		}
-
-		for (int i=0; i< dimension_ternaria;i++)
-		{
-			for (int j=0;j<dimension_ternaria;j++)
-			{
-				matriz_aristas[i][j]=1;
-			}
-		}
-
-		cout << "Creada la matriz de vértices con dimensión: " << dimension_ternaria << endl;
-
-		contador_aristas=0; // Aristas que voy a borrar.
-		//cout << "\n\nGenero el fichero DIMACS con el grafo......................\n" << endl;
-		
-		
-		for (k=0;k<lista_variables_ternarias.size()-1;k++)
-		{
-			for (i=k,j=i+1;j<lista_variables_ternarias.size();j++)
-			{
-				cout << "Nuevas Variables a procesar U[" << i << "] - U[" << j << "]" << endl ;
-				cout << "Contador aristas: " << contador_aristas << endl;
-
-		 		for(itero_primera_variable=nueva_super_variable[i].begin(); 
-					itero_primera_variable < nueva_super_variable[i].end(); itero_primera_variable++)
-					{
-						for(itero_segunda_variable=nueva_super_variable[j].begin(); 
-							itero_segunda_variable < nueva_super_variable[j].end();itero_segunda_variable++)
-						{
-							cout << *itero_primera_variable << "-" << *itero_segunda_variable;
-							
-							if(*itero_primera_variable == *itero_segunda_variable)
-							{	
-								pila_comparacion.push(*itero_primera_variable);
-								cout << "\nVariable " << *itero_primera_variable << " a la pila." << endl;
-							}
-							else 
-								cout << "  ";
-						}
-						
-						cout << endl;
-					}
-				
-				if(!pila_comparacion.empty())
-							ejecuto_comparacion(i,j);
-				
-				cout << endl;
-			}
-		}
-
-		
-		cout << "\n=========================================\n" << endl;
-
-		
-
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	void escribe_grafo()
 	{
 		string var;
@@ -2001,15 +1660,7 @@ void imprimo_vertices()
 				cout << "escribiendo conflict en: " << "(" << var_cero << ","
 						<< var_uno << ")" << endl;
 #endif
-
-#ifdef mipause
-        	cin.get();
-#endif
-	
-
-#ifdef midebug
-		cout << "\n ** Fin buildConstraintExtension ** " << id << endl;
-#endif */
+*/
 
 	}
 
@@ -2025,8 +1676,11 @@ void imprimo_vertices()
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
 		int i=0,j=0,k=0;
+		int contador=0;
 		int rango=0;
+		int fila=0;
 		string var;
+		vector<int> auxiliar;
 		
 		int indice0, indice1;
 		int coordenadas_base[2];
@@ -2076,62 +1730,55 @@ void imprimo_vertices()
 			{
 				cout << (*itero_variables)->id << " - " ;
 				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+				
 			}
+			var = nueva_super_variable[indice_var_ternarias][0];
+			fila = pow(rango_variable[var],list.size());
+			dimension_variables_ternarias.push_back(fila);
+			cout << "Tamaño fila: " << fila << " var: " << var << " Indice Var Ternarias: " << indice_var_ternarias << endl;
+			matriz_vertices[indice_var_ternarias] = new int [fila];
 
-			// Compruebo que se han guardado bien los valores en el mapa.
-			cout << "\nU[" << indice_var_ternarias << "]: \n";
-			for(itero_dentro_variables = nueva_super_variable[indice_var_ternarias].begin();
-					itero_dentro_variables < nueva_super_variable[indice_var_ternarias].end();
-					   itero_dentro_variables++)
-			{
-				cout << "\t" << *itero_dentro_variables << " ";
-				cout << "Dominio valores variable: " << rango_variable[*itero_dentro_variables] << endl;
-				var = *itero_dentro_variables;
-			}
-
-			cout << endl;
-			
-			dimension_ternaria = pow (rango_variable[var],list.size()); // Ahora mismo se calcula cada vez, habrá que mejorarlo.
-			cout << "Dimensión Regla: " << list.size() << " Tamaño tuplas: " << las_tuplas.size() 
-			       << " Dimensión total: " << dimension_ternaria << endl;
-
-			lista_variables_ternarias.push_back(list.size()); // Para generar el fichero .csp y varios procesos.
-			
-			dimension_variables_ternarias.push_back(las_tuplas.size()); // NO sé para que sirve esto.
-			tamano_tuplas.push_back(las_tuplas.size());
-			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
-			
-			j=0;
-			for (itero_tuplas = las_tuplas.begin(); itero_tuplas != las_tuplas.end();
-					++itero_tuplas)
-			{
-				itero_dentro_tuplas = itero_tuplas->begin();
-				matriz_vertices[indice_vertices]=new int[list.size()];
-			 	puntero_vertice = matriz_vertices[indice_vertices];
-
-				cardinal_vertices.push_back(indice_vertices);  // NO sé para que sirve esto.
-				
-				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
-				
-				cout << "\tv(" << indice_vertices << "): " ;
-				cout << "(";
-				
-				for(int i=0; i<itero_tuplas->size(); i++)
-				{
-					cout << *itero_dentro_tuplas;
-					if (i<list.size()-1)
-						cout << ",";
-					*puntero_vertice=*itero_dentro_tuplas;
-					puntero_vertice++;
-					itero_dentro_tuplas++;
+			//Inicializo la fila a unos
+			for (int i=0; i < fila; i++)
+				{	
+					matriz_vertices[indice_var_ternarias][i] = 1;
 				}
-				cout <<")" << endl;
-				indice_vertices++;
-				j++;
-			}
 
+			contador=0;
+
+			// Genero los valores de los vértices	
+			// Y Pongo los valores de las tuplas a 0
+			for (int j=0; j < rango_variable[nueva_super_variable[indice_var_ternarias][0]]; j++)
+				for (int k=0 ; k < rango_variable[nueva_super_variable[indice_var_ternarias][1]]; k++)
+					for (int h=0; h < rango_variable[nueva_super_variable[indice_var_ternarias][2]]; h++)
+					{
+						auxiliar.clear();
+						auxiliar.push_back(j);
+						auxiliar.push_back(k);
+						auxiliar.push_back(h);
+						cout << "Contador: " << contador << endl;
+						cout << auxiliar[0] << " " << auxiliar[1] << " " << auxiliar[2] << endl;
+						for (auto superit=las_tuplas.begin();superit!=las_tuplas.end();superit++)
+						{
+							if (*superit == auxiliar)
+							{
+								cout << "Es un 0 ...............\n";
+								matriz_vertices[indice_var_ternarias][contador]=0;
+							}
+						}
+					contador++;
+
+					}
+		
 			cout << endl;
+			cout << "Fila de la variable Ternaria: " << indice_var_ternarias << endl;
+			for (int i=0; i < fila; i++)
+				cout << matriz_vertices[indice_var_ternarias][i] << " - " ;
+			cout << endl;
+
 			indice_var_ternarias++;
+
+
 
 		}
 
@@ -2161,8 +1808,13 @@ void imprimo_vertices()
 			bool support, bool hasStar) {
 		
 		int i=0,j=0,k=0;
+		int contador=0;
 		int rango=0;
+		int fila=0;
 		string var;
+		vector<int> auxiliar;
+		
+		
 		int dimension;
 		string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
@@ -2231,62 +1883,29 @@ void imprimo_vertices()
 			{
 				cout << (*itero_variables)->id << " - " ;
 				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+				
 			}
+			var = nueva_super_variable[indice_var_ternarias][0];
+			fila = pow(rango_variable[var],list.size());
+			dimension_variables_ternarias.push_back(fila);
+			cout << "Tamaño fila: " << fila << " var: " << var << " Indice Var Ternarias: " << indice_var_ternarias << endl;
+			matriz_vertices[indice_var_ternarias] = new int [fila];
 
-			// Compruebo que se han guardado bien los valores en el mapa.
-			cout << "\nU[" << indice_var_ternarias << "]: \n";
-			for(itero_dentro_variables = nueva_super_variable[indice_var_ternarias].begin();
-					itero_dentro_variables < nueva_super_variable[indice_var_ternarias].end();
-					   itero_dentro_variables++)
-			{
-				cout << "\t" << *itero_dentro_variables << " ";
-				cout << "Dominio valores variable: " << rango_variable[*itero_dentro_variables] << endl;
-				var = *itero_dentro_variables;
-			}
-
-			cout << endl;
-			
-			dimension_ternaria = pow (rango_variable[var],list.size());
-			cout << "Dimensión Regla: " << list.size() << " Tamaño tuplas: " << las_tuplas.size() 
-			       << " Dimensión total: " << dimension_ternaria << endl;
-
-			lista_variables_ternarias.push_back(list.size()); // Para generar el fichero .csp
-			
-			dimension_variables_ternarias.push_back(las_tuplas.size()); // NO sé para que sirve esto.
-			tamano_tuplas.push_back(las_tuplas.size());
-			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
-			
-			j=0;
-			for (itero_tuplas = las_tuplas.begin(); itero_tuplas != las_tuplas.end();
-					++itero_tuplas)
-			{
-				itero_dentro_tuplas = itero_tuplas->begin();
-				matriz_vertices[indice_vertices]=new int[list.size()];
-			 	puntero_vertice = matriz_vertices[indice_vertices];
-
-				cardinal_vertices.push_back(indice_vertices);  // NO sé para que sirve esto.
-				
-				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
-				
-				cout << "\tv(" << indice_vertices << "): " ;
-				cout << "(";
-				
-				for(int i=0; i<itero_tuplas->size(); i++)
-				{
-					cout << *itero_dentro_tuplas;
-					if (i<list.size()-1)
-						cout << ",";
-					*puntero_vertice=*itero_dentro_tuplas;
-					puntero_vertice++;
-					itero_dentro_tuplas++;
+			//Copio la fila anterior
+			for (int i=0; i < fila; i++)
+				{	
+					matriz_vertices[indice_var_ternarias][i] = matriz_vertices[indice_var_ternarias-1][i];
 				}
-				cout <<")" << endl;
-				indice_vertices++;
-				j++;
-			}
 
 			cout << endl;
+			cout << "Fila de la variable Ternaria: " << indice_var_ternarias << endl;
+			for (int i=0; i < fila; i++)
+				cout << matriz_vertices[indice_var_ternarias][i] << " - " ;
+			cout << endl;
+
 			indice_var_ternarias++;
+
+
 			
 		}
 
@@ -2764,8 +2383,8 @@ void beginConstraints() {
 
 void endConstraints() {
     cout << "Fin declaración Constraints .................." << endl << endl;
-	cout << "Genero el grafo ternario .............." << endl;
-	genera_grafo_ternario();
+	
+	
 }
 
 
@@ -2799,6 +2418,7 @@ void endConstraints() {
 int main(int argc, char **argv) {
 	MiSolverPrintCallbacks miparser;
 	char *nombre_fichero_dimacs;
+	int dimension = 0;
 
 	
 
@@ -2846,17 +2466,23 @@ int main(int argc, char **argv) {
 	
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo a fichero
 
-	ugraph ug(miparser.dimension_ternaria);
+	dimension = miparser.indice_var_ternarias * miparser.dimension_variables_ternarias[0];
 
-	cout << "Número de vérices: " << miparser.dimension_ternaria*miparser.dimension_ternaria << " Número aristas quitadas: "
-			<< miparser.contador_aristas << endl; 
+	ugraph ug(dimension);
+
+	cout << "Número de aristas: " << miparser.indice_var_ternarias*miparser.dimension_variables_ternarias[0] << 
+	       " Dimensión total: " << dimension <<endl; 
 	
-	for (int i=0; i < miparser.dimension_ternaria-1; i++)
-		for(int j=i+1; j < miparser.dimension_ternaria; j++)
+	for (int i=0; i < miparser.indice_var_ternarias; i++)
+		for(int j=0; j < miparser.dimension_variables_ternarias[i]; j++)
 		{
-			if (miparser.matriz_aristas[i][j] == 1)
+			if (miparser.matriz_vertices[i][j] == 1)
+			{
+				//cout << i << "," << j << " ";
 				ug.add_edge(i,j);
+			}
 		} 
+	cout << endl;
 	
 
 
@@ -2896,9 +2522,7 @@ int main(int argc, char **argv) {
 	ug.write_dimacs(f);
 	f.close();
 
-	miparser.imprimo_vertices();
-
-
+	
 	//salida matriz de datos
 	/* ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
