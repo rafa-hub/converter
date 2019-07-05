@@ -79,7 +79,8 @@ private:
 	vector<int> tamano_total_tuplas;	// Vector que almacena el tamaño total de los elementos de las tuplas: (dimensión*número de tuplas)
 
 	map <int,vector<int>> mapa_vertices;	// Lista de vértices.
-	stack <string> pila_comparacion;				// Pila para hacer la comparación de los datos.
+	stack <string> pila_comparacion;		// Pila para hacer la comparación de los datos.
+
 	
 	
 public:
@@ -88,22 +89,25 @@ public:
 
 	vector<string> lista_variables; 			// Guarda la lista de variables.
 	vector<string> lista_variables_con_rango;	// Guarda la lista de variables con rango discreto.
+	vector<string> lista_variables_discretas;	// Guarda la lista de variables con rango discreto.
 	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
 												// en cada posición se guarda el "número" de variables.
 												// Sirve para generar el fichero CSP
 	vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
 
-	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada
-	int dimension_matriz_ternaria = 0;	//Guarda la dimension definitiva de la matriz ternaria
+	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada.
+	int dimension_ternaria = 0;			// Guarda la dimensión de la matriz de vértices.
 	
 	int **matriz_datos; 	// Matriz donde se almacena el resultado.
 	//int **matriz_shadow; 	// Matriz donde se almacenan las escrituras. (Deprecated)
-	int **matriz_vertices;  // Matriz donde se almacenan los punteros a los valores de las tuplas de los vértices.
+	int **matriz_aristas; // Matriz con todas las aristas.
+	int **matriz_vertices;  // Matriz donde se almacenan los punteros a los valores de las tuplas 
+							// de los vértices a procesar.
 	int indice_vertices=0;	// Índice global para indexar los vértices del grafo. (a quitar)
 	vector<int> cardinal_vertices; 	// Contiene una relación entre los vértices de cada variable nueva.
 	vector<int> lista_vertices;		// Guarda la lista de los vertices 
 
-	map <int , vector <int>> grafo;		// Almacena el grafo que será volcado a fichero
+	map <int , vector <int>> grafo;		// Almacena el grafo que será volcado a fichero. DEPRECATED.
 	int contador_aristas=0;				// Sirve para contar las aristas y poder generar el grafo,
 										// delimita el recorrido del mapa que almacena el grafo.
 	
@@ -525,7 +529,8 @@ public:
 		{
 			matriz_datos[i]=new int[dimension_matriz];
 		}
-		matriz_datos[0]= new int[dimension_matriz*dimension_matriz];
+		
+		//matriz_datos[0]= new int[dimension_matriz*dimension_matriz];
     
 		//matriz_shadow = new int *[dimension_matriz];
 		//matriz_shadow[0]= new int[dimension_matriz*dimension_matriz];
@@ -1391,7 +1396,7 @@ void imprimo_vertices()
 		int i=0;
 
 		for (i=0;i<lista_variables_ternarias[nueva_var];i++)
-			if(var==nueva_super_variable[nueva_var][i])
+			if(var == nueva_super_variable[nueva_var][i])
 			{
 				cout << "Encontrada "  << var << ", posición " << i << endl;
 				break;
@@ -1399,6 +1404,26 @@ void imprimo_vertices()
 		return i;
 	}
 
+
+
+
+
+
+
+	void traslacion_vertices(int *vertice1,int *vertice2)
+	{
+		// Esta función calcula el índice de cada vértice en la matriz_genaral_vertices[][]
+
+		int *v;
+
+		v = matriz_vertices[*vertice1];
+
+		for (int i=0; i<lista_variables.size(); i++)
+		{
+
+		}
+
+	}
 
 
 
@@ -1466,15 +1491,18 @@ void imprimo_vertices()
 				}
 
 				if(hay_arista)
-				{	cout << "Hay arista entre los vertices " << vertice1 << " y " << vertice2 << endl;
+				{	cout << "Hay conflicto entre los vertices " << vertice1 << " y " << vertice2 << endl;
 
+					traslacion_vertices(&vertice1,&vertice2);
 					//Escribo en el grafo
+					matriz_aristas[vertice1][vertice2] = 0;
+					matriz_aristas[vertice2][vertice1] = 0;
 					grafo[contador_aristas] = {vertice1,vertice2};
 					contador_aristas++;
 				}
 				else
 					{
-						cout << "Sin arista entre " << vertice1 << " y " << vertice2 <<  endl;
+						cout << "Sin conflicto entre " << vertice1 << " y " << vertice2 <<  endl;
 					}
 					
 			}
@@ -1538,19 +1566,33 @@ void imprimo_vertices()
 
 
 
-	void genero_grafo_ternario()
+	void genera_grafo_ternario()
 	{
 		int i=0,j=0,k=0,l=0;
 		
 		int indice=0;
 		vector<string>::iterator itero_primera_variable,itero_segunda_variable;
 		
-		int coordenadas_base[2];
-		int pos_uno=0,pos_dos=0;
+	
+		
+		// Genero la matriz ternaria con todos las posibles aristas.
+		matriz_aristas = new int* [dimension_ternaria];
+		for (int i=0;i<dimension_ternaria;i++)
+		{
+			matriz_aristas[i]=new int[dimension_ternaria];
+		}
 
+		for (int i=0; i< dimension_ternaria;i++)
+		{
+			for (int j=0;j<dimension_ternaria;j++)
+			{
+				matriz_aristas[i][j]=1;
+			}
+		}
 
+		cout << "Creada la matriz de vértices con dimensión: " << dimension_ternaria << endl;
 
-		contador_aristas=0;
+		contador_aristas=0; // Aristas que voy a borrar.
 		//cout << "\n\nGenero el fichero DIMACS con el grafo......................\n" << endl;
 		
 		
@@ -1561,11 +1603,11 @@ void imprimo_vertices()
 				cout << "Nuevas Variables a procesar U[" << i << "] - U[" << j << "]" << endl ;
 				cout << "Contador aristas: " << contador_aristas << endl;
 
-		 		for(itero_primera_variable=nueva_super_variable[i].begin(),pos_uno=0; 
-					itero_primera_variable < nueva_super_variable[i].end(); itero_primera_variable++,pos_uno++)
+		 		for(itero_primera_variable=nueva_super_variable[i].begin(); 
+					itero_primera_variable < nueva_super_variable[i].end(); itero_primera_variable++)
 					{
-						for(itero_segunda_variable=nueva_super_variable[j].begin(),pos_dos=0; 
-							itero_segunda_variable < nueva_super_variable[j].end();itero_segunda_variable++,pos_dos++)
+						for(itero_segunda_variable=nueva_super_variable[j].begin(); 
+							itero_segunda_variable < nueva_super_variable[j].end();itero_segunda_variable++)
 						{
 							cout << *itero_primera_variable << "-" << *itero_segunda_variable;
 							
@@ -1583,11 +1625,7 @@ void imprimo_vertices()
 				
 				if(!pila_comparacion.empty())
 							ejecuto_comparacion(i,j);
-				else 
-				{
-					cout << "\n¡ATENCIÓN!-> Pongo todas las aristas entre U[" << i << "] y U[" << j << "]" << endl;
-					//relleno_aristas(i,j);
-				}
+				
 				cout << endl;
 			}
 		}
@@ -1919,7 +1957,8 @@ void imprimo_vertices()
 	//Versión para Restricciones UNARIAS
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
 		cout << "Regla UNARIA:" << endl;
-		cout << "¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........" << endl; 
+		throw runtime_error("¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........");
+		exit(2); 
 		/* string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int direccion;
@@ -2015,12 +2054,15 @@ void imprimo_vertices()
 
 
 		if (list.size() == 2){
-			//cout << "Regla BINARIA:" << endl;
-			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout << "Regla BINARIA:" << endl;
+			throw runtime_error("¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........");
+			exit(2); 
+			
+			/*cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 			//cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 
 			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
-			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); 
+			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support);  */
 		}
 
 
@@ -2049,9 +2091,11 @@ void imprimo_vertices()
 
 			cout << endl;
 			
-			cout << "Dimensión Regla: " << list.size() << " Tamaño tuplas: " << las_tuplas.size() << endl;
+			dimension_ternaria = pow (rango_variable[var],list.size()); // Ahora mismo se calcula cada vez, habrá que mejorarlo.
+			cout << "Dimensión Regla: " << list.size() << " Tamaño tuplas: " << las_tuplas.size() 
+			       << " Dimensión total: " << dimension_ternaria << endl;
 
-			lista_variables_ternarias.push_back(list.size()); // Para generar el fichero .csp
+			lista_variables_ternarias.push_back(list.size()); // Para generar el fichero .csp y varios procesos.
 			
 			dimension_variables_ternarias.push_back(las_tuplas.size()); // NO sé para que sirve esto.
 			tamano_tuplas.push_back(las_tuplas.size());
@@ -2167,12 +2211,15 @@ void imprimo_vertices()
 		
 		
 		if (list.size() == 2){
-			//cout << "Regla BINARIA:" << endl;
-			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout << "Regla BINARIA:" << endl;
+			throw runtime_error("¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........");
+			exit(2); 
+			
+			/*cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 			//cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 
 			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
-			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support); 
+			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support);  */
 		} 
 		
 		if (list.size() == 3)
@@ -2199,7 +2246,9 @@ void imprimo_vertices()
 
 			cout << endl;
 			
-			cout << "Dimensión Regla: " << list.size() << " Tamaño tuplas: " << las_tuplas.size() << endl;
+			dimension_ternaria = pow (rango_variable[var],list.size());
+			cout << "Dimensión Regla: " << list.size() << " Tamaño tuplas: " << las_tuplas.size() 
+			       << " Dimensión total: " << dimension_ternaria << endl;
 
 			lista_variables_ternarias.push_back(list.size()); // Para generar el fichero .csp
 			
@@ -2716,7 +2765,7 @@ void beginConstraints() {
 void endConstraints() {
     cout << "Fin declaración Constraints .................." << endl << endl;
 	cout << "Genero el grafo ternario .............." << endl;
-	genero_grafo_ternario();
+	genera_grafo_ternario();
 }
 
 
@@ -2794,19 +2843,19 @@ int main(int argc, char **argv) {
 	
 	cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
 	
-		
-
+	
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo a fichero
 
-	ugraph ug(miparser.indice_vertices);
+	ugraph ug(miparser.dimension_ternaria);
 
-	cout << "Número de vérices: " << miparser.indice_vertices << " Número aristas: "
+	cout << "Número de vérices: " << miparser.dimension_ternaria*miparser.dimension_ternaria << " Número aristas quitadas: "
 			<< miparser.contador_aristas << endl; 
 	
-	for (int i=0; i < miparser.contador_aristas; i++)
+	for (int i=0; i < miparser.dimension_ternaria-1; i++)
+		for(int j=i+1; j < miparser.dimension_ternaria; j++)
 		{
-			cout <<  "e " << miparser.grafo[i][0]+1 << " - " << miparser.grafo[i][1]+1 << endl;
-			ug.add_edge((miparser.grafo[i][0]),(miparser.grafo[i][1]));
+			if (miparser.matriz_aristas[i][j] == 1)
+				ug.add_edge(i,j);
 		} 
 	
 
