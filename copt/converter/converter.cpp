@@ -580,6 +580,7 @@ public:
 					//cout << lista_variables[i] <<  " - " << lista_variables[j] << " - " << lista_variables[k] << endl;
 					nueva_super_variable[contador] = {lista_variables[i],lista_variables[j],lista_variables[k]};
 					fila = pow(rango_variable[lista_variables[i]],dimension);
+					dimension_variables_ternarias.push_back(fila);
 					//cout << "Tamaño fila: " << fila << endl; 
 					matriz_vertices[contador] = new int [fila];
 					for(int l=0; l < fila; l++)
@@ -1798,14 +1799,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				}
 			}
 
-	
-
-			var = nueva_super_variable[indice_nueva_super_variable][0];
-			// fila = pow(rango_variable[var],rango_variable[var]);
-			fila = pow(3,list.size());
-			// fila *= list.size();
-			dimension_variables_ternarias.push_back(fila);
-			
 			contador=0;
 
 			// Genero los valores de los vértices	
@@ -1847,10 +1840,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		if (list.size() > 3){
 			cout << "Regla N-ARIA > 3: " << endl;
-			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl;
-
-
-			
+			throw runtime_error("¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........");
+			exit(2); 
 		} 
 
 	}
@@ -1976,20 +1967,10 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				if (pila_comparacion.size() == list.size())
 				{
 					indice_nueva_super_variable = i;
-					cout << "Soy una Polla como una OLLA: " << indice_nueva_super_variable << endl; 
+					cout << "Coincide con la Nueva Supervariable: " << indice_nueva_super_variable << endl; 
 					break;
 				}
 			}
-
-	
-
-			var = nueva_super_variable[indice_nueva_super_variable][0];
-			// fila = pow(rango_variable[var],rango_variable[var]);
-			fila = pow(3,list.size());
-			// fila *= list.size();
-			dimension_variables_ternarias.push_back(fila);
-			cout << "Tamaño fila: " << fila << " var: " << var << " Indice Var Ternarias: " << indice_var_ternarias << endl;
-
 
 			contador=0;
 
@@ -2026,15 +2007,14 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			indice_var_ternarias++;
 
 
-
 			
 		}
 
 		if (list.size() > 3)
 		{
 			cout << "Regla N-ARIA:" << endl;
-			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
-			
+			throw runtime_error("¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........");
+			exit(2);  
 			
 			
 		} 
