@@ -62,6 +62,7 @@ private:
 
 	map<int,vector<string>> nueva_super_variable;		// Nueva Super-Variable para procesar las reglas ternarias.
 														// Contiene las variables como strings.
+	int indice_nueva_super_variable = 0;				// El índice para acceder al mapa anterior.
 	
 
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
@@ -92,7 +93,7 @@ public:
 	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
 												// en cada posición se guarda el "número" de variables.
 												// Sirve para generar el fichero CSP
-	int indice_var_ternarias = 0;		// Va indexando las variables ternarias. (a substituir por algo más consistente)
+	int indice_var_ternarias_con_ceros = 0;		// Va indexando las variables ternarias. (a substituir por algo más consistente)
 	vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
 	int **matriz_ternaria;
 
@@ -1350,6 +1351,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	{
 		string var;
 		char *nombre_fichero_csp;
+		int contador_vertices=0;
 
 		nombre_fichero_csp = strrchr(nombre_fichero, '.');
 		strcpy(nombre_fichero_csp, ".clq");
@@ -1357,19 +1359,45 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		
 		ofstream fichero_salida(nombre_fichero);
 
-		
+		// Cuento el número de aristas del grafo
+
+		for (unsigned int i = 0; i < indice_nueva_super_variable; i++)
+		{
+			for (unsigned int j=0; j < dimension_variables_ternarias[i] ; j++)
+			{
+				//cout << "Número de variables en la fila: " << dimension_variables_ternarias[i] << endl;
+				if (matriz_vertices[i][j] == 1)
+				{
+					contador_vertices++;
+				}
+			}	
+		}
+
+
 		fichero_salida << "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
 		fichero_salida << "c " << nombre_fichero << endl;
-		fichero_salida << "p " << grafo.size() << endl;
+		fichero_salida << "p " << indice_nueva_super_variable << " " << contador_vertices  <<  endl;
 
-		for (unsigned int j = 0; j < lista_variables_ternarias.size(); j++)
-			fichero_salida << "e " << grafo[j][0] << " " << grafo[j][1] << endl;
-					
-		fichero_salida << endl;
+		// for (unsigned int j = 0; j < lista_variables_ternarias.size(); j++)
+		// 	fichero_salida << "e " << grafo[j][0] << " " << grafo[j][1] << endl;
+
+		cout << "Filas Matriz a volcar (Número de Supervariables): " << indice_nueva_super_variable << endl;
 		
+		
+		for (unsigned int i = 0; i < indice_nueva_super_variable; i++)
+		{
+			for (unsigned int j=0; j < dimension_variables_ternarias[i] ; j++)
+			{
+				//cout << "Número de variables en la fila: " << dimension_variables_ternarias[i] << endl;
+				if (matriz_vertices[i][j] == 1)
+				{
+					fichero_salida << "e " << i+1 << " " << j+1 << endl;
+					cout << "e " << i+1 << " " << j+1 << endl;
+				}
+			}	
+		}
+		fichero_salida << endl;
 		fichero_salida.close();
-
-
 
 
 	}
@@ -1734,7 +1762,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		vector <int>::iterator itero_dentro_tuplas;
 
 		vector <string> super_variable;
-		int indice_nueva_super_variable = 0;
+		
 
 
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
@@ -1831,7 +1859,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				cout << matriz_vertices[indice_nueva_super_variable][i] << " - " ;
 			cout << endl;
 
-			indice_var_ternarias++;
+			indice_var_ternarias_con_ceros++;
 
 
 
@@ -1888,7 +1916,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		vector <int>::iterator itero_dentro_tuplas;
 
 		vector <string> super_variable;
-		int indice_nueva_super_variable = 0;
+		
 
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
 		//cout << "Tamaño de la lista: " << list.size() << endl;
@@ -2004,7 +2032,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				cout << matriz_vertices[indice_nueva_super_variable][i] << " - " ;
 			cout << endl;
 
-			indice_var_ternarias++;
+			indice_var_ternarias_con_ceros++;
 
 
 			
@@ -2564,18 +2592,19 @@ int main(int argc, char **argv) {
 
 	
 	cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
+	miparser.escribe_grafo();
 	
 	
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo a fichero
 
-	dimension = miparser.indice_var_ternarias * miparser.dimension_variables_ternarias[0];
+	/* dimension = miparser.indice_var_ternarias_con_ceros * miparser.dimension_variables_ternarias[0];
 
 	ugraph ug(dimension);
 
-	cout << "Número de aristas: " << miparser.indice_var_ternarias*miparser.dimension_variables_ternarias[0] << 
+	cout << "Número de aristas: " << miparser.indice_var_ternarias_con_ceros*miparser.dimension_variables_ternarias[0] << 
 	       " Dimensión total: " << dimension <<endl; 
 	
-	for (int i=0; i < miparser.indice_var_ternarias; i++)
+	for (int i=0; i < miparser.indice_var_ternarias_con_ceros; i++)
 		for(int j=0; j < miparser.dimension_variables_ternarias[i]; j++)
 		{
 			if (miparser.matriz_vertices[i][j] == 1)
@@ -2584,7 +2613,7 @@ int main(int argc, char **argv) {
 				ug.add_edge(i,j);
 			}
 		} 
-	cout << endl;
+	cout << endl; */
 	
 
 
@@ -2612,7 +2641,7 @@ int main(int argc, char **argv) {
 	*/
 	
 	
-	ug.set_name(miparser.nombre_fichero, false);
+	/* ug.set_name(miparser.nombre_fichero, false);
 	
 
 	nombre_fichero_dimacs = strrchr(miparser.nombre_fichero, '.');
@@ -2623,7 +2652,7 @@ int main(int argc, char **argv) {
 	std::fstream f(miparser.nombre_fichero, ios::out);
 	ug.write_dimacs(f);
 	f.close();
-
+ */
 	
 	//salida matriz de datos
 	/* ofstream fmat("log_mat.txt", ios::out);
