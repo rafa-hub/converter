@@ -62,7 +62,7 @@ private:
 
 	map<int,vector<string>> nueva_super_variable;		// Nueva Super-Variable para procesar las reglas ternarias.
 														// Contiene las variables como strings.
-	int indice_nueva_super_variable = 0;				// El índice para acceder al mapa anterior.
+	
 	
 
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
@@ -1361,7 +1361,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		// Cuento el número de aristas del grafo
 
-		for (unsigned int i = 0; i < indice_nueva_super_variable; i++)
+		for (unsigned int i = 0; i < dimension_variables_ternarias.size(); i++)
 		{
 			for (unsigned int j=0; j < dimension_variables_ternarias[i] ; j++)
 			{
@@ -1376,15 +1376,15 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		fichero_salida << "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
 		fichero_salida << "c " << nombre_fichero << endl;
-		fichero_salida << "p " << indice_nueva_super_variable << " " << contador_vertices  <<  endl;
+		fichero_salida << "p " << dimension_variables_ternarias.size() << " " << contador_vertices  <<  endl;
 
 		// for (unsigned int j = 0; j < lista_variables_ternarias.size(); j++)
 		// 	fichero_salida << "e " << grafo[j][0] << " " << grafo[j][1] << endl;
 
-		cout << "Filas Matriz a volcar (Número de Supervariables): " << indice_nueva_super_variable << endl;
+		cout << "Filas Matriz a volcar (Número de Supervariables): " << dimension_variables_ternarias.size() << endl;
 		
 		
-		for (unsigned int i = 0; i < indice_nueva_super_variable; i++)
+		for (unsigned int i = 0; i < dimension_variables_ternarias.size(); i++)
 		{
 			for (unsigned int j=0; j < dimension_variables_ternarias[i] ; j++)
 			{
@@ -1392,7 +1392,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				if (matriz_vertices[i][j] == 1)
 				{
 					fichero_salida << "e " << i+1 << " " << j+1 << endl;
-					cout << "e " << i+1 << " " << j+1 << endl;
+					//cout << "e " << i+1 << " " << j+1 << endl;
 				}
 			}	
 		}
@@ -1762,6 +1762,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		vector <int>::iterator itero_dentro_tuplas;
 
 		vector <string> super_variable;
+		int id_supervariable=0;
 		
 
 
@@ -1821,8 +1822,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 				if (pila_comparacion.size() == list.size())
 				{
-					indice_nueva_super_variable = i;
-					cout << "Coincide con la Nueva Supervariable: " << indice_nueva_super_variable << endl; 
+					id_supervariable = i;
+					cout << "Coincide con la Nueva Supervariable: " << id_supervariable << endl; 
 					break;
 				}
 			}
@@ -1831,9 +1832,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 			// Genero los valores de los vértices	
 			// Y Pongo los valores de las tuplas a 0
-			for (int j=0; j < rango_variable[nueva_super_variable[indice_nueva_super_variable][0]]; j++)
-				for (int k=0 ; k < rango_variable[nueva_super_variable[indice_nueva_super_variable][1]]; k++)
-					for (int h=0; h < rango_variable[nueva_super_variable[indice_nueva_super_variable][2]]; h++)
+			for (int j=0; j < rango_variable[nueva_super_variable[id_supervariable][0]]; j++)
+				for (int k=0 ; k < rango_variable[nueva_super_variable[id_supervariable][1]]; k++)
+					for (int h=0; h < rango_variable[nueva_super_variable[id_supervariable][2]]; h++)
 					{
 						auxiliar.clear();
 						auxiliar.push_back(j);
@@ -1846,7 +1847,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 							if (*superit == auxiliar)
 							{
 								cout << "Es un 0 ...............\n";
-								matriz_vertices[indice_nueva_super_variable][contador]=0;
+								matriz_vertices[id_supervariable][contador]=0;
 							}
 						}
 					contador++;
@@ -1854,9 +1855,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 					}
 		
 			cout << endl;
-			cout << "Fila de la variable Ternaria: " << indice_nueva_super_variable << endl;
+			cout << "Fila de la variable Ternaria: " << id_supervariable << endl;
 			for (int i=0; i < fila; i++)
-				cout << matriz_vertices[indice_nueva_super_variable][i] << " - " ;
+				cout << matriz_vertices[id_supervariable][i] << " - " ;
 			cout << endl;
 
 			indice_var_ternarias_con_ceros++;
@@ -1916,6 +1917,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		vector <int>::iterator itero_dentro_tuplas;
 
 		vector <string> super_variable;
+		int id_supervariable=0;
 		
 
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
@@ -1994,8 +1996,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 				if (pila_comparacion.size() == list.size())
 				{
-					indice_nueva_super_variable = i;
-					cout << "Coincide con la Nueva Supervariable: " << indice_nueva_super_variable << endl; 
+					id_supervariable = i;
+					cout << "Coincide con la Nueva Supervariable: " << id_supervariable << endl; 
 					break;
 				}
 			}
@@ -2004,9 +2006,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 			// Genero los valores de los vértices	
 			// Y Pongo los valores de las tuplas a 0
-			for (int j=0; j < rango_variable[nueva_super_variable[indice_nueva_super_variable][0]]; j++)
-				for (int k=0 ; k < rango_variable[nueva_super_variable[indice_nueva_super_variable][1]]; k++)
-					for (int h=0; h < rango_variable[nueva_super_variable[indice_nueva_super_variable][2]]; h++)
+			for (int j=0; j < rango_variable[nueva_super_variable[id_supervariable][0]]; j++)
+				for (int k=0 ; k < rango_variable[nueva_super_variable[id_supervariable][1]]; k++)
+					for (int h=0; h < rango_variable[nueva_super_variable[id_supervariable][2]]; h++)
 					{
 						auxiliar.clear();
 						auxiliar.push_back(j);
@@ -2019,7 +2021,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 							if (*superit == auxiliar)
 							{
 								cout << "Es un 0 ...............\n";
-								matriz_vertices[indice_nueva_super_variable][contador]=0;
+								matriz_vertices[id_supervariable][contador]=0;
 							}
 						}
 					contador++;
@@ -2027,9 +2029,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 					}
 		
 			cout << endl;
-			cout << "Fila de la variable Ternaria: " << indice_nueva_super_variable << endl;
+			cout << "Fila de la variable Ternaria: " << id_supervariable << endl;
 			for (int i=0; i < fila; i++)
-				cout << matriz_vertices[indice_nueva_super_variable][i] << " - " ;
+				cout << matriz_vertices[id_supervariable][i] << " - " ;
 			cout << endl;
 
 			indice_var_ternarias_con_ceros++;
