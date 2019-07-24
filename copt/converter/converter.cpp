@@ -1302,7 +1302,7 @@ void imprimo_vertices()
 
 
 		contador_aristas=0;
-		cout << "\n\nGenero el ficheor DIMACS con el grafo......................\n" << endl;
+		cout << "\n\nGenero el fichero DIMACS con el grafo......................\n" << endl;
 		
 		
 		for (k=0;k<lista_variables_ternarias.size()-1;k++)
@@ -1772,7 +1772,9 @@ void imprimo_vertices()
 	//Versión para Restricciones UNARIAS
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
 		cout << "Regla UNARIA:" << endl;
-		cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+		//cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+		throw runtime_error("¡¡¡¡Funcionalidad no implementada en esta versión.");
+		exit(2);
 		/* string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int direccion;
@@ -1868,7 +1870,9 @@ void imprimo_vertices()
 
 		if (list.size() == 2){
 			cout << "Regla BINARIA:" << endl;
-			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl;
+			//cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl;
+			throw runtime_error("¡¡¡¡Funcionalidad no implementada en esta versión.");
+			exit(2);
 			/* cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 
 			indice0 = get_indice(*(list[0]));
@@ -1884,62 +1888,88 @@ void imprimo_vertices()
 			
 			cout << "Regla TERNARIA:" << endl;
 			
-			//displayList(list);
-			for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+			if (support)
 			{
-				//cout << (*itero_variables)->id << " - " ;
-				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
-			}
-
-
-			cout << "U[" << indice_var_ternarias << "]: \n";
-			for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
-					itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
-			{
-				cout << "\t" << *itero_dentro_variables << " ";
-				var = get_nombre(*itero_dentro_variables);
-				rango = rango_variable[var];
-				cout << "Dominio valores variable: " << rango_variable[var] << endl;
-			}
-
-			cout << endl;
-			
-			cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
-
-			lista_variables_ternarias.push_back(list.size());
-			dimension = pow(rango_variable[var],list.size());
-			cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
-			dimension_variables_ternarias.push_back(las_tuplas.size());
-			tamano_tuplas.push_back(las_tuplas.size());
-			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
-			
-			j=0;
-			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
-			{
-				itero_dentro_tuplas = itero_tuplas->begin();
-				matriz_vertices[indice_vertices]=new int[list.size()];
-				
-			 
-				lista_vertices.push_back(rango);
-				puntero_vertice = matriz_vertices[indice_vertices];
-
-				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
-				
-				cout << "\tv(" << indice_vertices << "): " ;
-				cout << "(";
-				
-				for(int i=0; i<itero_tuplas->size(); i++)
+				//displayList(list);
+				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 				{
-					cout << *itero_dentro_tuplas;
-					if (i<list.size()-1)
-						cout << ",";
-					*puntero_vertice=*itero_dentro_tuplas;
-					puntero_vertice++;
-					itero_dentro_tuplas++;
+					//cout << (*itero_variables)->id << " - " ;
+					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 				}
-				cout <<")" << endl;
-				indice_vertices++;
-				j++;
+
+
+				cout << "U[" << indice_var_ternarias << "]: \n";
+				for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
+						itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
+				{
+					cout << "\t" << *itero_dentro_variables << " ";
+					var = get_nombre(*itero_dentro_variables);
+					rango = rango_variable[var];
+					cout << "Dominio valores variable: " << rango_variable[var] << endl;
+				}
+
+				cout << endl;
+				
+				cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
+
+				lista_variables_ternarias.push_back(list.size());
+				dimension = pow(rango_variable[var],list.size());
+				cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
+				dimension_variables_ternarias.push_back(las_tuplas.size());
+				tamano_tuplas.push_back(las_tuplas.size());
+				tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
+				
+				j=0;
+				for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+				{
+					itero_dentro_tuplas = itero_tuplas->begin();
+					matriz_vertices[indice_vertices]=new int[list.size()];
+					
+				
+					lista_vertices.push_back(rango);
+					puntero_vertice = matriz_vertices[indice_vertices];
+
+					mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+					
+					cout << "\tv(" << indice_vertices << "): " ;
+					cout << "(";
+					
+					for(int i=0; i<itero_tuplas->size(); i++)
+					{
+						cout << *itero_dentro_tuplas;
+						if (i<list.size()-1)
+							cout << ",";
+						*puntero_vertice=*itero_dentro_tuplas;
+						puntero_vertice++;
+						itero_dentro_tuplas++;
+					}
+					cout <<")" << endl;
+					indice_vertices++;
+					j++;
+				}
+			} else {
+
+				cout << "Soy una regla Conflict, estoy en ello\n";
+				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+				{
+					//cout << (*itero_variables)->id << " - " ;
+					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+				}
+
+
+				cout << "U[" << indice_var_ternarias << "]: \n";
+				for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
+						itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
+				{
+					cout << "\t" << *itero_dentro_variables << " ";
+					var = get_nombre(*itero_dentro_variables);
+					rango = rango_variable[var];
+					cout << "Dominio valores variable: " << rango_variable[var] * list.size() << endl;
+				}
+
+				cout << endl;
+
+
 			}
 
 			cout << endl;
@@ -2019,9 +2049,9 @@ void imprimo_vertices()
 			bool support, bool hasStar) {
 		
 		int i=0,j=0,k=0;
-		int rango;
+		int rango=0;
 		string var;
-		int dimension;
+		int dimension=0;
 		/*string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int coordenadas_base[2];
@@ -2070,7 +2100,9 @@ void imprimo_vertices()
 		
 		if (list.size() == 2){
 			cout << "Regla BINARIA:" << endl;
-			cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl; 
+			//cout << "¡¡¡¡Funcionalidad no implementada cuando no hay reglas ternarias!!!! ........" << endl;
+			throw runtime_error("¡¡¡¡Funcionalidad no implementada en esta versión.");
+			exit(2); 
 			/* cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
 
 			indice0 = get_indice(*(list[0]));
@@ -2090,66 +2122,94 @@ void imprimo_vertices()
 		{
 			cout << "Regla TERNARIA (AS): " << endl;
 
-			//displayList(list);
-			for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+			if (support)
 			{
-				//cout << (*itero_variables)->id << " - " ;
-				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
-			}
-
-
-			cout << "U[" << indice_var_ternarias << "]: \n";
-			for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
-					itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
-			{
-				cout << "\t" << *itero_dentro_variables << " ";
-				var = get_nombre(*itero_dentro_variables);
-				rango = rango_variable[var];
-				cout << "Dominio valores variable: " << rango_variable[var] << endl;
-			}
-
-			cout << endl;
-			
-			cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
-
-			lista_variables_ternarias.push_back(list.size());
-			dimension = pow(rango_variable[var],list.size());
-			cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
-			dimension_variables_ternarias.push_back(las_tuplas.size());
-			tamano_tuplas.push_back(las_tuplas.size());
-			tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
-			
-			j=0;
-			for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
-			{
-				itero_dentro_tuplas = itero_tuplas->begin();
-				matriz_vertices[indice_vertices]=new int[list.size()];
-				
-			 
-				lista_vertices.push_back(rango);
-				puntero_vertice = matriz_vertices[indice_vertices];
-
-				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
-				
-				cout << "\tv(" << indice_vertices << "): " ;
-				cout << "(";
-				
-				for(int i=0; i<itero_tuplas->size(); i++)
+				//displayList(list);
+				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 				{
-					cout << *itero_dentro_tuplas;
-					if (i<list.size()-1)
-						cout << ",";
-					*puntero_vertice=*itero_dentro_tuplas;
-					puntero_vertice++;
-					itero_dentro_tuplas++;
+					cout << (*itero_variables)->id << " - " ;
+					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 				}
-				cout <<")" << endl;
-				indice_vertices++;
-				j++;
+
+
+				cout << "U[" << indice_var_ternarias << "]: \n";
+				for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
+						itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
+				{
+					cout << "\t" << *itero_dentro_variables << " ";
+					var = get_nombre(*itero_dentro_variables);
+					rango = rango_variable[var];
+					cout << "Dominio valores variable: " << rango_variable[var] << endl;
+				}
+
+				cout << endl;
+				
+				cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
+
+				lista_variables_ternarias.push_back(list.size());
+				dimension = pow(rango_variable[var],list.size());
+				cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
+				dimension_variables_ternarias.push_back(las_tuplas.size());
+				tamano_tuplas.push_back(las_tuplas.size());
+				tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
+				
+				j=0;
+				for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+				{
+					itero_dentro_tuplas = itero_tuplas->begin();
+					matriz_vertices[indice_vertices]=new int[list.size()];
+					
+				
+					lista_vertices.push_back(rango);
+					puntero_vertice = matriz_vertices[indice_vertices];
+
+					mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+					
+					cout << "\tv(" << indice_vertices << "): " ;
+					cout << "(";
+					
+					for(int i=0; i<itero_tuplas->size(); i++)
+					{
+						cout << *itero_dentro_tuplas;
+						if (i<list.size()-1)
+							cout << ",";
+						*puntero_vertice=*itero_dentro_tuplas;
+						puntero_vertice++;
+						itero_dentro_tuplas++;
+					}
+					cout <<")" << endl;
+					indice_vertices++;
+					j++;
+				}
+			} else {
+
+				cout << "Soy una regla Conflict, estoy en ello\n";
+				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+				{
+					//cout << (*itero_variables)->id << " - " ;
+					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+				}
+
+
+				cout << "U[" << indice_var_ternarias << "]: \n";
+				for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
+						itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
+				{
+					cout << "\t" << *itero_dentro_variables << " ";
+					var = get_nombre(*itero_dentro_variables);
+					rango = rango_variable[var];
+					cout << "Dominio valores variable: " << rango_variable[var]*list.size() << endl;
+				}
+
+				cout << endl;
+				
+
+
 			}
 
 			cout << endl;
 			indice_var_ternarias++;
+
 			
 		}
 
