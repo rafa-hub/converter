@@ -1247,6 +1247,80 @@ void imprimo_vertices()
 
 
 
+void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_uno, int indice_nueva_variable2,vector<int>pos_var_dos)
+	{
+		stack <int> pila_resultado;
+		int vertice1,vertice2;
+		int bucle=0;
+		int hay_coincidencia=0;
+		int tamano_comparacion = pos_var_uno.size();
+
+		
+		
+		for (int i=0; i < tamano_tuplas[indice_nueva_variable1]; i++)
+		{
+			for(int j=0; j < tamano_tuplas[indice_nueva_variable2]; j++)
+			{
+				// Comparación de cada uno de los vértices
+				vertice1 = mapa_vertices[indice_nueva_variable1][i];
+				vertice2 = mapa_vertices[indice_nueva_variable2][j];
+
+				cout << "\nEmpiezo la comparación ........................" << endl;
+				cout << "i: " << i << " - j: " << j << endl;
+				cout << "Número de variables a comparar: " << tamano_comparacion << " Vertice1: " << vertice1 << " Vertice2: " << vertice2 << endl;
+				
+				//pila_resultado.reset();
+				for (int k=0; k < tamano_comparacion ; k++)
+				{
+					// cout << "posición_uno: " << pos_var_uno[k] << " valor: " << matriz_vertices[vertice1][pos_var_uno[k]] 
+					// 		<< " posición_dos: " <<  pos_var_dos[k] << " valor: "<< matriz_vertices[vertice2][pos_var_dos[k]] << endl;
+					cout << " valor: " << matriz_vertices[vertice1][pos_var_uno[k]] 
+					 		<< " valor: "<< matriz_vertices[vertice2][pos_var_dos[k]] << endl;
+					
+					if(matriz_vertices[vertice1][pos_var_uno[k]] == matriz_vertices[vertice2][pos_var_dos[k]])
+					{
+						//cout << "comparación " << k << " con exito" << endl;
+						pila_resultado.push(1);
+					}
+					else
+					{
+						//cout << "comparación " << k << " SIN exito" << endl;
+						pila_resultado.push(0);
+					}					
+				}
+
+				hay_coincidencia = pila_resultado.top();
+				bucle = pila_resultado.size();
+
+				for (int l=0; l< bucle;l++)
+				{	
+					if (pila_resultado.top() == 0)
+						hay_coincidencia=0;
+					pila_resultado.pop();
+				}
+
+				if(hay_coincidencia)
+				{	cout << "Regla conflict: no hay arista entre los vertices " << vertice1 << " y " << vertice2 << endl;
+
+					//Escribo en el grafo
+					
+				}
+				else
+					{
+						cout << "Regla conflict: el resto a unos " << vertice1 << " y " << vertice2 <<  endl;
+						cout << "Aunque todavía no sé como hacerlo.\n";
+						grafo[contador_aristas]={vertice1,vertice2};
+						contador_aristas++;
+					}
+					
+			}
+
+		}
+
+
+		
+		
+	}
 
 
 
@@ -1342,7 +1416,7 @@ void imprimo_vertices()
 			}
 		}
 
-		//escribe_grafo();
+		escribe_grafo();
 
 		cout << "\n=========================================\n" << endl;
 
@@ -1548,13 +1622,13 @@ void imprimo_vertices()
 		// imprime_matriz_ternaria(terminal);
 		// cout <<"---------------------------------------------------"<<endl;
 
-		/* for (int i=0;i<lista_variables_ternarias.size();i++)
+		for (int i=0;i<lista_variables_ternarias.size();i++)
 		{
 			dimension_matriz_ternaria += (lista_variables_ternarias[i]);
-		} */
+		} 
 
 		
-		imprimo_vertices();
+		//imprimo_vertices();
 
 		genero_grafo();
 
@@ -2539,18 +2613,18 @@ int main(int argc, char **argv) {
 	cout << "- SEGUNDA FASE -" << endl;
 	cout << "Creando el fichero con el grafo ............" << endl;
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo y se resuelve
-	ugraph ug(miparser.indice_vertices);
+	//ugraph ug(miparser.indice_vertices);
 
 	cout << "Número de vérices: " << miparser.indice_vertices << " Número aristas: "
 			<< miparser.contador_aristas << endl;
 
-	
+	/* 
 	for (int i=0; i < miparser.contador_aristas;i++)
 		{
 			//cout <<  "e " << miparser.grafo[i][0] << " - " << miparser.grafo[i][1] << endl;
 			ug.add_edge(miparser.grafo[i][0],miparser.grafo[i][1]);
 		}
-	
+	 */
 	/* for (int i = 0; i < (miparser.lista_variables_ternarias.size()); i++)
 	{
 	 	for (int j = 0; j < (miparser.lista_variables_ternarias[j]); j++)
@@ -2568,15 +2642,15 @@ int main(int argc, char **argv) {
 	//miparser.remove_edges_same_var(ug);
 	////////////////////
 
-	ug.set_name(miparser.nombre_fichero, false);
-	ug.print_data(false /* from scratch*/, cout);
+	/* ug.set_name(miparser.nombre_fichero, false);
+	ug.print_data(false, cout);
 
-	nombre_fichero_dimacs = strrchr(miparser.nombre_fichero, '.');
+	/* nombre_fichero_dimacs = strrchr(miparser.nombre_fichero, '.');
 	strcpy(nombre_fichero_dimacs, ".clq");
 
 	std::fstream f(miparser.nombre_fichero, ios::out);
 	ug.write_dimacs(f);
-	f.close();
+	f.close(); */
 
 	//salida matriz de datos
 	/* ofstream fmat("log_mat.txt", ios::out);
@@ -2590,6 +2664,9 @@ int main(int argc, char **argv) {
 	cout << "\n\nEl resultado de la matriz SHADOW ......................\n " << endl;
 	miparser.imprime_matriz("shadow", terminal); */
 
+
+	delete [] miparser.matriz_punteros;
+	delete [] miparser.matriz_vertices;
 
 
 	return 0;
