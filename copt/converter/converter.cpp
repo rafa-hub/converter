@@ -1913,9 +1913,9 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
 
 		int i=0,j=0;
-		int rango;
+		int rango = 0;
 		string var;
-		int dimension;
+		int dimension = 0;
 		/* string var_cero, var_uno, var_ternaria;
 		int indice0, indice1, i,j,k;
 		int coordenadas_base[2];
@@ -2023,13 +2023,12 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 				}
 			} else {
 
-				cout << "Soy una regla Conflict, estoy en ello\n";
+				cout << "Soy una regla CONFLICT, estoy en ello\n";
+				
 				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
-				{
-					//cout << (*itero_variables)->id << " - " ;
 					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
-				}
-
+				
+				
 
 				cout << "U[" << indice_var_ternarias << "]: \n";
 				for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
@@ -2037,15 +2036,50 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 				{
 					cout << "\t" << *itero_dentro_variables << " ";
 					var = get_nombre(*itero_dentro_variables);
-					rango = rango_variable[var];
-					cout << "Dominio valores variable: " << rango_variable[var] * list.size() << endl;
+					dimension = pow(rango_variable[var],list.size());
+					cout << "Dominio valores variable: " << dimension << endl;
 				}
 
 				cout << endl;
+				
+				cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
 
+				lista_variables_ternarias.push_back(list.size());
+				dimension = pow(rango_variable[var],list.size());
+				cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
+				dimension_variables_ternarias.push_back(las_tuplas.size());
+				tamano_tuplas.push_back(las_tuplas.size());
+				tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
+				
+				j=0;
+				for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+				{
+					itero_dentro_tuplas = itero_tuplas->begin();
+					matriz_vertices[indice_vertices]=new int[list.size()];
+					
+				
+					lista_vertices.push_back(rango);
+					puntero_vertice = matriz_vertices[indice_vertices];
 
+					mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+					
+					cout << "\tv(" << indice_vertices << "): " ;
+					cout << "(";
+					
+					for(int i=0; i<itero_tuplas->size(); i++)
+					{
+						cout << *itero_dentro_tuplas;
+						if (i<list.size()-1)
+							cout << ",";
+						*puntero_vertice=*itero_dentro_tuplas;
+						puntero_vertice++;
+						itero_dentro_tuplas++;
+					}
+					cout <<")" << endl;
+					indice_vertices++;
+					j++;
+				}
 			}
-
 			cout << endl;
 			indice_var_ternarias++;
 
@@ -2201,7 +2235,7 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 				//displayList(list);
 				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 				{
-					cout << (*itero_variables)->id << " - " ;
+					//cout << (*itero_variables)->id << " - " ;
 					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 				}
 
@@ -2257,13 +2291,14 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 				}
 			} else {
 
-				cout << "Soy una regla Conflict, estoy en ello\n";
-				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
-				{
-					//cout << (*itero_variables)->id << " - " ;
-					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
-				}
+				cout << "Soy una regla CONFLICT, estoy en ello\n";
 
+				cout << "Soy una regla CONFLICT, estoy en ello\n";
+				
+				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+				
+				
 
 				cout << "U[" << indice_var_ternarias << "]: \n";
 				for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
@@ -2271,16 +2306,50 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 				{
 					cout << "\t" << *itero_dentro_variables << " ";
 					var = get_nombre(*itero_dentro_variables);
-					rango = rango_variable[var];
-					cout << "Dominio valores variable: " << rango_variable[var]*list.size() << endl;
+					dimension = pow(rango_variable[var],list.size());
+					cout << "Dominio valores variable: " << dimension << endl;
 				}
 
 				cout << endl;
 				
+				cout << "Tamaño tuplas y nuevo número de vértices: " << las_tuplas.size() << endl;
 
+				lista_variables_ternarias.push_back(list.size());
+				dimension = pow(rango_variable[var],list.size());
+				cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
+				dimension_variables_ternarias.push_back(las_tuplas.size());
+				tamano_tuplas.push_back(las_tuplas.size());
+				tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
+				
+				j=0;
+				for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+				{
+					itero_dentro_tuplas = itero_tuplas->begin();
+					matriz_vertices[indice_vertices]=new int[list.size()];
+					
+				
+					lista_vertices.push_back(rango);
+					puntero_vertice = matriz_vertices[indice_vertices];
 
+					mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+					
+					cout << "\tv(" << indice_vertices << "): " ;
+					cout << "(";
+					
+					for(int i=0; i<itero_tuplas->size(); i++)
+					{
+						cout << *itero_dentro_tuplas;
+						if (i<list.size()-1)
+							cout << ",";
+						*puntero_vertice=*itero_dentro_tuplas;
+						puntero_vertice++;
+						itero_dentro_tuplas++;
+					}
+					cout <<")" << endl;
+					indice_vertices++;
+					j++;
+				}
 			}
-
 			cout << endl;
 			indice_var_ternarias++;
 
