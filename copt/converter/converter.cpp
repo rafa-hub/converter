@@ -17,7 +17,7 @@
 //#define mipause
 #define midebug
 //#define mitest
-#define BUFFER_PUNTEROS 10*1024
+#define BUFFER_PUNTEROS 10*1024*1024
 #define TERNARIA 3
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -108,6 +108,8 @@ public:
 
 
 
+
+
 	// Escribe los resultados en un fichero
 	void escribe_nombre_fichero() {
 		string var;
@@ -143,6 +145,10 @@ public:
 
 
 
+
+
+
+
 	void escribe_fichero_csp_ternario() 
 	{
 		string var;
@@ -152,7 +158,7 @@ public:
 		nombre_fichero_csp = strrchr(nombre_fichero, '.');
 		strcpy(nombre_fichero_csp, ".csp");
 		cout << "Nombre fichero CSP: " << nombre_fichero << endl;
-		cout << "Rango variables: " << lista_vertices.size() << endl;
+		//cout << "Rango variables: " << lista_vertices.size() << endl;
 
 		ofstream fichero_salida(nombre_fichero);
 
@@ -416,6 +422,9 @@ public:
 		cout << "Creado buffer punteros y buffer de punteros a vértices con " << (BUFFER_PUNTEROS) << " posiciones." << endl;
 			
 	}
+
+
+
 
 
 
@@ -1455,7 +1464,7 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 			}
 		}
 
-		escribe_grafo();
+		
 
 		cout << "\n=========================================\n" << endl;
 
@@ -1490,14 +1499,12 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 		
 		fichero_salida << "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
 		fichero_salida << "c " << nombre_fichero << endl;
-		fichero_salida << "p " << grafo.size() << endl;
+		fichero_salida << "p " << indice_vertices << "\t" << contador_aristas << endl;
 
-		for (unsigned int j = 0; j < lista_variables_ternarias.size(); j++)
-			fichero_salida << "e " << grafo[j][0] << " " << grafo[j][1] << endl;
+		for (unsigned int j = 0; j < grafo.size(); j++)
+			fichero_salida << "e " << grafo[j][0]+1 << " " << grafo[j][1]+1 << endl;
 					
 		fichero_salida << endl;
-		
-
 		fichero_salida.close();
 
 
@@ -1670,6 +1677,7 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 		//imprimo_vertices();
 
 		genero_grafo();
+		escribe_grafo();
 
 
 		//imprimo_datos_grafo();
@@ -1956,6 +1964,8 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 		int rango = 0;
 		string var;
 		int dimension = 0;
+		int numero_vertices_nueva_variable=0;
+		int hay_vertice = 1;
 		/* string var_cero, var_uno, var_ternaria;
 		int indice0, indice1, i,j,k;
 		int coordenadas_base[2];
@@ -2063,7 +2073,7 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 				}
 			} else {
 
-				cout << "Soy una regla CONFLICT, estoy en ello\n";
+				cout << "Regla CONFLICT..............\n";
 				
 				// Guardo las variables que componen la regla que generan la nueva supervariable
 				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
@@ -2088,52 +2098,55 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 				lista_variables_ternarias.push_back(list.size());
 				dimension = pow(rango_variable[var],list.size());
 				// cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
-				dimension_variables_ternarias.push_back(las_tuplas.size());
+				
 				tamano_tuplas.push_back(las_tuplas.size());
 				tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
 				
 
 				
-				for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+				
+				
+					
+				for (int i=0; i < 8; i++)
 				{
-					
-					itero_dentro_tuplas = itero_tuplas->begin();
-					
-					for (int i=0; i < 8; i++)
-					{
-						if(tuplas_ternarias[i] != *itero_tuplas)
+						hay_vertice = 1;
+						for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+						{
+							if(tuplas_ternarias[i] == *itero_tuplas)
 							{
-								cout << "Guardo el vértice: " << indice_vertices;
-
-								matriz_vertices[indice_vertices]=new int[list.size()];
-
-								lista_vertices.push_back(rango);
-								puntero_vertice = matriz_vertices[indice_vertices];
-
-								mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
-								
-								cout << "\tv(" << indice_vertices << "): " ;
-								cout << "(";
-								
-								for(int k=0; k< list.size(); k++)
-								{
-									matriz_vertices[indice_vertices][k] = tuplas_ternarias[i][k];
-									cout << matriz_vertices[indice_vertices][k];
-									if (k < list.size()-1)
-										cout << ",";
-								}
-
-
-								cout <<")" << endl;
-								indice_vertices++;
+								hay_vertice = 0;
 							}
-					}
+						}
 
+						if (hay_vertice)
+						{
+							cout << "Guardo el vértice: " << indice_vertices;
 
-					
-					
+							matriz_vertices[indice_vertices]=new int[list.size()];
+
+							lista_vertices.push_back(rango);
+							puntero_vertice = matriz_vertices[indice_vertices];
+							mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+								
+							cout << "\tv(" << indice_vertices << "): " ;
+							cout << "(";
+							
+							for(int k=0; k< list.size(); k++)
+							{
+								matriz_vertices[indice_vertices][k] = tuplas_ternarias[i][k];
+								cout << matriz_vertices[indice_vertices][k];
+								if (k < list.size()-1)
+									cout << ",";
+							}
+							cout <<")" << endl;
+							indice_vertices++;
+							numero_vertices_nueva_variable++;
+						}
 				}
+					
+				
 			}
+			dimension_variables_ternarias.push_back(numero_vertices_nueva_variable);
 			cout << endl;
 			indice_var_ternarias++;
 
@@ -2214,6 +2227,8 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 		int rango=0;
 		string var;
 		int dimension=0;
+		int numero_vertices_nueva_variable=0;
+		int hay_vertice = 1;
 		/*string var_cero, var_uno, var_aux;
 		int indice0, indice1, indice_aux;
 		int coordenadas_base[2];
@@ -2345,7 +2360,9 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 				}
 			} else {
 
-				cout << "Soy una regla CONFLICT, estoy en ello\n";// Guardo las variables que componen la regla que generan la nueva supervariable
+				cout << "Regla CONFLICT...............\n";
+				
+				// Guardo las variables que componen la regla que generan la nueva supervariable
 				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 				
@@ -2367,53 +2384,56 @@ void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_un
 
 				lista_variables_ternarias.push_back(list.size());
 				dimension = pow(rango_variable[var],list.size());
-				cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
-				dimension_variables_ternarias.push_back(las_tuplas.size());
+				// cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
+				
 				tamano_tuplas.push_back(las_tuplas.size());
 				tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
 				
 
-
 				
-				for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+				
+				
+					
+				for (int i=0; i < 8; i++)
 				{
-					itero_dentro_tuplas = itero_tuplas->begin();
-					
-					for (int i=0; i < 8; i++)
-					{
-						if(tuplas_ternarias[i] != *itero_tuplas)
+						hay_vertice = 1;
+						for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
+						{
+							if(tuplas_ternarias[i] == *itero_tuplas)
 							{
-								cout << "Guardo el vértice: " << indice_vertices;
-
-								matriz_vertices[indice_vertices]=new int[list.size()];
-
-								lista_vertices.push_back(rango);
-								puntero_vertice = matriz_vertices[indice_vertices];
-
-								mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
-								
-								cout << "\tv(" << indice_vertices << "): " ;
-								cout << "(";
-								
-								for(int k=0; k<itero_tuplas->size(); k++)
-								{
-									cout << *itero_dentro_tuplas;
-									if (k < list.size()-1)
-										cout << ",";
-									*puntero_vertice=*itero_dentro_tuplas;
-									puntero_vertice++;
-									itero_dentro_tuplas++;
-								}
-								cout <<")" << endl;
-								indice_vertices++;
+								hay_vertice = 0;
 							}
-					}
+						}
 
+						if (hay_vertice)
+						{
+							cout << "Guardo el vértice: " << indice_vertices;
 
-					
-					
+							matriz_vertices[indice_vertices]=new int[list.size()];
+
+							lista_vertices.push_back(rango);
+							puntero_vertice = matriz_vertices[indice_vertices];
+							mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+								
+							cout << "\tv(" << indice_vertices << "): " ;
+							cout << "(";
+							
+							for(int k=0; k< list.size(); k++)
+							{
+								matriz_vertices[indice_vertices][k] = tuplas_ternarias[i][k];
+								cout << matriz_vertices[indice_vertices][k];
+								if (k < list.size()-1)
+									cout << ",";
+							}
+							cout <<")" << endl;
+							indice_vertices++;
+							numero_vertices_nueva_variable++;
+						}
 				}
+					
+				
 			}
+			dimension_variables_ternarias.push_back(numero_vertices_nueva_variable);
 			cout << endl;
 			indice_var_ternarias++;
 
