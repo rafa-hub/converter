@@ -2318,26 +2318,26 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 				cout << "Regla CONFLICT..............\n";
 				
 				
+				// Guardo las variables que componen la regla que generan la nueva supervariable
 				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
-					{
-						//cout << (*itero_variables)->id << " - " ;
-						nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
-					}
+					nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 				
+				
+				// Imprimo resultados
 				cout << "U[" << indice_var_ternarias << "]: \n";
 				for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
-							itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
+						itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 				{
 					cout << "\t" << *itero_dentro_variables << " ";
 					var = get_nombre(*itero_dentro_variables);
-					rango = rango_variable[var];
-					cout << "Dominio valores variable: " << rango_variable[var] << endl;
+					dimension = pow(rango_variable[var],list.size());
+					cout << "Dominio valores variable: " << dimension << endl;
 				}
-				cout << endl;	
 
+				cout << endl;
+				
 				cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
-				lista_variables_binarias.push_back(list.size());
 				lista_variables_ternarias.push_back(list.size());
 				dimension = pow(rango_variable[var],list.size());
 				// cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
@@ -2345,15 +2345,18 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 				tamano_tuplas.push_back(las_tuplas.size());
 				tamano_total_tuplas.push_back(las_tuplas.size()*list.size());
 				
-				for (int i=0; i < 4; i++)
+
+				
+				
+				
+					
+				for (int i=0; i < 8; i++)
 				{
 						hay_vertice = 1;
-
 						for (itero_tuplas = las_tuplas.begin();itero_tuplas != las_tuplas.end();++itero_tuplas)
-						{							
-							if(tuplas_binarias[i] == *itero_tuplas)
+						{
+							if(tuplas_ternarias[i] == *itero_tuplas)
 							{
-								
 								hay_vertice = 0;
 							}
 						}
@@ -2371,9 +2374,9 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 							cout << "\tv(" << indice_vertices << "): " ;
 							cout << "(";
 							
-							for(int k=0; k < list.size(); k++)
+							for(int k=0; k< list.size(); k++)
 							{
-								matriz_vertices[indice_vertices][k] = tuplas_binarias[i][k];
+								matriz_vertices[indice_vertices][k] = tuplas_ternarias[i][k];
 								cout << matriz_vertices[indice_vertices][k];
 								if (k < list.size()-1)
 									cout << ",";
@@ -2383,13 +2386,12 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 							numero_vertices_nueva_variable++;
 						}
 				}
+					
 				
-				
-				}
+			}
 			dimension_variables_ternarias.push_back(numero_vertices_nueva_variable);
 			cout << endl;
 			indice_var_ternarias++;
-
 		}
 
 
