@@ -1329,7 +1329,7 @@ void imprimo_vertices()
 
 
 
-void comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_uno, int indice_nueva_variable2,vector<int>pos_var_dos)
+void                                                                                                comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_uno, int indice_nueva_variable2,vector<int>pos_var_dos)
 	{
 		stack <int> pila_resultado;
 		int vertice1,vertice2;
@@ -2185,7 +2185,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 					cout << "\t" << *itero_dentro_variables << " ";
 					var = get_nombre(*itero_dentro_variables);
 					rango = rango_variable[var];
-					cout << "Dominio valores variable: " << rango_variable[var] << endl;
+					dimension = pow(rango_variable[var],list.size());
+					cout << "Dominio valores variable: " << dimension << endl;
 				}
 				cout << endl;	
 
@@ -2193,7 +2194,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 				lista_variables_binarias.push_back(list.size());
 				lista_variables_ternarias.push_back(list.size());
-				dimension = pow(rango_variable[var],list.size());
+				
 				// cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
 				
 				tamano_tuplas.push_back(las_tuplas.size());
@@ -2521,8 +2522,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 			} else {
 
 				cout << "Regla CONFLICT ............\n";
-
-				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 					{
 						//cout << (*itero_variables)->id << " - " ;
 						nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
@@ -2535,7 +2535,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 					cout << "\t" << *itero_dentro_variables << " ";
 					var = get_nombre(*itero_dentro_variables);
 					rango = rango_variable[var];
-					cout << "Dominio valores variable: " << rango_variable[var] << endl;
+					dimension = pow(rango_variable[var],list.size());
+					cout << "Dominio valores variable: " << dimension << endl;
 				}
 				cout << endl;	
 
@@ -2543,7 +2544,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 				lista_variables_binarias.push_back(list.size());
 				lista_variables_ternarias.push_back(list.size());
-				dimension = pow(rango_variable[var],list.size());
+				
 				// cout << "Rango variable: " << rango_variable[var] << " - Dimensión: " << dimension << endl;
 				
 				tamano_tuplas.push_back(las_tuplas.size());
