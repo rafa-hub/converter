@@ -1329,7 +1329,7 @@ void imprimo_vertices()
 
 
 
-void                                                                                                comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_uno, int indice_nueva_variable2,vector<int>pos_var_dos)
+void  comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_uno, int indice_nueva_variable2,vector<int>pos_var_dos)
 	{
 		stack <int> pila_resultado;
 		int vertice1,vertice2;
@@ -2522,7 +2522,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 			} else {
 
 				cout << "Regla CONFLICT ............\n";
-for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 					{
 						//cout << (*itero_variables)->id << " - " ;
 						nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
