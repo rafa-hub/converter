@@ -228,6 +228,10 @@ public:
 
 
 
+
+
+
+
 	//Extrae y devuelve el nombre de la variable sin indice, es decir, el nombre del array
 	string get_nombre(string variable) {
 		string nombre, vector;
@@ -371,6 +375,10 @@ public:
 
 
 
+
+
+
+
 	//removes edges corresponding to values of the same variable, from ug and matriz_datos
 	//(all incompatible since a variable may only have one value)
 	int remove_edges_same_var(ugraph& ug) {
@@ -418,6 +426,11 @@ public:
 
 
 
+
+
+
+
+
 	void reserva_memoria_punteros()
 	{
 		matriz_punteros = new int *[BUFFER_PUNTEROS];
@@ -425,6 +438,11 @@ public:
 		cout << "Creado buffer punteros y buffer de punteros a vértices con " << (BUFFER_PUNTEROS) << " posiciones." << endl;
 			
 	}
+
+
+
+
+
 
 
 	void genero_tuplas_binarias()
@@ -539,6 +557,11 @@ public:
 		//imprime_matriz("shadow",fmatriz); 
 #endif
 	}
+
+
+
+
+
 
 
 
@@ -1078,6 +1101,9 @@ public:
 
 
 
+
+
+
 	//Funcion que escribe en la matriz una regla AllEqual o AllDifferent
 	void  escribe_regla_all(int *coordenadas_base, string var_cero, string var_uno, int REGLA)
 	{
@@ -1159,6 +1185,13 @@ public:
 
 
 
+
+
+
+
+
+
+
 void imprimo_vertices()
 	{
 		cout << "Imprimo los vertices del grafo por cada nueva Nueva Variable. Número de vértices: " << indice_vertices << endl;
@@ -1191,6 +1224,9 @@ void imprimo_vertices()
 		
 
 	}
+
+
+
 
 
 
@@ -1317,11 +1353,13 @@ void imprimo_vertices()
 			}
 
 		}
-
-
-		
 		
 	}
+
+
+
+
+
 
 
 
@@ -1394,11 +1432,7 @@ void  comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_u
 					
 			}
 
-		}
-
-
-		
-		
+		}		
 	}
 
 
@@ -1539,6 +1573,12 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		
 
 	}
+
+
+
+
+
+
 
 
 
@@ -1755,12 +1795,10 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 					
 				cout << endl;
 			}
-		}
-
-
-
-		
+		}		
 	}
+
+
 
 
 
@@ -1880,6 +1918,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
 	// Se invoca cuando se termina de procesar todas las variables de un array.
 	// En este momento se actualizan las variables globales.
 	// Con esa información se realiza el cálculo para poder escribir en la matriz.
@@ -1899,6 +1939,9 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 #endif
 
 	}
+
+
+
 
 
 
@@ -1961,12 +2004,14 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
 	//PSS calls here alsp for variables with singleton values (<var id="x0"> -1 <\var> )
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 
 		lista_variables.push_back(id);
 		mapa_indices[id]=numero_variables;
 		rango_variables = (maxValue - minValue) + 1;
+		rango_variable[id] = rango_variables;
 		minimo_variables = minValue;					/*TODO-hay variables (singleton) con valor -1!!*/
 		numero_variables++;
 		cout << "Variable: " << id << " indice var: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
@@ -2008,6 +2053,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 		lista_variables.push_back(id);
 		rango_variables = values.size();
+		rango_variable[id] = rango_variables;
 		minimo_variables = values.front(); 		/*TODO-extend to non-index values */
 		mapa_indices[id]=numero_variables;
 		numero_variables++;
@@ -2034,6 +2080,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 //    	cout << "        ";
 //    	displayList(values);
 	}
+
+
 
 
 
@@ -2104,6 +2152,10 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
+
+
 	//Versión para restricciones binarias o superiores
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
@@ -2136,7 +2188,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 		if(list.size()==0)
 		{
-			throw runtime_error("Tamaño de tupla no procesado.");
+			throw runtime_error("Tamaño cero de tupla, hay algún error, no procesado.");
 			exit(2);
 		}
 
@@ -2166,8 +2218,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 			
 			if (support)
 			{
-				throw runtime_error("Regla Support binaria, todavía no implementada.");
-				exit(2);
+				cout << "Regla Support binaria, implementandose." << endl;
+				
 			} else {
 
 				cout << "Regla CONFLICT ............\n";
@@ -2489,7 +2541,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		
 		if(list.size()==0)
 		{
-			throw runtime_error("Tamaño de tupla no procesado.");
+			throw runtime_error("Tamaño cero de tupla, hay algún error, no procesado.");
 			exit(2);
 		}
 
@@ -2517,8 +2569,9 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 			cout << "Regla BINARIA:" << endl;
 			if (support)
 			{
-				throw runtime_error("Regla Support binaria, todavía no implementada.");
-				exit(2);
+				cout << "Regla Support binaria, implementandose." << endl;
+
+
 			} else {
 
 				cout << "Regla CONFLICT ............\n";
@@ -2969,6 +3022,40 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+	void buildConstraintIntension(string id, string expr) {
+    cout << "\n    SOY intension constraint : " << id << " : " << expr << endl;
+	}
+
+
+	
+
+
+
+
+
+
+
+
+	void buildConstraintPrimitive(string id, OrderType, XVariable *x, int k, XVariable *y) {
+    cout << "\n   VIVESOY intension constraint " << id << ": " << x->id << (k >= 0 ? "+" : "") << k << " op " << y->id << endl;
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	// string id, vector<XVariable *> &list, int startIndex
 	void buildConstraintChannel(string, vector<XVariable *> &list, int startIndex) {
     	cout << "\n   1) channel constraint" << endl;
@@ -2978,14 +3065,34 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	}
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 	// string id, vector<XVariable *> &list1, int startIndex1, vector<XVariable *> &list2, int startIndex2
 	void buildConstraintChannel(string, vector<XVariable *> &list1, int, vector<XVariable *> &list2, int) {
-    	cout << "\n    2) channel constraint" << endl;
+    	cout << "\n    2) TOPE channel constraint" << endl;
     	cout << "        list1 ";
     	displayList(list1);
     	cout << "        list2 ";
     	displayList(list2);
 	}
+
+
+
+
+
+
+
 
 
 	// string id, vector<XVariable *> &list, int startIndex, XVariable *value
@@ -2995,6 +3102,12 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
     	displayList(list);
     	cout << "        value: " << *value << endl;
 	}
+
+
+
+
+
+
 
 
 	// string id, vector<XVariable *> &list, vector<int> &values
