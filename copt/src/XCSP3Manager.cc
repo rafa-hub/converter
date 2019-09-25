@@ -1011,6 +1011,8 @@ void XCSP3Manager::newConstraintGroup(XConstraintGroup *group) {
         return;
 
     vector<XVariable *> previousArguments; // Used to check if extension arguments have same domains
+    callback->_arguments = &(group->arguments);
+    
     for(unsigned int i = 0 ; i < group->arguments.size() ; i++) {
         if(group->type == INTENSION)
             unfoldConstraint<XConstraintIntension>(group, i, &XCSP3Manager::newConstraintIntension);
@@ -1087,6 +1089,7 @@ void XCSP3Manager::newConstraintGroup(XConstraintGroup *group) {
             throw runtime_error("Group constraint is badly defined");
         }
     }
+    callback->_arguments = nullptr;
 }
 
 
