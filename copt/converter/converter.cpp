@@ -561,7 +561,7 @@ public:
 		{
 			for (int j=0;j<dimension_matriz;j++)
 			{
-				matriz_datos[i][j]=0;
+				matriz_datos[i][j]=1 ;
 				//matriz_shadow[i][j]=1;
 			}
 		}
@@ -2641,6 +2641,9 @@ void endConstraints() {
 	void buildConstraintChannel(string, vector<XVariable *> &list1, int, vector<XVariable *> &list2, int) {
 		vector<XVariable *>::iterator itero1,itero2;
 		int coordenada_final[2],coordenada_base[2];
+		int i = 0,j = 0, k=0;
+
+		
 		
 
 		cout << "\n   Restricción de \"CANAL\": " << endl;
@@ -2649,7 +2652,40 @@ void endConstraints() {
 		cout << "        list2 ";
 		displayList(list2);
 
-		/* for(itero1 = list1.begin(); itero1 != list1.end();itero1++)
+		
+		// Pongo a cero todo
+  
+		for(k=0,itero1 = list1.begin(); itero1 != list1.end();itero1++)
+		{
+			cout << "Variable1: " << (*itero1)->id << endl;
+			for (itero2 = list2.begin(); itero2 != list2.end(); itero2++)
+			{
+				cout << "Variable2: " << (*itero2)->id << " " << endl;
+				coordenada_base[0] = base_variable[(*itero1)->id];
+				coordenada_base[1] = base_variable[(*itero2)->id];
+
+				for(int i=0; i < rango_variable[(*itero1)->id]; i++)
+					for (int j=0; j < rango_variable[(*itero2)->id]; j++)
+					{
+						coordenada_final[0] = coordenada_base[0] + i;
+						coordenada_final[1] = coordenada_base[1] + j;
+						
+						cout << "Coordenadas finales[" << k << "]: " << coordenada_final[0] << " - " 
+							<< coordenada_final[1] << endl;
+						k++;
+						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+					}	
+			}
+			cout << endl; 
+		} 
+
+ 
+
+
+/* 
+
+		for(itero1 = list1.begin(); itero1 != list1.end();itero1++)
 		{
 			for (itero2 = list2.begin(); itero2 != list2.end(); itero2++)
 			{
@@ -2659,25 +2695,34 @@ void endConstraints() {
 					<< " - Base en Matriz: " << base_variable[(*itero2)->id] << endl;
 					
 			} 
-		} */
+		} 
+ */
 
+		// Pongo a Uno el canal
 		
-
-		for (itero1 = list1.begin(); itero1 != list1.end();itero1++)
+    
+		for (k=0, itero1 = list1.begin(), i=0; itero1 != list1.end();itero1++,i++)
 		{
+			
 			coordenada_base[0] = base_variable[(*itero1)->id];
 			
-			for (int i=0; i < rango_variable[(*itero1)->id]; i++)
+			for (itero2 = list2.begin(), j = 0; itero2 != list2.end(); itero2++, j++)
 			{
-				coordenada_final[0] = coordenada_base[0] + i;
-				//calcular coordenada de la otra variable y escribir
-				coordenada_final[1] = coordenada_final[0];
+				coordenada_final[0] = coordenada_base[0]+j;
+				coordenada_final[1] = base_variable[(*itero2)->id]+i;
 
+				cout << "Var1: " << (*itero1)->id << " - Var2: " << (*itero2)->id << " - ";
+				cout << "Coordenadas finales[" << k << "]: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;
+				
+				k++;
+					
 				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
 			}
+			
 		}
-
-
+  
+ 
 		cout << endl;
 
 	}
@@ -2854,9 +2899,9 @@ int main(int argc, char **argv) {
  */
 	
 	//salida matriz de datos
-	/* ofstream fmat("log_mat.txt", ios::out);
+	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.close(); */
+	fmat.close();
 
 	cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
 	ostream & terminal=cout;
