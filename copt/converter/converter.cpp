@@ -1718,10 +1718,12 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
 		
 		
-		cout << "Regla UNARIA:" << endl;
-		cout << "Hay que implementar........." << endl;
+		cout << "Regla UNARIA: " << endl;
+		cout << "Implementando........." << endl;
 
 		cout << "Variable: " << variable->id << endl;
+		cout << "Support: " << support << endl;
+		cout << "HasStar: " << hasStar << endl;
 
 		cout << "Número tuplas: " << tuples.size() << endl;
 		cout << "Tuplas: ";
@@ -1852,16 +1854,11 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		} 
 
 		if (list.size() == 2){
-			cout << "Regla BINARIA:" << endl;
-			cout << "Hay que implementar........." << endl;
-			displayList(list);
-			cout << endl;
 			
-			/*cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-			//cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
-
+			cout << "Regla BINARIA:" << endl;
+			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
-			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support);  */
 		}
 
 
@@ -2029,15 +2026,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		if (list.size() == 2){
 			cout << "Regla BINARIA:" << endl;
-			cout << "Hay que implementar........." << endl;
-			displayList(list);
-			cout << endl;
-			
-			/*cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-			//cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
-
+			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
-			//escribe_en_matriz(coordenadas_base, las_tuplas, var_cero, var_uno, support);  */
 		}
 
 
@@ -2333,10 +2324,11 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		int rango_cero,rango_uno,indice0,indice1;
     	int dimension=2; 
 		int coordenadas_base[2]={0,0};
-		int *punt_auxiliar;
 		int coordenadas_final[2]={0,0};
 
-		punt_auxiliar=coordenadas_base;
+		rango_cero = rango_variable[x->id];
+		rango_uno = rango_variable[y->id];
+
 
 	//cout << "\nFórmula simple.............. \n  " << id;
 			
@@ -2346,21 +2338,11 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			cout << "\n   OPERACIONES BINARIAS............... Order Type: " << orden <<endl;
 	#endif
 
-		cout << "Mi gran polla ........\n";
+		cout << "PRIMITIVA .....................\n";
 
-		var_cero=get_nombre(x->id);
-		var_uno=get_nombre(y->id);
-		indice0=get_indice_ternario(x->id);
-		indice1=get_indice_ternario(y->id);
-		rango_cero=rango_variable[var_cero];
-		rango_uno=rango_variable[var_uno];
+		
+		cout << x->id << " base: " << base_variable[x->id] << " - " << y->id << " base: " << base_variable[y->id] << " : Operación: " << orden << endl; 
 
-		//calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-		*punt_auxiliar = base_array[var_cero] + (indice0 * rango_variable[var_cero]);
-		punt_auxiliar++;
-		*punt_auxiliar = base_array[var_uno] + (indice1 * rango_variable[var_uno]);
-
-		cout << var_cero << "[" << indice0 << "] - " << var_uno << "[" << indice1 << "] : Operación: " << orden << endl; 
 
 
 	#ifdef midebug
@@ -2377,8 +2359,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 						if (i>j)
 						{
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j)
-							coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;					
+							coordenadas_final[0] = base_variable[x->id]+i;
+							coordenadas_final[1] = base_variable[y->id]+j;					
 							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
 							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
 
@@ -2391,8 +2373,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 						if (i>=j)
 						{
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;
+							coordenadas_final[0] = base_variable[x->id]+i;
+							coordenadas_final[1] = base_variable[y->id]+j;
 							
 							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
 							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
@@ -2405,8 +2387,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 						if (i<j)
 						{
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;
+							coordenadas_final[0] = base_variable[x->id]+i;
+							coordenadas_final[1] = base_variable[y->id]+j;
 							
 							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
 							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
@@ -2419,8 +2401,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 						if (i<=j)
 						{
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;
+							coordenadas_final[0] = base_variable[x->id]+i;
+							coordenadas_final[1] = base_variable[y->id]+j;
 							
 							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
 							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
@@ -2437,8 +2419,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 						if (i!=j)
 						{
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;
+							coordenadas_final[0] = base_variable[x->id]+i;
+							coordenadas_final[1] = base_variable[y->id]+j;
 							
 							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
 							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
@@ -2452,8 +2434,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 						{
 							//cout << "i: " << i << " - " << "j: " << j << endl;
 							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;
+							coordenadas_final[0] = base_variable[x->id]+i;
+							coordenadas_final[1] = base_variable[y->id]+j;
 							//cout << "Escribo en coordenadas: " << coordenadas_final[0] << " - " << coordenadas_final[1] << endl;
 							
 							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
@@ -2653,7 +2635,9 @@ void endConstraints() {
 		displayList(list2);
 
 		
-		// Pongo a cero todo
+		// Pongo a cero las variables del canal
+
+		cout << "Poniendo a cero las variables del canal ............\n";
   
 		for(k=0,itero1 = list1.begin(); itero1 != list1.end();itero1++)
 		{
@@ -2670,8 +2654,8 @@ void endConstraints() {
 						coordenada_final[0] = coordenada_base[0] + i;
 						coordenada_final[1] = coordenada_base[1] + j;
 						
-						cout << "Coordenadas finales[" << k << "]: " << coordenada_final[0] << " - " 
-							<< coordenada_final[1] << endl;
+						// cout << "Coordenadas finales[" << k << "]: " << coordenada_final[0] << " - " 
+						// 	<< coordenada_final[1] << endl;
 						k++;
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
@@ -2683,20 +2667,6 @@ void endConstraints() {
  
 
 
-/* 
-
-		for(itero1 = list1.begin(); itero1 != list1.end();itero1++)
-		{
-			for (itero2 = list2.begin(); itero2 != list2.end(); itero2++)
-			{
-				cout << "lista1: " << (*itero1)->id << " - Rango: " << rango_variable[(*itero1)->id] 
-					<< " - Base en Matriz: " << base_variable[(*itero1)->id];
-				cout << " -.- lista2: " << (*itero2)->id << " - Rango: " << rango_variable[(*itero2)->id] 
-					<< " - Base en Matriz: " << base_variable[(*itero2)->id] << endl;
-					
-			} 
-		} 
- */
 
 		// Pongo a Uno el canal
 		
@@ -2743,7 +2713,7 @@ void endConstraints() {
 
 
 	void beginSlide(string id, bool) {
-		cout << "   start slide CON POLLÓN." << id << endl;
+		cout << "Empieza un slide.............." << id << endl;
 	}
 
 
@@ -2759,7 +2729,7 @@ void endConstraints() {
 
 
 	void endSlide() {
-		cout << "   end slide  SIN POLLÓN." << endl;
+		cout << "\nFin slide..............." << endl;
 	}
 
 
