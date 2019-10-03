@@ -40,6 +40,7 @@ private:
 	int indice_var_ternarias = 0;
 	
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable
+	map<string,string> mapa_nombres;	// Guarda el nombre de cada variable
 	
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
 
@@ -113,6 +114,9 @@ public:
 
 
 
+
+
+
 	// Escribe los resultados en un fichero
 	void escribe_nombre_fichero() {
 		string var;
@@ -143,6 +147,9 @@ public:
 
 		fichero_salida.close();
 	}
+
+
+
 
 
 
@@ -209,6 +216,10 @@ public:
 	}
 
 
+
+
+
+
 	int get_indice_ternario(string variable) {
 
 		int pos_uno,pos_dos;
@@ -224,6 +235,8 @@ public:
 		//cout << "Variable:  " << var << endl;
 		return stoi(indice);
 	}
+
+
 
 
 
@@ -251,6 +264,10 @@ public:
 
 		return vector;
 	}
+
+
+
+
 
 
 
@@ -455,7 +472,7 @@ public:
 			{
 				tuplas_binarias[i].push_back(j);
 				tuplas_binarias[i].push_back(k);
-				cout << i+1 << ":" "(" << j << "," << k << ")" << endl;	
+				//cout << i+1 << ":" "(" << j << "," << k << ")" << endl;	
 				i++;
 			}
 		}
@@ -490,7 +507,7 @@ public:
 					tuplas_ternarias[i].push_back(j);
 					tuplas_ternarias[i].push_back(k);
 					tuplas_ternarias[i].push_back(l);
-					cout << i+1 << ":" "(" << j << "," << k << "," << l << ")" << endl;	
+					//cout << i+1 << ":" "(" << j << "," << k << "," << l << ")" << endl;	
 					i++;
 				}
 			}
@@ -641,6 +658,8 @@ public:
 
 
 
+
+
 	
 	//Vuelca en pantalla la matriz, solo útil para depuración, en casos reales
 	//la matriz suele ser demasiado grande
@@ -665,6 +684,9 @@ public:
 
 		return o;
 	}
+
+
+
 
 
 
@@ -2009,8 +2031,10 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 
 		lista_variables.push_back(id);
-		mapa_indices[id]=numero_variables;
+		mapa_indices[id] = numero_variables;
+		mapa_nombres[id] = id;
 		rango_variables = (maxValue - minValue) + 1;
+		cout << "ID: " << id << " - " ;
 		rango_variable[id] = rango_variables;
 		minimo_variables = minValue;					/*TODO-hay variables (singleton) con valor -1!!*/
 		numero_variables++;
@@ -2056,6 +2080,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		rango_variable[id] = rango_variables;
 		minimo_variables = values.front(); 		/*TODO-extend to non-index values */
 		mapa_indices[id]=numero_variables;
+		mapa_nombres[id] = id;
 		numero_variables++;
 
 		cout << "Variable: " << id << " - min: " << values[0] << " - max: "
@@ -2186,6 +2211,30 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		las_tuplas=tuples;
 		
 
+
+
+		for (int i = 0; i < list.size() ; i++)
+			cout << list[i]->id << " : Rango: " << rango_variable[list[i]->id] 
+				<< " - Dimensión: " << pow(rango_variable[list[i]->id],list.size()) << endl;
+			
+		
+
+		cout << "Tuplas: " ;
+		for (int j=0; j < las_tuplas.size(); j++)
+		{
+			cout << "(";
+			for (int k=0; k<2; k++)
+				cout << las_tuplas[j][k] << " ";
+			cout << ") ";
+		}
+
+		cout << endl;
+
+		cout << "Genero todos los vértices posibles...............\n";
+		cout << "Quito los vértices CONFLICT\n";
+
+
+
 		if(list.size()==0)
 		{
 			throw runtime_error("Tamaño cero de tupla, hay algún error, no procesado.");
@@ -2226,21 +2275,28 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
 					{
-						//cout << (*itero_variables)->id << " - " ;
+						cout << (*itero_variables)->id << " - " ;
 						nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 					}
+
+				cout << endl;
 				
 				cout << "U[" << indice_var_ternarias << "]: \n";
+
 				for(itero_dentro_variables=nueva_super_variable[indice_var_ternarias].begin();
 							itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 				{
 					cout << "\t" << *itero_dentro_variables << " ";
-					var = get_nombre(*itero_dentro_variables);
+					var = *itero_dentro_variables;
+					cout << "nombre var: " << var << " - " ;
 					rango = rango_variable[var];
+					cout << "Rango: " << rango << endl;
+
 					dimension = pow(rango_variable[var],list.size());
 					cout << "Dominio valores variable: " << dimension << endl;
 				}
 				cout << endl;	
+
 
 				cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
@@ -2322,7 +2378,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 						itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 				{
 					cout << "\t" << *itero_dentro_variables << " ";
-					var = get_nombre(*itero_dentro_variables);
+					var = *itero_dentro_variables;
 					rango = rango_variable[var];
 					cout << "Dominio valores variable: " << rango_variable[var] << endl;
 				}
@@ -2537,6 +2593,25 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
 		//cout << "Tamaño de la lista: " << list.size() << endl;
+
+		for (int i = 0; i < list.size() ; i++)
+			cout << list[i]->id << " : Rango: " << rango_variable[list[i]->id] 
+				<< " - Dimensión: " << pow(rango_variable[list[i]->id],list.size()) << endl;
+		
+
+		cout << "Tuplas: " ;
+		for (int j=0; j < las_tuplas.size(); j++)
+		{
+			cout << "(";
+			for (int k=0; k<2; k++)
+				cout << las_tuplas[j][k] << " ";
+			cout << ") ";
+		}
+
+		cout << endl;
+
+		cout << "Genero todos los vértices posibles...............\n";
+		cout << "Quito los vértices CONFLICT\n";
 		
 		
 		if(list.size()==0)
@@ -2586,7 +2661,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 							itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 				{
 					cout << "\t" << *itero_dentro_variables << " ";
-					var = get_nombre(*itero_dentro_variables);
+					var = *itero_dentro_variables;
 					rango = rango_variable[var];
 					dimension = pow(rango_variable[var],list.size());
 					cout << "Dominio valores variable: " << dimension << endl;
@@ -2670,7 +2745,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 						itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 				{
 					cout << "\t" << *itero_dentro_variables << " ";
-					var = get_nombre(*itero_dentro_variables);
+					var = *itero_dentro_variables;
 					rango = rango_variable[var];
 					cout << "Dominio valores variable: " << rango_variable[var] << endl;
 				}
@@ -2729,7 +2804,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 						itero_dentro_variables<nueva_super_variable[indice_var_ternarias].end();itero_dentro_variables++)
 				{
 					cout << "\t" << *itero_dentro_variables << " ";
-					var = get_nombre(*itero_dentro_variables);
+					var = *itero_dentro_variables;
 					dimension = pow(rango_variable[var],list.size());
 					cout << "Dominio valores variable: " << dimension << endl;
 				}
