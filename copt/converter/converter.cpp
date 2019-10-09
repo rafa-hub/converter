@@ -37,8 +37,19 @@ private:
 	vector<string> 	lista_arrays;    	// Guarda la lista de arrays
 	vector<string> 	lista_variables; 	// Guarda la lista de variables
 	
-	int indice_var_ternarias = 0;
-	
+	struct dato {						// Estructura necesaria para la generalización de la solución binaria.
+
+			string var;
+			int contador;
+			vector <int> valores;
+			
+		};
+
+	vector <dato> datos;				// Vector de estructuras para la generación de los vértices.
+	vector <int> contadores;			// Vector que guarda el estado de los contadores.
+
+
+	int indice_var_ternarias = 0;		// Índice global de variables ternarias.
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable
 	map<string,string> mapa_nombres;	// Guarda el nombre de cada variable
 	
@@ -90,6 +101,7 @@ public:
 	int **matriz_punteros;  // Matriz donde se almacenan los datos punteros a los datos ternarios.
 	int **matriz_vertices;  // Matriz donde se almacenan los punteros a los valores de las tuplas de los vértices.
 	int **matriz_aux;		// Matriz temporal para generar todos los vértices entre dos variables binarizadas.
+	
 	int indice_vertices=0;	// Índice global para indexar los vértices del grafo.
 	vector<int> lista_vertices; // Contiene una relación entre los vértices y su rango de valores posibles.
 
@@ -1470,6 +1482,8 @@ void  comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_u
 
 
 
+
+
 	void ejecuto_comparacion(int indice_nueva_variable1, int indice_nueva_variable2)
 	{
 		int tamano_pila = pila_comparacion.size();
@@ -1503,6 +1517,13 @@ void  comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_u
 
 
 
+
+
+
+
+
+
+
 void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_variable2)
 	{
 		int tamano_pila = pila_comparacion.size();
@@ -1530,6 +1551,9 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		comparo_vertices_conflict(indice_nueva_variable1,pos_var_uno,indice_nueva_variable2,pos_var_dos);
 
 	}
+
+
+
 
 
 
@@ -1597,6 +1621,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		
 
 	}
+
+
 
 
 
@@ -1833,16 +1859,16 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////
-	/* ==========Fin de mis funciones============================================================
-
-	 =========Comienzo de las funciones que invoca el parser ===================================== */
+///		Fin de mis funciones
+//
+//	 	Comienzo de las funciones que invoca el parser 
 ////////////////////////////////////////////
 
-
+////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -1886,8 +1912,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		//imprimo_vertices();
 
 		//genero_grafo();
-		genero_grafo_conflict();
-		escribe_grafo();
+		//genero_grafo_conflict();
+		//escribe_grafo();
 
 
 		//imprimo_datos_grafo();
@@ -1952,7 +1978,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		base_siguiente_array += (numero_variables * rango_variables);
 		numero_variable[array_actual] = numero_variables;
 		rango_variable[array_actual] = rango_variables;
-		minimo_variable[array_actual] = minimo_variables;
+		//minimo_variable[array_actual] = minimo_variables;
 
 		is_array=false;
 
@@ -2185,6 +2211,10 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
+
+
 	//Versión para restricciones binarias o superiores
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 			vector<vector<int>> &tuples, bool support, bool hasStar) {
@@ -2196,34 +2226,26 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		int dimension = 0;
 		int numero_vertices_nueva_variable=0;
 		int hay_vertice = 1;
-		vector<int> contadores;
-		vector<int> nuevo_vertice;
-
-		struct dato {
-
-			string var;
-			dato *siguiente;
-			dato *anterior;
-			int contador;
-			vector <int> valores;
+		int fin = 0;
+		
 			
-		};
 
-		vector <dato> datos;
-		dato *ida,*vuelta;	
-
-		dato *cabeza_lista = new dato();
-		dato *auxiliar = new dato();
+		
+		dato aux;
 		
 		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
 		int *puntero_vertice;	// Puntero auxiliar para recorrer la tupla de cada vértice.
 								// Se inicializa un nuevo puntero de la matriz y se asigna
 								// a este puntero auxiliar.
 
+		
+		vector <dato>::iterator itero_datos;
+		
 		vector<XVariable *>::iterator itero_variables;
 		vector<string>::iterator itero_dentro_variables;
 		vector<vector<int>>::iterator itero_tuplas;
 		vector <int>::iterator itero_dentro_tuplas;
+
 
 
 
@@ -2232,26 +2254,13 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		// Guardo el valor de las tuplas por si es una restriccion de grupo
 		las_tuplas=tuples;
 		
-		if(list.size()==0)
-		{
-			throw runtime_error("Tamaño cero de tupla, hay algún error, no procesado.");
-			exit(2);
-		}
+		
 
-
-		if (list.size() == 1)
-		{
-			cout << "Regla UNARIA:" << endl;
-			throw runtime_error("Funcionalidad no implementada cuando no hay reglas ternarias ........");
-			exit(2);
-								
-		} 
-
-		datos.clear();
-
+		
+		
 		// Creo la nueva supervariable correspondiente a la regla.
 		cout << "\nNueva supervariable ..........  - con índice: " << indice_var_ternarias << endl;
-		for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+		for (itero_variables = list.begin();itero_variables != list.end();itero_variables++)
 		{
 				//cout << (*itero_variables)->id << " - " ;
 				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
@@ -2263,52 +2272,27 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 		cout << "tamano_lista: " << tamano_lista << " - tamano_valores: " << tamano_valores << endl;
 
-		//dato dato_cabeza,dato_lista;
-			
-		cabeza_lista->var = list[0]->id;
-		cabeza_lista->contador = 0;
-		cabeza_lista->anterior = NULL;
-
-		for (int i = minimo_variable[cabeza_lista->var]; i < maximo_variable[cabeza_lista->var]; i++)
-			cabeza_lista->valores.push_back(i);
-		
+		// Reseteo el vector datos para generar la nueva tanda de vértices.
+		datos.clear();
 
 		
-		datos.push_back(*cabeza_lista);
+		for(int i = 0; i < list.size(); i++)
+		{
+			aux.var = list[i]->id;
+			aux.contador = 0;
+			aux.valores.clear();
+			for (int j = minimo_variable[list[i]->id]; j <= maximo_variable[list[i]->id]; j++)
+				aux.valores.push_back(j);
 
-		
-
-		for(int j = 1; j < list.size(); j++)
-		{	
-			auxiliar->var = list[j]->id;
-			auxiliar->contador = 0;
-			auxiliar->anterior = &datos[j-1];
-			auxiliar->siguiente = NULL;
-
-
-			if (j == 1)
-				{
-					datos[0].siguiente = auxiliar;
-					auxiliar->anterior = cabeza_lista;
-				}
-			
-			auxiliar->valores.clear();
-			for (int i = minimo_variable[auxiliar->var]; i < maximo_variable[auxiliar->var]; i++)
-			{
-				auxiliar->valores.push_back(i);
-			}
-
-			auxiliar->anterior->siguiente = auxiliar;
-			//datos[datos.size()-1].siguiente = auxiliar;	
-			datos.push_back(*auxiliar);
-			
+			datos.push_back(aux);
 		}
 
+
+		
 		// Datos base creados
 		// Ahora se generan los vértices
-
-
-
+		
+		
 		if (!support)
 		{
 			// En el caso de conflict, si el vértice es "conflicto", no se genera.
@@ -2316,85 +2300,47 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 			cout << "Genero los vértices.......... \n";
 
 
-
-
-
-			mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
-
-			cout << "En el mapa de vértices ............ - Orden: "  << indice_vertices << endl;
-
-
-			
-		
-		cout << "Gurado los vértices .................. \n";
-		cout << "Tuplas: " ;
-		for (int j=0; j < las_tuplas.size(); j++)
-		{
-
-			matriz_vertices[indice_vertices]=new int[list.size()];
-			cout << "(";
-			for (int k=0; k<2; k++)
+			while (datos.back().contador < tamano_valores)
 			{
-				matriz_vertices[indice_vertices][k] = tuplas_binarias[i][k];
-				cout << las_tuplas[j][k] << " ";
+
+				// Genero los vértices.
+				// y Comparo los vértices con conflicto.
+
+
+			cout << "(";
+			for(itero_datos = datos.begin(); itero_datos != datos.end(); itero_datos++)
+			{
+				cout << itero_datos->valores[itero_datos->contador] << ",";
 			}
-			cout << ") ";
+			cout << ")\n";	 
 
 			
-		}
+			
+			// Gestiono los contadores
+			
 
-		cout << endl;
+			datos.begin()->contador++;
 
-		cout << "Genero todos los vértices posibles...............\n";
-		cout << "Quito los vértices CONFLICT\n";
-
-				
-
-
-
-
-
-
-
-
-				cout << "Espacio reservado\n";
-
-				for (int i=0; i < tamano_lista; i++)
-				{
-					matriz_aux[i] = new int[tamano_valores];
-					for (int j=0; j < tamano_valores; j++)
-					{
-						matriz_aux[i][j] = j;  
-						cout  << i << " - " << j << endl;
-						contadores.push_back(0);
-						nuevo_vertice.push_back(0);
-					}
-					cout << endl;
-				}
-
-				while (contadores[0] < rango_variable[list[0]->id])
-				{
+			for (int i=0; i < tamano_lista; i++)
+			{
+				if (datos.back().contador == tamano_valores)
 					break;
-				}
 
-
-
-
-
-
-
-
-
-
-
-				
-				for (int i=0; i < tamano_lista; i++)
+				if(datos[i].contador == tamano_valores)
 				{
-					delete[] matriz_aux[i];
+					datos[i].contador = 0; 
+					datos[i+1].contador++;
 				}
+			}
+			cout << "Último contador: " << datos.back().contador << endl; 		
+		} 
 
 
 
+		
+
+
+			indice_var_ternarias++;
 				
 			}
 
@@ -2946,6 +2892,11 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
+
+
+
 	void buildConstraintIntension(string id, string expr) {
     cout << "\n    SOY intension constraint : " << id << " : " << expr << endl;
 	}
@@ -2960,9 +2911,15 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
+
+
 	void buildConstraintPrimitive(string id, OrderType, XVariable *x, int k, XVariable *y) {
     cout << "\n   VIVESOY intension constraint " << id << ": " << x->id << (k >= 0 ? "+" : "") << k << " op " << y->id << endl;
 	}
+
+
 
 
 
