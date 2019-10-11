@@ -17,7 +17,7 @@
 //#define mipause
 #define midebug
 //#define mitest
-#define BUFFER_PUNTEROS 10*1024*1024
+#define BUFFER_PUNTEROS 100*1024*1024
 #define TERNARIA 3
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -132,7 +132,7 @@ public:
 
 
 	// Escribe los resultados en un fichero
-	void escribe_nombre_fichero() {
+	void escribe_fichero() {
 		string var;
 		char *nombre_fichero_csp;
 
@@ -464,7 +464,7 @@ public:
 
 	void reserva_memoria_punteros()
 	{
-		matriz_punteros = new int *[BUFFER_PUNTEROS];
+		//matriz_punteros = new int *[BUFFER_PUNTEROS];
 		matriz_vertices = new int *[BUFFER_PUNTEROS];
 		cout << "Creado buffer punteros y buffer de punteros a vértices con " << (BUFFER_PUNTEROS) << " posiciones." << endl;
 			
@@ -1458,13 +1458,8 @@ void  comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_u
 				{	
 					grafo[contador_aristas]={vertice1,vertice2};
 					contador_aristas++;
-					//cout << "Regla conflict: arista " << contador_aristas << " entre los vertices " << vertice1 << " y " << vertice2 << endl;
-					
+					//cout << "Regla conflict: arista " << contador_aristas << " entre los vertices " << vertice1 << " y " << vertice2 << endl;	
 				}
-				else
-					{
-					//	cout << "No hay arista entre " << vertice1 << " y " << vertice2 <<  endl;
-					}
 					
 			}
 
@@ -1562,7 +1557,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
-	void genero_grafo()
+	void genero_grafo_support()
 	{
 		int i=0,j=0,k=0,l=0;
 		
@@ -1641,20 +1636,17 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		vector<string>::iterator itero_primera_variable,itero_segunda_variable;
 		
 		int coordenadas_base[2];
-		
-
 
 
 		contador_aristas=0;
 		cout << "\nGenero el grafo......................" << endl;
 		
-		
 		for (k=0;k<lista_variables_ternarias.size()-1;k++)
 		{
 			for (i=k,j=i+1;j<lista_variables_ternarias.size();j++)
 			{
-				//cout << "Nuevas Variables a procesar U[" << i << "] - U[" << j << "]" << endl ;
-				//cout << "Contador aristas: " << contador_aristas << endl;
+				cout << "Nuevas Variables a procesar U[" << i << "] - U[" << j << "]" << endl ;
+				
 
 		 		for(itero_primera_variable=nueva_super_variable[i].begin(); 
 					itero_primera_variable < nueva_super_variable[i].end(); itero_primera_variable++)
@@ -1684,6 +1676,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 					//cout << "\n¡ATENCIÓN!-> Pongo todas las aristas entre U[" << i << "] y U[" << j << "]" << endl;
 					relleno_aristas(i,j);
 				}
+				cout << "Contador aristas: " << contador_aristas << endl;
 				//cout << endl;
 			}
 		}
@@ -1899,14 +1892,16 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	void endInstance() {
 		
 		//imprimo_vertices();
-
-		//genero_grafo();
-		genero_grafo_conflict();
-		//escribe_grafo();
-
 		//imprimo_datos_grafo();
+
 		cout << "FIN del parsing ............." << endl;
+		//genero_grafo_support();
+		genero_grafo_conflict();
+
+
 		cout << "Escribo los ficheros ........" << endl;
+		escribe_grafo();	
+		
 	}
 
 
@@ -1999,19 +1994,20 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	void endVariables() {
 
 		//Escribo el fichero .csp
-		//escribe_nombre_fichero();
+		//escribe_fichero();
 		reserva_memoria_punteros();
 
 		// Genero la matriz
+
 		//cout << "Genero la matriz Ternaria............." << endl;
 		//genera_matriz_ternaria();
-		genero_tuplas_binarias();
-		genero_tuplas_ternarias();
+		//genero_tuplas_binarias();
+		//genero_tuplas_ternarias();
 
 		//cout << "Genero la matriz Binaria............." << endl;
 		//genera_matriz();
-		
 		//cout << "Matriz generada .............." << endl;
+
 #ifdef midebug
 		//print_coordenadas_base();
 		cout << " - FIN declaracion variables - " << endl << endl;
@@ -2230,12 +2226,14 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		cout << "\nNueva supervariable ..........  - con índice: " << indice_var_ternarias << endl;
 		for (itero_variables = list.begin();itero_variables != list.end();itero_variables++)
 		{
-				//cout << (*itero_variables)->id << " - " ;
+				cout << (*itero_variables)->id << " - " ;
 				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 		}
 
-		tamano_lista = list.size();					// Tamaño tuplas.
-		tamano_valores = rango_variable[list[0]->id];  	// Tamaño datos.
+		lista_variables_ternarias.push_back(list.size());	// Guardo las variables ternarias. (Número de variables binarizadas)
+		dimension_variables_ternarias.push_back(las_tuplas.size()); // Guardo las tuplas de cada variable.
+		tamano_lista = list.size();							// Tamaño tuplas.
+		tamano_valores = rango_variable[list[0]->id];  		// Tamaño datos.
 
 		cout << "tamano_lista: " << tamano_lista << " - tamano_valores: " << tamano_valores << endl;
 
@@ -2295,7 +2293,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 					if (k < list.size()-1)
 						cout << ",";
 				}
-				cout <<")" << endl;
+				cout <<") Vertice: " << indice_vertices << endl;
 
 				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
 				indice_vertices++;
@@ -2386,8 +2384,10 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 		}
 
-		tamano_lista = list.size();					// Tamaño tuplas.
-		tamano_valores = rango_variable[list[0]->id];  	// Tamaño datos.
+		lista_variables_ternarias.push_back(list.size());	// Guardo las variables ternarias. (Número de variables binarizadas)
+		dimension_variables_ternarias.push_back(las_tuplas.size()); // Guardo las tuplas de cada variable.
+		tamano_lista = list.size();							// Tamaño tuplas.
+		tamano_valores = rango_variable[list[0]->id]; 	 	// Tamaño datos.
 
 		cout << "tamano_lista: " << tamano_lista << " - tamano_valores: " << tamano_valores << endl;
 
@@ -2445,8 +2445,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 					if (k < list.size()-1)
 						cout << ",";
 				}
-				cout <<")" << endl;
-
+				cout <<") Vertice: " << indice_vertices << endl;
+				
 				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
 				indice_vertices++;
 			}
@@ -2799,6 +2799,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
 	// string id, vector<XVariable *> &list, vector<int> &values
 	void buildConstraintInstantiation(string, vector<XVariable *> &list, vector<int> &values) {
     	cout << "\n   Mi instantiation constraint" << endl;
@@ -2924,7 +2926,7 @@ int main(int argc, char **argv) {
 	miparser.imprime_matriz("shadow", terminal); */
 
 
-	delete [] miparser.matriz_punteros;
+	//delete [] miparser.matriz_punteros;
 	delete [] miparser.matriz_vertices;
 
 
