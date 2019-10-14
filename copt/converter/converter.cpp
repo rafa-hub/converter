@@ -15,7 +15,7 @@
 #include <math.h>
 
 //#define mipause
-#define midebug
+//#define midebug
 //#define mitest
 #define BUFFER_PUNTEROS 100*1024*1024
 #define TERNARIA 3
@@ -1410,9 +1410,10 @@ void  comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_u
 		int hay_coincidencia=0;
 		int tamano_comparacion = pos_var_uno.size();
 
-		//cout << "Número de vértices variable U[" << indice_nueva_variable1 << "]: " << mapa_vertices[indice_nueva_variable1].size() << endl;
-		//cout << "Número de vértices variable U[" << indice_nueva_variable2 << "]: " << mapa_vertices[indice_nueva_variable2].size() << endl;
+		cout << "Número de vértices variable U[" << indice_nueva_variable1 << "]: " << mapa_vertices[indice_nueva_variable1].size() << endl;
+		cout << "Número de vértices variable U[" << indice_nueva_variable2 << "]: " << mapa_vertices[indice_nueva_variable2].size() << endl;
 		
+		cout << "Tamaño pila comparación: " << pila_resultado.size() << endl;
 		
 		for (int i=0; i <mapa_vertices[indice_nueva_variable1].size(); i++)
 		{
@@ -1422,25 +1423,26 @@ void  comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_u
 				vertice1 = mapa_vertices[indice_nueva_variable1][i];
 				vertice2 = mapa_vertices[indice_nueva_variable2][j];
 
-				//cout << "\nEmpiezo la comparación ........................" << endl;
-				//cout << "Número de variables a comparar: " << tamano_comparacion << " Vertice1: " << vertice1 << " Vertice2: " << vertice2 << endl;
+				cout << "\nEmpiezo la comparación ........................" << endl;
+				cout << "Número de variables a comparar: " << tamano_comparacion << " Vertice1: " << vertice1 << " Vertice2: " << vertice2 << endl;
+				cout << "Tamaño pila comparación: " << pila_resultado.size() << endl;
 				
-				//pila_resultado.reset();
+				//pila_resultado.clear();
 				for (int k=0; k < tamano_comparacion ; k++)
 				{
-					// cout << "posición_uno: " << pos_var_uno[k] << " valor: " << matriz_vertices[vertice1][pos_var_uno[k]] 
-					// 		<< " posición_dos: " <<  pos_var_dos[k] << " valor: "<< matriz_vertices[vertice2][pos_var_dos[k]] << endl;
-					//cout << " valor: " << matriz_vertices[vertice1][pos_var_uno[k]] 
-					// 		<< " valor: "<< matriz_vertices[vertice2][pos_var_dos[k]] << endl;
+					cout << "posición_uno: " << pos_var_uno[k] << " valor: " << matriz_vertices[vertice1][pos_var_uno[k]] 
+					 		<< " posición_dos: " <<  pos_var_dos[k] << " valor: "<< matriz_vertices[vertice2][pos_var_dos[k]] << endl;
+					cout << " valor: " << matriz_vertices[vertice1][pos_var_uno[k]] 
+					 		<< " valor: "<< matriz_vertices[vertice2][pos_var_dos[k]] << endl;
 					
 					if(matriz_vertices[vertice1][pos_var_uno[k]] == matriz_vertices[vertice2][pos_var_dos[k]])
 					{
-						//cout << "comparación " << k << " con exito" << endl;
+						cout << "comparación " << k << " con exito" << endl;
 						pila_resultado.push(1);
 					}
 					else
 					{
-						//cout << "comparación " << k << " SIN exito" << endl;
+						cout << "comparación " << k << " SIN exito" << endl;
 						pila_resultado.push(0);
 					}					
 				}
@@ -1458,7 +1460,7 @@ void  comparo_vertices_conflict(int indice_nueva_variable1, vector<int>pos_var_u
 				{	
 					grafo[contador_aristas]={vertice1,vertice2};
 					contador_aristas++;
-					//cout << "Regla conflict: arista " << contador_aristas << " entre los vertices " << vertice1 << " y " << vertice2 << endl;	
+					cout << "Regla conflict: arista " << contador_aristas << " entre los vertices " << vertice1 << " y " << vertice2 << endl;	
 				}
 					
 			}
@@ -1532,18 +1534,15 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 		for (int i=0; i< tamano_pila ;i++)
 		{
-			//cout << "\nTamaño pila: " << pila_comparacion.size() << endl;
+			cout << "\nTamaño pila variables a comparar: " << pila_comparacion.size() << endl;
 			var = pila_comparacion.top();
-			//cout << "Variable a procesar: " << var << endl;
+			cout << "Variable a procesar: " << var << endl;
 			pos_var_uno[i] = posicion_variable(indice_nueva_variable1,var);
 			pos_var_dos[i] = posicion_variable(indice_nueva_variable2,var);
-			//cout << "Sacamos variable de la pila: " << pila_comparacion.top();
+			cout << "Sacamos variable de la pila: " << pila_comparacion.top() << endl;
 			pila_comparacion.pop();
+			comparo_vertices_conflict(indice_nueva_variable1,pos_var_uno,indice_nueva_variable2,pos_var_dos);
 		}
-
-
-		
-		comparo_vertices_conflict(indice_nueva_variable1,pos_var_uno,indice_nueva_variable2,pos_var_dos);
 
 	}
 
@@ -1635,8 +1634,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		int indice=0;
 		vector<string>::iterator itero_primera_variable,itero_segunda_variable;
 		
-		int coordenadas_base[2];
-
+		
 
 		contador_aristas=0;
 		cout << "\nGenero el grafo......................" << endl;
@@ -1654,16 +1652,16 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 						for(itero_segunda_variable=nueva_super_variable[j].begin(); 
 							itero_segunda_variable < nueva_super_variable[j].end();itero_segunda_variable++)
 						{
-							//cout << *itero_primera_variable << "-" << *itero_segunda_variable;
+							cout << *itero_primera_variable << "-" << *itero_segunda_variable;
 							
 							if(*itero_primera_variable == *itero_segunda_variable)
 							{	
 								pila_comparacion.push(*itero_primera_variable);
-								//cout << "\nVariable " << *itero_primera_variable << " a la pila." << endl;
+								cout << "\nVariable " << *itero_primera_variable << " a la pila." << endl;
 							}
 							else 
 							{
-								//cout << "  ";
+								cout << "  ";
 							}
 						}
 						
@@ -1673,7 +1671,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 							ejecuto_comparacion_conflict(i,j);
 				else 
 				{
-					//cout << "\n¡ATENCIÓN!-> Pongo todas las aristas entre U[" << i << "] y U[" << j << "]" << endl;
+					cout << "\n¡ATENCIÓN!-> Pongo todas las aristas entre U[" << i << "] y U[" << j << "]" << endl;
 					relleno_aristas(i,j);
 				}
 				cout << "Contador aristas: " << contador_aristas << endl;
@@ -1870,12 +1868,10 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
-
-
 	void beginInstance(InstanceType type) {
 
 #ifdef midebug
-		cout << "Empieza Instancia tipo: " << type << " ............" << endl;
+		cout << "Empieza Instancia................ " << type << endl;
 #endif
 
 		//XCSP3PrintCallbacks::beginInstance(type);
@@ -1908,12 +1904,19 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
+
+
+
 	// Se invoca cuando se comienza a procesar un array.
 	// Se resetean los contadores para poder llevar registro del
 	// tamaño del array y del rango de las variables.
 	void beginVariableArray(string id) {
 
+#ifdef midebug
 		cout << "Empiezo con el Array, reseteo los valores para el array:  " << id << endl;
+#endif
 
 		lista_arrays.push_back(id);
 		array_actual = id;
@@ -1994,19 +1997,21 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	void endVariables() {
 
 		//Escribo el fichero .csp
-		//escribe_fichero();
 		reserva_memoria_punteros();
 
-		// Genero la matriz
-
-		//cout << "Genero la matriz Ternaria............." << endl;
-		//genera_matriz_ternaria();
 		//genero_tuplas_binarias();
 		//genero_tuplas_ternarias();
 
+
+		// Genero la matriz
 		//cout << "Genero la matriz Binaria............." << endl;
 		//genera_matriz();
 		//cout << "Matriz generada .............." << endl;
+		//cout << "Genero la matriz Ternaria............." << endl;
+		//genera_matriz_ternaria();
+
+
+
 
 #ifdef midebug
 		//print_coordenadas_base();
@@ -2235,7 +2240,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		tamano_lista = list.size();							// Tamaño tuplas.
 		tamano_valores = rango_variable[list[0]->id];  		// Tamaño datos.
 
-		cout << "tamano_lista: " << tamano_lista << " - tamano_valores: " << tamano_valores << endl;
+		cout << "Número Variables: " << tamano_lista << " - Rango de valores: " << tamano_valores << endl;
 
 		// Reseteo el vector datos para generar la nueva tanda de vértices.
 		datos.clear();
@@ -2389,7 +2394,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		tamano_lista = list.size();							// Tamaño tuplas.
 		tamano_valores = rango_variable[list[0]->id]; 	 	// Tamaño datos.
 
-		cout << "tamano_lista: " << tamano_lista << " - tamano_valores: " << tamano_valores << endl;
+		cout << "Número Variables: " << tamano_lista << " - Rango de valores: " << tamano_valores << endl;
 
 		// Reseteo el vector datos para generar la nueva tanda de vértices.
 		datos.clear();
