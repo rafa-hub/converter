@@ -1228,6 +1228,10 @@ public:
 
 
 
+
+
+
+
 void imprimo_vertices()
 	{
 		cout << "Imprimo los vertices del grafo por cada nueva Nueva Variable. Número de vértices: " << indice_vertices << endl;
@@ -1311,6 +1315,8 @@ void imprimo_vertices()
 			}
 		return i;
 	}
+
+
 
 
 
@@ -2110,6 +2116,9 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 //    	cout << "        ";
 //    	displayList(values);
 	}
+
+
+
 
 
 
