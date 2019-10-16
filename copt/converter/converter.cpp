@@ -345,6 +345,7 @@ public:
 	// instancia de la variable y el valor de la coordenada de la restriccion
 	// Hay que restar el minimo del rango de valores para el caso en el que no sea cero
 	// Si no, se escribe fuera del rango de la matriz
+	// Deprecated: Ahora se calculan al principio y se guardan en un mapa.
 	void calcula_coordenadas_base(string var_cero, string var_uno, int indice0,
 									int indice1, int *coordenadas_base) {
 
@@ -353,13 +354,13 @@ public:
 		*coordenadas_base = base_array[var_uno] + (indice1 * rango_variable[var_uno]);
 		
 #ifdef midebug
-		/* coordenadas_base--;
+		coordenadas_base--;
 		cout << "Var cero: " << var_cero << " - indice: " << indice0 << " - Coordenada Base X: " 
 		<< *coordenadas_base << endl;
 		
 		coordenadas_base++;
 		cout << "Var uno: " << var_uno << " - indice: " << indice1 << " - Coordenada Base Y: " 
-		<< *coordenadas_base << endl; */
+		<< *coordenadas_base << endl;
 #endif
 
 		return;
@@ -475,17 +476,6 @@ public:
 
 
 
-	
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -526,16 +516,7 @@ public:
 			}
 			o << "\n\n" << endl;
 		}
-		/* if (matriz == "shadow") {
-			//cout<<"MATRIZ SHADOW----------------"<<endl;
-			for (int x = 0; x < dimension_matriz; x++){
-				for (int y = 0; y < dimension_matriz; y++){
-					o << matriz_shadow[x][y] << " ";
-				}
-				o << endl;
-			}
-			o << "\n\n" << endl;
-		} */
+		
 		return o;
 	}
 
@@ -900,7 +881,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	//Funcion que escribe en la matriz una regla AllEqual o AllDifferent
 	// Hay que adaptarla para el uso de las nuevas funciones.(nueva_escribe_en_matriz())
-	void  escribe_regla_all(int *coordenadas_base, string var_cero, string var_uno, int REGLA)
+	void  escribe_regla_all(string var_cero, string var_uno, int REGLA)
 	{
 		int i=0,j=0;
 		int coordenada_final[2];
@@ -919,14 +900,14 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 #ifdef midebug
 						cout << "  -->  Son diferentes " ;
 #endif
-						coordenada_final[0]=coordenadas_base[0]+i;
-						coordenada_final[1]=coordenadas_base[1]+j;
+						coordenada_final[0]=base_variable[var_cero]+i;
+						coordenada_final[1]=base_variable[var_uno]+j;
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
 					}
 					else {
-						coordenada_final[0]=coordenadas_base[0]+i;
-						coordenada_final[1]=coordenadas_base[1]+j;
+						coordenada_final[0]=base_variable[var_cero]+i;
+						coordenada_final[1]=base_variable[var_uno]+j;
 						//if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
 						//	throw std::runtime_error("Error: UNA REGLA AllDifferent ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
@@ -954,14 +935,14 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 #ifdef midebug
 						cout << "  -->  Son iguales " ;
 #endif
-						coordenada_final[0]=coordenadas_base[0]+i;
-						coordenada_final[1]=coordenadas_base[1]+j;
+						coordenada_final[0]=base_variable[var_cero]+i;
+						coordenada_final[1]=base_variable[var_uno]+j;
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
 					}
 					else {
-						coordenada_final[0]=coordenadas_base[0]+i;
-						coordenada_final[1]=coordenadas_base[1]+j;
+						coordenada_final[0]=base_variable[var_cero]+i;
+						coordenada_final[1]=base_variable[var_uno]+j;
 						//if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
 						//	throw std::runtime_error("Error: UNA REGLA AllEqual ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
@@ -977,6 +958,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	}
 		
 	}
+
+
 
 
 
@@ -1332,38 +1315,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	//Versión para restricciones binarias o superiores
 	void buildConstraintExtension(string id, vector<XVariable *> list,
-			vector<vector<int>> &tuples, bool support, bool hasStar) {
-
-		int i=0,j=0,k=0;
-		int contador=0;
-		int rango=0;
-		int fila=0;
-		string var;
-		vector<int> auxiliar;
-		stack <int> pila_comparacion;
+		vector<vector<int>> &tuples, bool support, bool hasStar) {
+	
 		
-		int indice0, indice1,indice_aux;;
-		int dimension;
-		string var_cero, var_uno, var_aux;
-		int coordenadas_base[2];
-		vector<vector<int>>::iterator itero_parejas;
-		
-		
-		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria
-		int *puntero_vertice;	// Puntero auxiliar para recorrer la tupla de cada vértice.
-								// Se inicializa un nuevo puntero de la matriz y se asigna
-								// a este puntero auxiliar.
-
-		vector<XVariable *>::iterator itero_variables;
-		vector<string>::iterator itero_dentro_variables;
-		vector<vector<int>>::iterator itero_tuplas;
-		vector <int>::iterator itero_dentro_tuplas;
-
-		vector <string> super_variable;
-		int id_supervariable=0;
-		
-
-
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
 
 		// Guardo el valor de las tuplas por si es una restriccion de grupo
@@ -1430,35 +1384,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	void buildConstraintExtensionAs(string id, vector<XVariable *> list,
 			bool support, bool hasStar) {
 		
-		int i=0,j=0,k=0;
-		int contador=0;
-		int rango=0;
-		int fila=0;
-		string var;
-		vector<int> auxiliar;
-		stack <int> pila_comparacion;
-		
-		
-		int dimension;
-		string var_cero, var_uno, var_aux;
-		int indice0, indice1, indice_aux;
-		int coordenadas_base[2];
-	
-		vector<vector<int>>::iterator it;
-		vector<int>::iterator ite;
- 
-		int *puntero_ternario; 	// Puntero para recorrer la matriz ternaria.
-		int *puntero_vertice;	// Puntero auxiliar para recorrer la tupla de cada vértice.
-								// Se inicializa un nuevo puntero de la matriz y se asigna
-								// a este puntero auxiliar.
-		
-		vector<XVariable *>::iterator itero_variables;
-		vector<string>::iterator itero_dentro_variables;
-		vector<vector<int>>::iterator itero_tuplas;
-		vector <int>::iterator itero_dentro_tuplas;
-
-		vector <string> super_variable;
-		int id_supervariable=0;
 		
 
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
@@ -1559,10 +1484,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
     	
-		int indice0,indice1;
-		string var_cero, var_uno;
-		int coordenadas_base[2];
-		int i,j,k;
+		int i=0,j=0,k=0;
 		int REGLA;
 
 		REGLA=DIFERENTE;		
@@ -1576,18 +1498,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 #ifdef midebug
 				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
 #endif
-				indice0 = get_indice(*(list[i]));
-				indice1 = get_indice(*(list[j]));
-				var_cero = get_nombre(list[i]->id);
-				var_uno = get_nombre(list[j]->id);
-
-				calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-				escribe_regla_all(coordenadas_base,var_cero,var_uno,REGLA);
+				escribe_regla_all(list[i]->id,list[j]->id,REGLA);
 			}
-		}
-
-
-		
+		}		
 	}
 
 
@@ -1647,10 +1560,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	void buildConstraintAllEqual(string id, vector<XVariable *> &list) {
     	
-		int indice0,indice1;
-		string var_cero, var_uno;
-		int coordenadas_base[2];
-		int i,j,k;
+		int i=0,j=0,k=0;
 		int REGLA;
 
 		REGLA=IGUAL;
@@ -1664,22 +1574,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	#ifdef midebug
 				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
 	#endif
-
-				indice0 = get_indice(*(list[i]));
-				indice1 = get_indice(*(list[j]));
-				var_cero = get_nombre(list[i]->id);
-				var_uno = get_nombre(list[j]->id);
-
-				calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-				escribe_regla_all(coordenadas_base,var_cero,var_uno,REGLA);
+				escribe_regla_all(list[i]->id,list[j]->id,REGLA);
 			}
 		}
-
-
-		
-
-
-
 	}
 
 
@@ -1704,14 +1601,13 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
     	string var_cero,var_uno;
 		int rango_cero,rango_uno,indice0,indice1;
     	int dimension=2; 
-		int coordenadas_base[2]={0,0};
 		int coordenadas_final[2]={0,0};
 
 		rango_cero = rango_variable[x->id];
 		rango_uno = rango_variable[y->id];
 
 
-	//cout << "\nFórmula simple.............. \n  " << id;
+	cout << "\nFórmula simple.............. \n  " << id;
 			
 	#ifdef midebug
 			cout << "\nFórmula simple..............   " << id;
@@ -1722,7 +1618,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		cout << "Var uno: " << var_cero << "- Índice: " << indice0 << " - Rango: " << rango_cero << 
 				" - Var dos: " << var_uno << "- Índice: " << indice1 << " Rango: " << rango_uno << endl;
-
 	#endif
 		
 		switch(orden)
@@ -1932,6 +1827,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 //
 //////////////////////////////////
 
+
 void buildConstraintSum(string id, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond)
 {
 
@@ -1944,10 +1840,15 @@ void buildConstraintSum(string id, vector<XVariable *> &list, vector<int> &coeff
 
 
 
+
+
 void beginConstraints() {
     cout << "\nComienza la declaración de las Restricciones (Constraints) ..............\n" << endl;
 	
 }
+
+
+
 
 
 
@@ -1965,11 +1866,14 @@ void endConstraints() {
 
 
 
+
+
 //////////////////////////////////
 //
 // 	PROCESANDO REGLAS CHANNEL
 //
 //////////////////////////////////
+
 
 
 
@@ -1981,6 +1885,8 @@ void endConstraints() {
     	displayList(list);
     	cout << "        value: " << *value << endl;
 	}
+
+
 
 
 
@@ -2037,12 +1943,7 @@ void endConstraints() {
 			//cout << endl; 
 		} 
 
- 
-
-
-
 		// Pongo a Uno el canal
-		
     
 		for (k=0, itero1 = list1.begin(), i=0; itero1 != list1.end();itero1++,i++)
 		{
@@ -2064,10 +1965,7 @@ void endConstraints() {
 			}
 			
 		}
-  
- 
 		//cout << endl;
-
 	}
 
 
