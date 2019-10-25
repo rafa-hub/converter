@@ -47,23 +47,21 @@ private:
 
 
 
-	map<string,int> mapa_indices;		// Guarda el índice de cada variable 
-	map<string, vector<int>> valores_variable_discreta;	// Guarda los valores discretos de una variable
-	string primera_variable = "Si";
+	map<string,int> mapa_indices;		// Guarda el índice de cada variable.
+	map<string, vector<int>> valores_variable_discreta;	// Guarda los valores discretos de una variable.
+	string primera_variable = "Si";		// Permite calcular la base de las variables en la matriz, según se leen.
 	string variable_anterior="Vacia";
-	map<string, int> base_array; 		// Mapa de cada array con su coordenada base
-	map<string, int> base_variable;		// Mapa de cada Variable con su coordenada base, debe sustituir a base_array
-	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables
-	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables
-	map<string, int> rango_array;	 	// Mapa de cada array con el rango de valores de las variables
-	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables
-	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias
-										    // de variables del array
+	map<string, int> base_array; 		// Mapa de cada array con su coordenada base.
+	map<string, int> base_variable;		// Mapa de cada Variable con su coordenada base, debe sustituir a base_array.
+	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables.
+	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables.
+	map<string, int> rango_array;	 	// Mapa de cada array con el rango de valores de las variables.
+	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables.
+	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias.
+										// de variables del array.
 
 	map<int,vector<string>> nueva_super_variable;		// Nueva Super-Variable para procesar las reglas ternarias.
 														// Contiene las variables como strings.
-	
-	
 
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
 	int base_siguiente_array = 0; 		// Guarda el valor para calcular la posicion en la matriz del siguiente array
@@ -76,13 +74,10 @@ private:
 									  	// buildConstraintExtensionAs() no me las pasan como argumento
 	vector<int> tuplas_unarias;			// Lo mismo, pero para variables unarias
 	vector<int> tamano_tuplas;			// Vector que almacena el tamaño de las tuplas: (número de tuplas)
-	vector<int> tamano_total_tuplas;	// Vector que almacena el tamaño total de los elementos de las tuplas: (dimensión*número de tuplas)
-
+	
 	map <int,vector<int>> mapa_vertices;	// Lista de vértices.
 	stack <string> pila_comparacion;		// Pila para hacer la comparación de los datos.
 
-	
-	
 public:
 
 	char nombre_fichero[256]; 			// Nombre del fichero XML a procesar
@@ -106,9 +101,18 @@ public:
 	int indice_vertices=0;	// Índice global para indexar los vértices del grafo. (a quitar)
 	
 	map <int , vector <int>> grafo;		// Almacena el grafo que será volcado a fichero. DEPRECATED.
-	
-	
-	
+
+
+	//////////////////////////////////////////////////////////////
+	///
+	///  FIN DECLARACIÓN DE VARIABLES GLOBALES DE LA CLASE
+	///
+	//////////////////////////////////////////////////////////////
+
+
+
+
+
 
 #ifdef mitest
 	vector<vector<int>> matriz_check; 	// Matriz donde se almacena el resultado
@@ -162,6 +166,7 @@ public:
 
 		fichero_salida.close();
 	}
+
 
 
 
@@ -1730,61 +1735,25 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		vector<string> variable;
 		vector<int> rango;
     	map<string, int> tupla;
-		string var_cero,var_uno;
-		int indice0,indice1;
 		int resultado=0; 
-		int coordenadas_base[2];
-		int *punt_auxiliar;
 		int coordenadas_final[2];
-
-		punt_auxiliar=coordenadas_base;
 		
 
-    	//cout << "\nFórmula compleja..............   \n";
-    	//tree->prefixe();
-				
+    	// cout << "\nFórmula compleja..............   \n";
+    	// tree->prefixe();
 
 		for(int i=0;i<tree->arity();i++)
     	{
      		variable.push_back(tree->listOfVariables[i]);
-			rango.push_back(rango_variable[get_nombre(tree->listOfVariables[i])]);
+			rango.push_back(rango_variable[tree->listOfVariables[i]]);
     	}
-
-		
-
-		/* for(int i=0;i<tree->arity();i++)
-		{	
-			cout << "Variable: " << variable[i] << " - Rango de valores: " << rango[i] << endl;
-		} 
-
-		cout << endl; */
-
-		
-
 
 		if (tree->arity()==2)
 		{
-			var_cero=get_nombre(variable[0]);
-			var_uno=get_nombre(variable[1]);
-			
-			indice0=get_indice_ternario(variable[0]);
-			indice1=get_indice_ternario(variable[1]);
-
-			cout << variable[0] <<  " - " << variable[1] << endl;
-			//cout << var_cero << ": " << indice0 << " - " << var_uno << ": " << indice1 << endl;
-			//calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-			
-			*punt_auxiliar = base_array[var_cero] + (indice0 * rango_variable[var_cero]);
-			punt_auxiliar++;
-			*punt_auxiliar = base_array[var_uno] + (indice1 * rango_variable[var_uno]);	
-			
-		
 			for (int i=0; i<rango[0];i++)
 			{
 				for(int j=0;j<rango[1];j++)
 				{
-					//cout << variable[0] << ": " << i << " - " << variable[1] << ": " << j << endl;
-					//cout << var_cero << ": " << indice0 << " - " << var_uno << ": " << indice1 << endl;
 					tupla[variable[0]]=i;
 					tupla[variable[1]]=j;
 					
@@ -1798,8 +1767,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 					if (!resultado)
 					{		
 						//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-						coordenadas_final[0] = coordenadas_base[0]+i;
-						coordenadas_final[1] = coordenadas_base[1]+j;	
+						coordenadas_final[0] = base_variable[variable[0]]+i;
+						coordenadas_final[1] = base_variable[variable[1]]+j;	
 						
 						matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
 						matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
@@ -1807,9 +1776,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				}
 			}
 		}
-    
-    	
-
     	cout << "\n";
 	}
 
