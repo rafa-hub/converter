@@ -35,7 +35,7 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 private:
 
 	vector<string> 	lista_arrays;    	// Guarda la lista de arrays
-	vector<string> 	lista_variables; 	// Guarda la lista de variables
+	
 	
 	struct dato {						// Estructura necesaria para la generalización de la solución binaria.
 
@@ -55,12 +55,17 @@ private:
 	
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
 
-	map<string, int> base_array; 		// Mapa de cada array con su coordenada base
-	map<string, int> minimo_variable; 	// Guarda el minimo del rango de las variables
-	map<string, int> maximo_variable; 	// Guarda el maximo del rango de las variables
-	map<string, int> rango_variable; 	// Mapa de cada array con el rango de valores de las variables
-	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias
-										    // de variables del array
+	map<string, vector<int>> valores_variable_discreta;	// Guarda los valores discretos de una variable.
+	string primera_variable = "Si";		// Permite calcular la base de las variables en la matriz, según se leen.
+	string variable_anterior="Vacia";
+	map<string, int> base_array; 		// Mapa de cada array con su coordenada base.
+	map<string, int> base_variable;		// Mapa de cada Variable con su coordenada base, debe sustituir a base_array.
+	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables.
+	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables.
+	map<string, int> rango_array;	 	// Mapa de cada array con el rango de valores de las variables.
+	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables.
+	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias.
+										// de variables del array.
 
 	map<int,vector<string>> nueva_super_variable;	// Nueva Super-Variable para procesar las reglas ternarias.
 													// Contiene las variables como strings.
@@ -87,12 +92,16 @@ private:
 	
 public:
 
-	vector<int> lista_variables_binarias;		// Guarda la lista de variables binarizadas binarias.
-	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas.
-
+	vector<string> lista_variables; 			// Guarda la lista de variables.
+	vector<string> lista_variables_discretas;	// Guarda la lista de variables con rango discreto.
+	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
 												// en cada posición se guarda el "número" de variables.
+												// Sirve para generar el fichero CSP
+	int indice_var_ternarias_con_ceros = 0;		// Va indexando las variables ternarias. (a substituir por algo más consistente)
 	vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
-
+	vector<int> lista_variables_binarias;		// Guarda la lista de variables binarizadas binarias.
+												// en cada posición se guarda el "número" de variables.
+	
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada
 	int dimension_matriz_ternaria = 0;	//Guarda la dimension definitiva de la matriz ternaria
 	
@@ -278,6 +287,27 @@ public:
 
 		return vector;
 	}
+
+
+
+
+
+
+
+string get_nombre_ternario(string variable) {
+		string nombre;
+		size_t aux1 = 0;
+
+		nombre = variable;
+
+
+
+
+		return nombre;
+	}
+
+
+
 
 
 
@@ -1273,6 +1303,9 @@ void imprimo_vertices()
 
 
 
+
+
+
 	
 
 	void relleno_aristas(int primera,int segunda)
@@ -1303,6 +1336,11 @@ void imprimo_vertices()
 
 
 
+
+
+
+
+
 	int posicion_variable(int nueva_var,string var)
 	{
 		int i=0;
@@ -1315,6 +1353,11 @@ void imprimo_vertices()
 			}
 		return i;
 	}
+
+
+
+
+
 
 
 
@@ -1997,6 +2040,12 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
+
+
+
+
 	// Se invoca al terminar de procesar las variables.
 	// Escribe el fichero .csp que contiene todas las variables con sus rangos.
 	// Genera la matriz, que una vez escrita, servirá para generar el grafo.
@@ -2047,31 +2096,10 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		rango_variable[id] = rango_variables;
 		minimo_variables = minValue;
 		minimo_variable[id] = minValue;
-		maximo_variable[id] = maxValue;					/*TODO-hay variables (singleton) con valor -1!!*/
+		maximo_variable[id] = maxValue;					
 		numero_variables++;
 		cout << "Variable: " << id << " indice var: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
 				<< maxValue << endl;
-
-		//PSS-treats the case of singleton variables
-		if(!is_array){						/* variable extension to arrays: dirty */
-			cout << "¡¡¡ Soy Singelton !!!" << endl;
-			lista_arrays.push_back(id);
-			base_array[id] = base_siguiente_array;
-			numero_variables=1;
-
-			base_siguiente_array += rango_variables;
-			numero_variable[id] = 1;
-			rango_variable[id] = rango_variables;
-			minimo_variable[id] = minimo_variables;
-		}
-
-
-#ifdef midebug
-		cout << "Array actual " << array_actual << endl;
-		cout << "Rango valores: " << rango_variables
-				<< " - Instancia Variable: " << (numero_variables-1)
-				<< " - Minimo valor Variable: " << minimo_variables << endl;
-#endif
 
 	}
 
@@ -2086,36 +2114,41 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	//called for stand-alone values independent of a range: we assume they DO belong to a range
 	void buildVariableInteger(string id, vector<int> &values) override {
 
+		vector<int>::iterator itero_values;
+
 		lista_variables.push_back(id);
+		lista_variables_discretas.push_back(id);
+		rango_variable[id] = values.size();
+
 		rango_variables = values.size();
-		rango_variable[id] = rango_variables;
-		minimo_variables = values.front(); 		/*TODO-extend to non-index values */
-		mapa_indices[id]=numero_variables;
-		mapa_nombres[id] = id;
+		minimo_variable[id] = values.front(); 		
+		maximo_variable[id] = values.back();
+		mapa_indices[id] = numero_variables;
 		numero_variables++;
 
-		cout << "Variable: " << id << " - min: " << values[0] << " - max: "
-				<< values.back() << " Índice: " << mapa_indices[id] <<  endl;
 
 
-		//treats the case of singleton variables
-		if (!is_array) { /* variable extension to arrays: dirty */
-			cout << "¡¡¡ Soy Singelton !!!" << endl;
-			lista_arrays.push_back(id);
-			base_array[id] = base_siguiente_array;
-			numero_variables = 1;
-
-			base_siguiente_array += rango_variables;
-			numero_variable[id] = 1;
-			rango_variable[id] = rango_variables;
-			minimo_variable[id] = minimo_variables;
+		for (int i=0; i< values.size();i++)
+		{
+			valores_variable_discreta[id].push_back(values[i]);
 		}
 
 
-//		cout << "   Variable con valores discretos: " << id << " : ";
-//    	cout << "        ";
-//    	displayList(values);
+		cout << "Variable: " << id << " - min: " << values[0] << " - max: "
+		 		<< values.back() << " - Índice: " << mapa_indices[id] << " - Rango: " << rango_variable[id] <<  endl;
+
+		cout << "Valores: ";
+
+		for (int i=0; i< values.size();i++)
+		{
+			cout << valores_variable_discreta[id][i] << " ";
+		}
+		cout << endl;
 	}
+
+
+
+
 
 
 
@@ -2701,13 +2734,180 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 				escribe_regla_all(coordenadas_base,var_cero,var_uno,REGLA);
 			}
 		}
+	}
 
 
-		
 
+
+
+
+
+
+
+	// Para restricciones con suma sin coeficientes.
+	void buildConstraintSum(string, vector<XVariable *> &list, XCondition &cond)
+	{
+    	
+	vector<XVariable *>::iterator itero_variables;
+	vector<string>::iterator itero_dentro_variables;
+	
+	int dimension=0;
+	int rango=0;
+	int suma=0;
+
+	// Temporal
+	int rango_cero=2;
+	int rango_uno=2;
+	int operacion=0;
+
+	
+	cout << "\n RESTRICCIÓN DE SUMA SIN PESOS:";
+    cout << "        ";
+    displayList(list, "+");
+    cout << "Condición:" << cond << endl;
+	cout << "OrderType: " << cond.op << endl;
+	operacion = cond.op;
+	cout << "val: " << cond.val << endl;
+
+
+	for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+	{
+		cout << (*itero_variables)->id << " - Rango: " << rango_variable[(*itero_variables)->id] << endl  ;
+		nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+	}
+	indice_var_ternarias++;
+	
+	
+
+	switch(cond.op)
+		{
+			case (LE):
+				cout << "Less or Equal (" << operacion << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i<=j)
+						{
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							/* coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;					
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1; */
+
+						}
+				break;
+			case (LT):
+				cout << "Less Than (" << operacion << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i<j)
+						{
+							/* calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j); */
+						}
+				break;
+			case (GE):
+				cout << "Suma Greater or Equal (mayor o igual) que " << cond.val << endl;
+
+				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+				{
+					(*itero_variables)->id  ;
+					rango_variable[(*itero_variables)->id];
+				}
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+					{
+						suma = i+j;
+						if (suma >= cond.val)
+						{
+							cout << "¡Me corro! Suma " << suma << " mayor o igual que la condición " << cond.val << "." << endl;
+							/* calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j); */
+						}
+					}
+				break;
+			case (GT):
+				cout << "Greater Than (" << operacion << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i>j)
+						{
+							/* calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j); */
+						}
+				break;
+			case (IN):
+				cout << "Contenido en (" << operacion << ")" << endl;
+				cout << "Pendiente de implementar\n";
+				break;
+			case (EQ):
+				cout << "Equal (" << operacion << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i==j)
+						{
+							/* calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
+							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j); */
+						}
+				break;
+			case (NE):
+				cout << "Not Equal (" << operacion << ")" << endl;
+				for (int i=0; i<rango_cero;i++)
+					for (int j=0;j<rango_uno;j++)
+						if (i!=j)
+						{
+							//cout << "i: " << i << " - " << "j: " << j << endl;
+							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
+							/* coordenadas_final[0] = coordenadas_base[0]+i;
+							coordenadas_final[1] = coordenadas_base[1]+j;
+							
+							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
+							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1; */
+						}					
+				break; 
+		}
+
+	
+
+	
+	cout << endl;	
 
 
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	// Para restricciones con suma con coeficientes.
+	void buildConstraintSum(string, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond) {
+    cout << "\nEN TU COÑO sum constraint:";
+    if(list.size() > 8) {
+        for(int i = 0 ; i < 3 ; i++)
+            cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << "*" << *(list[i]) << " ";
+        cout << " ... ";
+        for(unsigned int i = list.size() - 4 ; i < list.size() ; i++)
+            cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << "*" << *(list[i]) << " ";
+    } else {
+        for(unsigned int i = 0 ; i < list.size() ; i++)
+            cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << "*" << *(list[i]) << " ";
+    }
+    cout << cond << endl;
+	}
+
+
+
+
+
+
 
 
 
