@@ -2838,164 +2838,178 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	void buildConstraintSum(string, vector<XVariable *> &list, XCondition &cond)
 	{
     
-	vector <dato>::iterator itero_datos;
-	vector<XVariable *>::iterator itero_variables;
-	vector<string>::iterator itero_dentro_variables;
-	
-	int dimension=0;
-	int rango=0;
-	int suma=0;
-	vector <int> temporal;			
-	dato aux;
+		vector <dato>::iterator itero_datos;
+		vector<XVariable *>::iterator itero_variables;
+		vector<string>::iterator itero_dentro_variables;
+		
+		int dimension=0;
+		int rango=0;
+		int suma=0;
+		vector <int> temporal;			
+		dato aux;
 
-	int tamano_lista = 0,tamano_valores = 0;
-	int numero_vertices_nueva_variable=0;
-	int hay_vertice = 1;
+		int tamano_lista = 0,tamano_valores = 0;
+		int numero_vertices_nueva_variable=0;
+		int hay_vertice = 1;
 
-	// Temporal
-	int rango_cero=2;
-	int rango_uno=2;
-	int operacion=0;
+		// Temporal
+		int rango_cero=2;
+		int rango_uno=2;
+		int operacion=0;
 
-	
-	cout << "\n RESTRICCIÓN DE SUMA SIN PESOS:";
-    cout << "        ";
-    displayList(list, "+");
-    cout << "Condición:" << cond << endl;
-	cout << "OrderType: " << cond.op << endl;
-	operacion = cond.op;
-	cout << "val: " << cond.val << endl;
+		
+		cout << "\nRESTRICCIÓN DE SUMA SIN PESOS..................\n";
+		/*cout << "        ";
+		displayList(list, "+");
+		cout << "Condición:" << cond << endl;
+		cout << "OrderType: " << cond.op << endl;
+		operacion = cond.op;
+		cout << "val: " << cond.val << endl; */
 
-	cout << "\nNueva supervariable ..........  - con índice: " << indice_var_ternarias << endl;
-	for (itero_variables = list.begin();itero_variables != list.end();itero_variables++)
-	{
-			cout << (*itero_variables)->id << " - " ;
-			nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
-	}
-
-	
-
-	lista_variables_ternarias.push_back(list.size());	// Guardo las variables ternarias. (Número de variables binarizadas)
-	// dimension_variables_ternarias; // Habrá que calcularlo de otra manera.
-	tamano_lista = list.size();							// Tamaño tuplas.
-	tamano_valores = rango_variable[list[0]->id];  		// Tamaño datos.
-
-	cout << "Número Variables: " << tamano_lista << " - Rango de valores: " << tamano_valores << endl;
-
-	// Reseteo el vector datos para generar la nueva tanda de vértices.
-	datos.clear();
-
-	// Relleno la estructura de datos que luego voy a recorrer.
-	for(int i = 0; i < list.size(); i++)
-	{
-		aux.var = list[i]->id;
-		aux.contador = 0;
-		aux.valores.clear();
-		for (int j = minimo_variable[list[i]->id]; j <= maximo_variable[list[i]->id]; j++)
+		cout << "Nueva supervariable ..........  - con índice: " << indice_var_ternarias << endl;
+		for (itero_variables = list.begin();itero_variables != list.end();itero_variables++)
 		{
-			aux.valores.push_back(j);
-			cout << "Valor variable: " << list[i]->id << " " << j << " - ";
+				cout << (*itero_variables)->id << " - " ;
+				nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 		}
-		cout << endl;
 
-		datos.push_back(aux);
-		}
 	
 
-	switch(cond.op)
+		lista_variables_ternarias.push_back(list.size());	// Guardo las variables ternarias. (Número de variables binarizadas)
+		tamano_lista = list.size();							// Tamaño tuplas.
+		tamano_valores = rango_variable[list[0]->id];  		// Tamaño datos.
+
+		cout << "Número Variables: " << tamano_lista << " - Rango de valores: " << tamano_valores << endl;
+
+		// Reseteo el vector datos para generar la nueva tanda de vértices.
+		datos.clear();
+
+		// Relleno la estructura de datos que luego voy a recorrer.
+		for(int i = 0; i < list.size(); i++)
 		{
-			case (GE):
-				cout << "Suma Greater or Equal (mayor o igual) que " << cond.val << endl;
+			aux.var = list[i]->id;
+			aux.contador = 0;
+			aux.valores.clear();
+			for (int j = minimo_variable[list[i]->id]; j <= maximo_variable[list[i]->id]; j++)
+			{
+				aux.valores.push_back(j);
+				cout << "Valor variable: " << list[i]->id << " " << j << " - ";
+			}
+			cout << endl;
 
-				while (datos.back().contador < tamano_valores)
-				{
-				// Genero los vértices.
-				// y Comparo los vértices descarto los conflicto.
+			datos.push_back(aux);
+		}
 
-				temporal.clear();
-				hay_vertice = 0;
-				suma = 0;
+		// Bucle para generar los vértices.
+		while (datos.back().contador < tamano_valores)
+		{
+		// Genero los vértices.
+		// y solo guardo los que cumplen la condición.
 
-				for(itero_datos = datos.begin(); itero_datos != datos.end(); itero_datos++)
-				{
-					suma += itero_datos->valores[itero_datos->contador];
-					temporal.push_back(itero_datos->valores[itero_datos->contador]);
-				}
+			temporal.clear();
+			suma = 0;
+			hay_vertice = 0;
 
-				if (suma >= cond.val)
-				{
-					hay_vertice = 1;
-					cout << "¡Me corro! Suma " << suma << " mayor o igual que la condición " << cond.val << "." << endl;
-					matriz_vertices[indice_vertices]=new int[list.size()];
+			for(itero_datos = datos.begin(); itero_datos != datos.end(); itero_datos++)
+			{
+				suma += itero_datos->valores[itero_datos->contador];
+				temporal.push_back(itero_datos->valores[itero_datos->contador]);
+			}
 
-					cout << "(";
-					for(int k=0; k < list.size(); k++)
+			switch(cond.op)
+			{
+				case (LE):
+					if (suma <= cond.val)
 					{
-						matriz_vertices[indice_vertices][k] = temporal[k];
-						cout << matriz_vertices[indice_vertices][k];
-						if (k < list.size()-1)
-							cout << ",";
+						hay_vertice = 1;
+						cout << "Suma " << suma << " menor o igual que la condición " << cond.val << "." << endl;
 					}
-					cout <<") Vertice: " << indice_vertices << endl;
+					break;
 
-					mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
-					indice_vertices++;
-				}
-
+				case (LT):
+					if (suma < cond.val)
+					{
+						hay_vertice = 1;
+						cout << "Suma " << suma << " menor que la condición " << cond.val << "." << endl;
+					}
+					break;
 					
-				
-
-				// Gestiono los contadores para ir generando las tuplas.
-				
-				datos.begin()->contador++;
-
-				for (int i=0; i < tamano_lista; i++)
-				{
-					if (datos.back().contador == tamano_valores)
-						break;
-
-					if(datos[i].contador == tamano_valores)
+				case (GE):
+					if (suma >= cond.val)
 					{
-						datos[i].contador = 0; 
-						datos[i+1].contador++;
+						hay_vertice = 1;
+						cout << "Suma " << suma << " mayor o igual que la condición " << cond.val << "." << endl;
 					}
+					break;
+				
+				case (GT):
+					cout << "Greater Than (" << operacion << ")" << endl;
+					if (suma > cond.val)
+					{
+						hay_vertice = 1;
+						cout << "Suma " << suma << " mayor que la condición " << cond.val << "." << endl;
+					}
+					break;
+
+				case (IN):
+					cout << "Contenido en (" << operacion << ")" << endl;
+					throw std::runtime_error("En Constraint SUM, operación \"IN\" no implementada todavía.\n");
+					break;
+
+				case (EQ):
+					if (suma == cond.val)
+					{
+						hay_vertice = 1;
+						cout << "Suma " << suma << " igual a la condición " << cond.val << "." << endl;
+					}
+					break;
+
+				case (NE):
+					if (suma == cond.val)
+					{
+						hay_vertice = 1;
+						cout << "Suma " << suma << " no es igual a la condición " << cond.val << "." << endl;
+					}
+									
+			}
+
+			// En el caso de que se cumpla la condición, se crea el vértice correspondiente.
+			if (hay_vertice)
+			{
+				matriz_vertices[indice_vertices]=new int[list.size()];
+
+				cout << "(";
+				for(int k=0; k < list.size(); k++)
+				{
+					matriz_vertices[indice_vertices][k] = temporal[k];
+					cout << matriz_vertices[indice_vertices][k];
+					if (k < list.size()-1)
+						cout << ",";
 				}
-				} 
-			break;
+				cout <<") Vertice: " << indice_vertices << endl;
 
-			// Por el momento lo dejamos desordenado.
-			case (LE):
-				cout << "Less or Equal (" << operacion << ")" << endl;
-				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
-				break;
-			case (LT):
-				cout << "Less Than (" << operacion << ")" << endl;
-				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
-				break;
-			case (GT):
-				cout << "Greater Than (" << operacion << ")" << endl;
-				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
-				break;
-			case (IN):
-				cout << "Contenido en (" << operacion << ")" << endl;
-				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
-				break;
-			case (EQ):
-				cout << "Equal (" << operacion << ")" << endl;
-				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
-				break;
-			case (NE):
-				cout << "Not Equal (" << operacion << ")" << endl;
-				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");				
-				 
-		}
+				mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+				indice_vertices++;	
+			}		
 
-	
+			// Gestiono los contadores para ir generando las tuplas.
+			datos.begin()->contador++;
+
+			for (int i=0; i < tamano_lista; i++)
+			{
+				if (datos.back().contador == tamano_valores)
+					break;
+
+				if(datos[i].contador == tamano_valores)
+				{
+					datos[i].contador = 0; 
+					datos[i+1].contador++;
+				}
+			}
+		} 	
 
 	indice_var_ternarias++;
 	cout << endl;	
-
-
 	}
 
 
@@ -3013,7 +3027,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 	// Para restricciones con suma con coeficientes.
 	void buildConstraintSum(string, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond) {
-    cout << "\nEN TU COÑO sum constraint:";
+    cout << "\nEN TU COÑO con un MOÑO sum constraint:";
     if(list.size() > 8) {
         for(int i = 0 ; i < 3 ; i++)
             cout << (coeffs.size() == 0 ? 1 : coeffs[i]) << "*" << *(list[i]) << " ";
