@@ -129,9 +129,33 @@ public:
 
 
 
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////////////
+/////
+/////  FUNCIONES AUXILIARES
+/////
+///////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
 	void set_nombre_fichero(char *nombre) {
 		strcpy(nombre_fichero, nombre);
 	}
+
+
+
+
+
 
 
 
@@ -201,7 +225,7 @@ public:
 		
 
 		for (unsigned int j = 0; j < lista_variables_ternarias.size(); j++)
-			fichero_salida << "v " << (j + 1) << " " << dimension_variables_ternarias[j]
+			fichero_salida << "v " << (j + 1) << " " << lista_variables_ternarias[j]
 					<< endl;
 		
 
@@ -237,6 +261,8 @@ public:
 		return(indice);
 // 		return(mapa_indices[variable.id]);  //Toda la función
 	}
+
+
 
 
 
@@ -656,12 +682,17 @@ string get_nombre_ternario(string variable) {
 
 
 
+
+
 	// Certificacion de que la matriz tiene la diagonal principal a cero
 	void pongo_diagonal_matriz_a_cero() {
 		for (int x = 0; x < dimension_matriz; x++) {
 			matriz_datos[x][x] = 0;
 		}
 	}
+
+
+
 
 
 
@@ -696,6 +727,11 @@ string get_nombre_ternario(string variable) {
 		}
 		return o;
 	}
+
+
+
+
+
 
 
 
@@ -1310,14 +1346,14 @@ void imprimo_vertices()
 
 	void relleno_aristas(int primera,int segunda)
 	{
-		//cout << "Número de vértices U[" << primera << "]: " << mapa_vertices[primera].size() << endl;
-		//cout << "Número de vértices U[" << segunda << "]: " << mapa_vertices[segunda].size() << endl;
+		cout << "Número de vértices U[" << primera << "]: " << mapa_vertices[primera].size() << endl;
+		cout << "Número de vértices U[" << segunda << "]: " << mapa_vertices[segunda].size() << endl;
 
 		for (int i=0;i<mapa_vertices[primera].size();i++)
 		{
 			for(int j=0;j<mapa_vertices[segunda].size();j++)
 			{
-				//cout << "Arista ......... v(" << mapa_vertices[primera][i] << ") <-> v(" << mapa_vertices[segunda][j] << ")" << endl; 
+				cout << "Arista ......... v(" << mapa_vertices[primera][i] << ") <-> v(" << mapa_vertices[segunda][j] << ")" << endl; 
 				grafo[contador_aristas]={mapa_vertices[primera][i],mapa_vertices[segunda][j]};
 				contador_aristas++;
 			}
@@ -1727,14 +1763,38 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 				//cout << endl;
 			}
 		}
-	
-
-		
-
-		
 
 	}
 
+
+
+
+
+
+	void genero_grafo_sum()
+	{
+
+		int i=0,j=0,k=0,l=0;
+		
+		contador_aristas=0;
+		cout << "\nGenero el grafo......................" << endl;
+		
+
+		for (k=0;k<lista_variables_ternarias.size()-1;k++)
+		{
+			for (i=k,j=i+1;j<lista_variables_ternarias.size();j++)
+			{
+				cout << "Pongo todas las aristas entre U[" << i << "] y U[" << j << "]" << endl;
+				relleno_aristas(i,j);
+				
+				cout << "Contador aristas: " << contador_aristas << endl;
+				
+			}
+		}
+
+
+
+	}
 
 
 
@@ -1940,8 +2000,9 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		//imprimo_datos_grafo();
 
 		cout << "FIN del parsing ............." << endl;
-		//genero_grafo_support();
-		genero_grafo_conflict();
+		// genero_grafo_support();
+		// genero_grafo_conflict();
+		genero_grafo_sum();
 
 
 		cout << "Escribo los ficheros ........" << endl;
@@ -2287,6 +2348,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		// Reseteo el vector datos para generar la nueva tanda de vértices.
 		datos.clear();
 
+		// Relleno la estructura de datos que luego voy a recorrer.
 		for(int i = 0; i < list.size(); i++)
 		{
 			aux.var = list[i]->id;
@@ -2632,6 +2694,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 //
 ///////////////////
 
+
+	// Para restricciones AllDifferent. En esta rama de código todavía NO IMPLEMENTADA.
 	void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
     	
 		int indice0,indice1;
@@ -2671,6 +2735,12 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
+
+
+
+
 	void buildConstraintAlldifferentMatrix(string id, vector<vector<XVariable *>> &matrix) {
   		cout << "\n  ¡Mi!  allDiff matrix constraint" << id << endl;
    		for(unsigned int i = 0 ; i < matrix.size() ; i++) {
@@ -2678,6 +2748,14 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
         	displayList(matrix[i]);
     	}
 	}
+
+
+
+
+
+
+
+
 
 
 
@@ -2744,16 +2822,35 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
+////////////////////
+//
+// PROCESSING SUMAS
+//
+///////////////////
+
+
+
+
+
 	// Para restricciones con suma sin coeficientes.
 	void buildConstraintSum(string, vector<XVariable *> &list, XCondition &cond)
 	{
-    	
+    
+	vector <dato>::iterator itero_datos;
 	vector<XVariable *>::iterator itero_variables;
 	vector<string>::iterator itero_dentro_variables;
 	
 	int dimension=0;
 	int rango=0;
 	int suma=0;
+	vector <int> temporal;			
+	dato aux;
+
+	int tamano_lista = 0,tamano_valores = 0;
+	int numero_vertices_nueva_variable=0;
+	int hay_vertice = 1;
 
 	// Temporal
 	int rango_cero=2;
@@ -2769,106 +2866,133 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	operacion = cond.op;
 	cout << "val: " << cond.val << endl;
 
-
-	for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+	cout << "\nNueva supervariable ..........  - con índice: " << indice_var_ternarias << endl;
+	for (itero_variables = list.begin();itero_variables != list.end();itero_variables++)
 	{
-		cout << (*itero_variables)->id << " - Rango: " << rango_variable[(*itero_variables)->id] << endl  ;
-		nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
+			cout << (*itero_variables)->id << " - " ;
+			nueva_super_variable[indice_var_ternarias].push_back((*itero_variables)->id);
 	}
-	indice_var_ternarias++;
+
 	
+
+	lista_variables_ternarias.push_back(list.size());	// Guardo las variables ternarias. (Número de variables binarizadas)
+	// dimension_variables_ternarias; // Habrá que calcularlo de otra manera.
+	tamano_lista = list.size();							// Tamaño tuplas.
+	tamano_valores = rango_variable[list[0]->id];  		// Tamaño datos.
+
+	cout << "Número Variables: " << tamano_lista << " - Rango de valores: " << tamano_valores << endl;
+
+	// Reseteo el vector datos para generar la nueva tanda de vértices.
+	datos.clear();
+
+	// Relleno la estructura de datos que luego voy a recorrer.
+	for(int i = 0; i < list.size(); i++)
+	{
+		aux.var = list[i]->id;
+		aux.contador = 0;
+		aux.valores.clear();
+		for (int j = minimo_variable[list[i]->id]; j <= maximo_variable[list[i]->id]; j++)
+		{
+			aux.valores.push_back(j);
+			cout << "Valor variable: " << list[i]->id << " " << j << " - ";
+		}
+		cout << endl;
+
+		datos.push_back(aux);
+		}
 	
 
 	switch(cond.op)
 		{
-			case (LE):
-				cout << "Less or Equal (" << operacion << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i<=j)
-						{
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							/* coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;					
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1; */
-
-						}
-				break;
-			case (LT):
-				cout << "Less Than (" << operacion << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i<j)
-						{
-							/* calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j); */
-						}
-				break;
 			case (GE):
 				cout << "Suma Greater or Equal (mayor o igual) que " << cond.val << endl;
 
-				for (itero_variables = list.begin();itero_variables < list.end();itero_variables++)
+				while (datos.back().contador < tamano_valores)
 				{
-					(*itero_variables)->id  ;
-					rango_variable[(*itero_variables)->id];
+				// Genero los vértices.
+				// y Comparo los vértices descarto los conflicto.
+
+				temporal.clear();
+				hay_vertice = 0;
+				suma = 0;
+
+				for(itero_datos = datos.begin(); itero_datos != datos.end(); itero_datos++)
+				{
+					suma += itero_datos->valores[itero_datos->contador];
+					temporal.push_back(itero_datos->valores[itero_datos->contador]);
 				}
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
+
+				if (suma >= cond.val)
+				{
+					hay_vertice = 1;
+					cout << "¡Me corro! Suma " << suma << " mayor o igual que la condición " << cond.val << "." << endl;
+					matriz_vertices[indice_vertices]=new int[list.size()];
+
+					cout << "(";
+					for(int k=0; k < list.size(); k++)
 					{
-						suma = i+j;
-						if (suma >= cond.val)
-						{
-							cout << "¡Me corro! Suma " << suma << " mayor o igual que la condición " << cond.val << "." << endl;
-							/* calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j); */
-						}
+						matriz_vertices[indice_vertices][k] = temporal[k];
+						cout << matriz_vertices[indice_vertices][k];
+						if (k < list.size()-1)
+							cout << ",";
 					}
+					cout <<") Vertice: " << indice_vertices << endl;
+
+					mapa_vertices[indice_var_ternarias].push_back(indice_vertices);
+					indice_vertices++;
+				}
+
+					
+				
+
+				// Gestiono los contadores para ir generando las tuplas.
+				
+				datos.begin()->contador++;
+
+				for (int i=0; i < tamano_lista; i++)
+				{
+					if (datos.back().contador == tamano_valores)
+						break;
+
+					if(datos[i].contador == tamano_valores)
+					{
+						datos[i].contador = 0; 
+						datos[i+1].contador++;
+					}
+				}
+				} 
+			break;
+
+			// Por el momento lo dejamos desordenado.
+			case (LE):
+				cout << "Less or Equal (" << operacion << ")" << endl;
+				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
+				break;
+			case (LT):
+				cout << "Less Than (" << operacion << ")" << endl;
+				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
 				break;
 			case (GT):
 				cout << "Greater Than (" << operacion << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i>j)
-						{
-							/* calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j); */
-						}
+				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
 				break;
 			case (IN):
 				cout << "Contenido en (" << operacion << ")" << endl;
-				cout << "Pendiente de implementar\n";
+				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
 				break;
 			case (EQ):
 				cout << "Equal (" << operacion << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i==j)
-						{
-							/* calcula_coordenadas_base(var_cero, var_uno, indice0, indice1,coordenadas_base);
-							escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j); */
-						}
+				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");
 				break;
 			case (NE):
 				cout << "Not Equal (" << operacion << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i!=j)
-						{
-							//cout << "i: " << i << " - " << "j: " << j << endl;
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							/* coordenadas_final[0] = coordenadas_base[0]+i;
-							coordenadas_final[1] = coordenadas_base[1]+j;
-							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 1;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 1; */
-						}					
-				break; 
+				throw std::runtime_error("Constraint SUM, operación no implementada todavía.\n");				
+				 
 		}
 
 	
 
-	
+	indice_var_ternarias++;
 	cout << endl;	
 
 
