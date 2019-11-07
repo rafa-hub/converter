@@ -16,9 +16,9 @@
 #include <map>
 #include <math.h>
 
-//#define mipause
-//#define midebug
-//#define mitest
+// #define mipause
+// #define midebug
+// #define mitest
 
 #define BUFFER_PUNTEROS 10*1024
 #define TERNARIA 3
@@ -398,9 +398,9 @@ public:
 			const int NUM_VAL = rango_variable[*it];
 			const int MAX_ROWS_ARRAY_VAR = row + NUM_VAL;
 #ifdef midebug
-			cout << array_var_name << " row:" << row << " range:" << NUM_VAL
-					<< " nb_var:" << numero_variable[array_var_name]
-					<< endl;
+			// cout << array_var_name << " row:" << row << " range:" << NUM_VAL
+			// 		<< " nb_var:" << numero_variable[array_var_name]
+			// 		<< endl;
 #endif
 
 			while (true) {
@@ -410,10 +410,10 @@ public:
 						matriz_datos[i][j] = 0;
 						matriz_datos[j][i] = 0;
 #ifdef midebug
-						cout<<"edge:"<<"("<<i<<","<<j<<")";
+/* 						cout<<"edge:"<<"("<<i<<","<<j<<")";
 						cout<<"var:"<<array_var_name<<" base_array:"<<base_array[array_var_name]<<endl;
 						cout<<"range: "<<NUM_VAL<<" MAX ROW:"<<MAX_ROWS_ARRAY_VAR<<endl;
-						cout<<"--------------------------"<<endl;
+						cout<<"--------------------------"<<endl; */
 #endif
 					}
 				}
@@ -556,8 +556,8 @@ public:
 			//cout << "Regla SUPPORT UNARIA....." << endl;
 
 #ifdef midebug	
-			cout << "Var:" << variable << " min var: "
-					<< minimo_variable[variable] << endl;
+		/* 	cout << "Var:" << variable << " min var: "
+					<< minimo_variable[variable] << endl; */
 #endif	
 
 			if (tuplas.size()==0)
@@ -604,11 +604,11 @@ public:
 						}
 
 #ifdef midebug
-						cout << "Coordenada base variable: "<< variable << "-> (" << 
+						/* cout << "Coordenada base variable: "<< variable << "-> (" << 
 						coordenadas_base[0] << "," << coordenadas_base[1] << ")" << endl;
 						
 						cout << "Tupla support leida-coord:(" << coordenada_final[0]
-							<< "," << coordenada_final[1] << ")" << endl;
+							<< "," << coordenada_final[1] << ")" << endl; */
 #endif
 					}
 
@@ -1128,9 +1128,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		is_array=false;
 
 #ifdef midebug
-		cout << "Base siguiente array: " << base_siguiente_array << endl;
+/* 		cout << "Base siguiente array: " << base_siguiente_array << endl;
 		cout << "Numero variables: " << numero_variables << " - Rango: "
-				<< rango_array << endl;
+				<< rango_array << endl; */
 #endif
 
 	}
@@ -1776,7 +1776,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				}
 			}
 		}
-    	cout << "\n";
+    	
 	}
 
 
@@ -2080,9 +2080,9 @@ int main(int argc, char **argv) {
  
 	
 	//salida matriz de datos
-	ofstream fmat("log_mat.txt", ios::out);
+/* 	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.close();
+	fmat.close(); */
 
 	//cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
 	//ostream & terminal=cout;
