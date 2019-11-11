@@ -39,7 +39,6 @@ private:
 
 	vector<string> 	lista_arrays;    	// Guarda la lista de arrays. Los arrays ya no se usan.
 	vector<string>	lista_variables_singleton;	// Guarda la lista de variables singleton. 
-	map<string, vector<int>> variables_singleton;	// Guarda los valores discretos de una variable	
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
 
 						// Todas las variables ahora se tratan como singleton. 
@@ -48,7 +47,7 @@ private:
 
 
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable.
-	map<string, vector<int>> valores_variable_discreta;	// Guarda los valores discretos de una variable.
+	map<string, vector<int>> valores_variable;	// Guarda los valores discretos de una variable.
 	string primera_variable = "Si";		// Permite calcular la base de las variables en la matriz, según se leen.
 	string variable_anterior="Vacia";
 	map<string, int> base_array; 		// Mapa de cada array con su coordenada base.
@@ -59,10 +58,6 @@ private:
 	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables.
 	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias.
 										// de variables del array.
-
-	map<int,vector<string>> nueva_super_variable;		// Nueva Super-Variable para procesar las reglas ternarias.
-														// Contiene las variables como strings.
-
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
 	int base_siguiente_array = 0; 		// Guarda el valor para calcular la posicion en la matriz del siguiente array
 	int minimo_variables = 0;        	// Guarda el minimo valor de cada array
@@ -75,8 +70,6 @@ private:
 	vector<int> tuplas_unarias;			// Lo mismo, pero para variables unarias
 	vector<int> tamano_tuplas;			// Vector que almacena el tamaño de las tuplas: (número de tuplas)
 	
-	map <int,vector<int>> mapa_vertices;	// Lista de vértices.
-	stack <string> pila_comparacion;		// Pila para hacer la comparación de los datos.
 
 public:
 
@@ -96,11 +89,8 @@ public:
 	
 	int **matriz_datos; 	// Matriz donde se almacena el resultado.
 	//int **matriz_shadow; 	// Matriz donde se almacenan las escrituras. (Deprecated)
-	int **matriz_aristas; // Matriz con todas las aristas.
 	
-	int indice_vertices=0;	// Índice global para indexar los vértices del grafo. (a quitar)
 	
-	map <int , vector <int>> grafo;		// Almacena el grafo que será volcado a fichero. DEPRECATED.
 
 
 	//////////////////////////////////////////////////////////////
@@ -155,17 +145,21 @@ public:
 		fichero_salida<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
 		fichero_salida << "x " << lista_variables.size() << endl;
 
-		for (unsigned int j = 0; j < lista_variables.size(); j++) {
+		for (unsigned int j = 0; j < lista_variables.size(); j++)
+		{
 			fichero_salida << "v " << (j + 1) << " " << rango_variable[lista_variables[j]]	<< endl;
 
 #ifdef midebug
-			cout << var << endl;
-			cout << "v " << (j + 1) << " " << rango_variable[var] << endl;
+			cout << lista_variables[j] << endl;
+			cout << "v " << (j + 1) << " " << rango_variable[lista_variables[j]] << endl;
 #endif
 		}
 
 		fichero_salida.close();
 	}
+
+
+
 
 
 
@@ -238,6 +232,8 @@ public:
 
 
 
+
+
 	// Extrae y devuelve el indice de una variable. Deprecated, a dejar de usar.
 	// Se han dejado de usar los arrays.
 	int get_indice_ternario(string variable) {
@@ -277,101 +273,7 @@ public:
 
 
 
-	//Extrae y devuelve el nombre de la variable sin indice, es decir, el nombre del array
-	// Deprecated, a dejar de usar
-	string get_nombre(string variable) {
-		string nombre, vector;
-		size_t aux1 = 0;
-
-		nombre = variable;
-
-		if (es_singleton(nombre))
-		{
-			return nombre;
-		}
-
-		aux1 = nombre.find_first_of('[', 0);
-		if(aux1!=string::npos)
-			vector = nombre.substr(0, aux1);
-		else{
-			//singleton variable
-			vector=nombre;
-		}
-
-
-		return vector;
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//Muestra en pantalla coord base de todas las variables
-	//TODO-mapping de "nombre var" con coordenada base?
-	void print_coordenadas_base(){
-		cout<<"IMPRIMENDO COORDENADAS BASE DE TODAS LAS VARIABLES"<<endl;
-		for (vector<string>::iterator it = lista_arrays.begin();
-					it != lista_arrays.end(); it++) {
-
-			string array_var_name = get_nombre(*it);
-			int row = base_array[array_var_name];
-			const int NUM_VAL = rango_variable[array_var_name];
-
-			for(int id=0; id<numero_variable[array_var_name]; id++){
-				cout<<array_var_name<<"["<<id<<"]"<<" base_row:"<<row+(id*rango_variable[array_var_name])<<endl;
-
-			}
-		}
-		cout<<"------------------------------------"<<endl;
-
-		displayList(lista_arrays);
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-	// Calcula las coordenadas base de la variable. A esto habra que sumar el orden de la
-	// instancia de la variable y el valor de la coordenada de la restriccion
-	// Hay que restar el minimo del rango de valores para el caso en el que no sea cero
-	// Si no, se escribe fuera del rango de la matriz
-	// Deprecated: Ahora se calculan al principio y se guardan en un mapa.
-	void calcula_coordenadas_base(string var_cero, string var_uno, int indice0,
-									int indice1, int *coordenadas_base) {
-
-		*coordenadas_base = base_array[var_cero] + (indice0 * rango_variable[var_cero]);
-		coordenadas_base++;
-		*coordenadas_base = base_array[var_uno] + (indice1 * rango_variable[var_uno]);
-		
-#ifdef midebug
-		coordenadas_base--;
-		cout << "Var cero: " << var_cero << " - indice: " << indice0 << " - Coordenada Base X: " 
-		<< *coordenadas_base << endl;
-		
-		coordenadas_base++;
-		cout << "Var uno: " << var_uno << " - indice: " << indice1 << " - Coordenada Base Y: " 
-		<< *coordenadas_base << endl;
-#endif
-
-		return;
-	}
-
-
+	
 
 
 
@@ -430,6 +332,12 @@ public:
 
 
 
+
+
+
+
+
+
 	// Genera la matriz
 	void genera_matriz() {
 		vector<string>::iterator lista;
@@ -447,6 +355,7 @@ public:
 			
 
 		matriz_datos = new int* [dimension_matriz];
+		cout << "Espacio para punteros asignado ..................." << sizeof(int) << endl;
 		for (int i=0;i<dimension_matriz;i++)
 		{
 			matriz_datos[i]=new int[dimension_matriz];
@@ -542,7 +451,7 @@ public:
 
 
 
-	//Funcion que escribe en la matriz reglas unarias. Hay que adaptarla a 
+	// Funcion que escribe en la matriz reglas unarias. Hay que adaptarla a 
 	// no usar get_indice() o get_nombre()
 	void escribe_en_matriz_unaria(vector<int>& tuplas,string var_unaria, bool support)
 	{
@@ -838,11 +747,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-
-
-
-
-
 	// Para el caso de reglas intensionales binarias, escribe en la matriz que fue creada
 	// para reglas extensionales binarias.
 
@@ -856,20 +760,29 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			cout << "Índices: " << i << " - " << j << endl; 
 			cout << "Valores donde escribo: " << i+coordenadas_base[0] << " - " << j+coordenadas_base[1] << endl;
 	#endif
-
-
 		coordenada_final[0] = coordenadas_base[0]+i;
 		coordenada_final[1] = coordenadas_base[1]+j;
-		
-		//cout << "Es aquíiiii ..................\n";
 		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
 		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-		//cout << "Síiiii ..................\n";
+		
 	}
 
 
 
 
+
+	void escribe_0_en_matriz(string var_cero, string var_uno,int i, int j)
+	{
+		int coordenada_final[2];
+
+#ifdef midebug
+			cout << "Escribo en: " << base_variable[var_cero]+i << " - " << j+base_variable[var_uno]+j << endl;
+#endif
+		coordenada_final[0] = base_variable[var_cero]+i;
+		coordenada_final[1] = base_variable[var_uno]+j;
+		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+	}
 
 
 
@@ -972,69 +885,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-	void escribe_grafo()
-	{
-		string var;
-		char *nombre_fichero_csp;
-		int contador_vertices=0;
-
-		nombre_fichero_csp = strrchr(nombre_fichero, '.');
-		strcpy(nombre_fichero_csp, ".clq");
-		cout << "Nombre fichero .CLQ: " << nombre_fichero << endl;
-		
-		ofstream fichero_salida(nombre_fichero);
-
-		// Cuento el número de aristas del grafo
-		for (unsigned int i = 0; i < dimension_matriz-1; i++)
-		{
-			for (unsigned int j=i+1; j < dimension_matriz ; j++)
-			{
-				if (matriz_datos[i][j] == 1)
-				{
-					contador_vertices++;
-				}
-			}	
-		}
-
-
-		fichero_salida << "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
-		fichero_salida << "c " << nombre_fichero << endl;
-		fichero_salida << "p " << lista_variables.size() << " " << contador_vertices  <<  endl;
-
-				
-		for (unsigned int i = 0; i < dimension_matriz-1; i++)
-		{
-			for (unsigned int j=i+1; j < dimension_matriz ; j++)
-			{
-				//cout << "Número de variables en la fila: " << dimension_variables_ternarias[i] << endl;
-				if (matriz_datos[i][j] == 1)
-				{
-					fichero_salida << "e " << i+1 << " " << j+1 << endl;
-					//cout << "e " << i+1 << " " << j+1 << endl;
-				}
-			}	
-		}
-		fichero_salida << endl;
-		fichero_salida.close();
-
-
-	}
-
-
-
-
-
-
-
-
-	
-
-
-
-
-
-
-
 
 
 
@@ -1122,6 +972,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		base_siguiente_array += (numero_variables * rango_variables);
 		numero_variable[array_actual] = numero_variables;
+		if (numero_variables == 1)
+			lista_variables_singleton.push_back(array_actual);
 		rango_array[array_actual] = rango_variables;
 		minimo_variable[array_actual] = minimo_variables;
 
@@ -1180,7 +1032,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 #ifdef midebug
-		print_coordenadas_base();
 		cout << " - FIN declaracion variables - " << endl << endl;
 #ifdef mipause
 		cin.get();
@@ -1197,10 +1048,15 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
+
+
+
+
+
 	//PSS calls here alsp for variables with singleton values (<var id="x0"> -1 <\var> )
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 		
-		cout << "Primera Variable: " << primera_variable;
+		// cout << "Primera Variable: " << primera_variable;
 
 		if (primera_variable == "Si")
 		{
@@ -1213,11 +1069,16 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			variable_anterior = lista_variables.back();
 		}
 
-		cout << " - Variable anterior: " << variable_anterior << endl;
+		// cout << " - Variable anterior: " << variable_anterior << endl;
 		
 		lista_variables.push_back(id);
 				
 		mapa_indices[id]=numero_variables;
+
+		for (int i = minValue; i<= maxValue; i++)
+		{
+			valores_variable[id].push_back(i);
+		}
 
 		// Para tratar los arrays actualmente deprecated, sin uso
 		rango_variables = (maxValue - minValue) + 1;
@@ -1270,21 +1131,20 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		numero_variables++;
 
 
-
 		for (int i=0; i< values.size();i++)
 		{
-			valores_variable_discreta[id].push_back(values[i]);
+			valores_variable[id].push_back(values[i]);
 		}
 
 
-		// cout << "Variable: " << id << " - min: " << values[0] << " - max: "
-		// 		<< values.back() << " - Índice: " << mapa_indices[id] << " - Rango: " << rango_variable[id] <<  endl;
+		cout << "Variable: " << id << " - min: " << values[0] << " - max: "
+		 		<< values.back() << " - Índice: " << mapa_indices[id] << " - Rango: " << rango_variable[id] <<  endl;
 
-		// cout << "Valores: ";
+		cout << "Valores: ";
 
 		for (int i=0; i< values.size();i++)
 		{
-			cout << valores_variable_discreta[id][i] << " ";
+			cout << valores_variable[id][i] << " ";
 		}
 		cout << endl;
 	}
@@ -1519,6 +1379,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
+
+
 	void buildConstraintAlldifferentMatrix(string id, vector<vector<XVariable *>> &matrix) {
   		cout << "\n  ¡Mi!  allDiff matrix constraint" << id << endl;
    		for(unsigned int i = 0 ; i < matrix.size() ; i++) {
@@ -1606,121 +1468,70 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
     	string var_cero,var_uno;
-		int rango_cero,rango_uno,indice0,indice1;
-    	int dimension=2; 
+		int dimension=2; 
 		int coordenadas_final[2]={0,0};
 
-		rango_cero = rango_variable[x->id];
-		rango_uno = rango_variable[y->id];
 
-
-	cout << "\nFórmula simple.............. \n  " << id;
+		cout << "\nFórmula simple.............. \n  " << id;
 			
 	#ifdef midebug
-			cout << "\nFórmula simple..............   " << id;
-			cout << endl;
 			cout << "\n   OPERACIONES BINARIAS............... Order Type: " << orden <<endl;
-		cout << "PRIMITIVA .....................\n";
-		cout << x->id << " base: " << base_variable[x->id] << " - " << y->id << " base: " << base_variable[y->id] << " : Operación: " << orden << endl; 
-
-		cout << "Var uno: " << var_cero << "- Índice: " << indice0 << " - Rango: " << rango_cero << 
-				" - Var dos: " << var_uno << "- Índice: " << indice1 << " Rango: " << rango_uno << endl;
+			cout << "PRIMITIVA .....................\n";
+			cout << x->id << " base: " << base_variable[x->id] << " - " << y->id << " base: " 
+				<< base_variable[y->id] << " : Operación: " << orden << endl; 
 	#endif
 		
 		switch(orden)
 		{
 			case (LE):
-				//cout << "Less or Equal (" << orden << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i>j)
-						{
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j)
-							coordenadas_final[0] = base_variable[x->id]+i;
-							coordenadas_final[1] = base_variable[y->id]+j;					
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
-
-						}
+				cout << "Less or Equal (" << orden << ")" << endl;
+				for (int i = 0; i< rango_variable[x->id]; i++)
+					for (int j = 0; j < rango_variable[y->id]; j++)
+						if (!(valores_variable[x->id][i] <= valores_variable[y->id][j]))
+							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (LT):
-				//cout << "Less Than (" << orden << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i>=j)
-						{
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = base_variable[x->id]+i;
-							coordenadas_final[1] = base_variable[y->id]+j;
-							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
-						}
+				cout << "Less Than (" << orden << ")" << endl;
+				for (int i = 0; i< rango_variable[x->id]; i++)
+					for (int j = 0; j < rango_variable[y->id]; j++)
+						if (!(valores_variable[x->id][i] < valores_variable[y->id][j]))
+							escribe_0_en_matriz(x->id,y->id,i,j); 
 				break;
 			case (GE):
-				//cout << "Greater or Equal (" << orden << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i<j)
-						{
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = base_variable[x->id]+i;
-							coordenadas_final[1] = base_variable[y->id]+j;
-							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
-						}
+				cout << "Greater or Equal (" << orden << ")" << endl;
+				for (int i = 0; i< rango_variable[x->id]; i++)
+					for (int j = 0; j < rango_variable[y->id]; j++)
+						if (!(valores_variable[x->id][i] >= valores_variable[y->id][j]))
+							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (GT):
-				//cout << "Greater Than (" << orden << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i<=j)
-						{
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = base_variable[x->id]+i;
-							coordenadas_final[1] = base_variable[y->id]+j;
-							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
-						}
+				cout << "Greater Than (" << orden << ")" << endl;
+				for (int i = 0; i< rango_variable[x->id]; i++)
+					for (int j = 0; j < rango_variable[y->id]; j++)
+						if (!(valores_variable[x->id][i] > valores_variable[y->id][j]))
+							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
+			
 			case (IN):
 				cout << "Contenido en (" << orden << ")" << endl;
-				cout << "Pendiente de implementar\n";
-				break;
+				throw runtime_error("Pendiente de implementar ........\n");
+				exit(2); 
+				
 			case (EQ):
-				//cout << "Equal (" << orden << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i!=j)
-						{
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = base_variable[x->id]+i;
-							coordenadas_final[1] = base_variable[y->id]+j;
-							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
-						}
+				cout << "Equal (" << orden << ")" << endl;
+				for (int i = 0; i< rango_variable[x->id]; i++)
+					for (int j = 0; j < rango_variable[y->id]; j++)
+						if (!(valores_variable[x->id][i] == valores_variable[y->id][j]))
+							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (NE):
-				//cout << "Not Equal (" << orden << ")" << endl;
-				for (int i=0; i<rango_cero;i++)
-					for (int j=0;j<rango_uno;j++)
-						if (i==j)
-						{
-							//cout << "i: " << i << " - " << "j: " << j << endl;
-							//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-							coordenadas_final[0] = base_variable[x->id]+i;
-							coordenadas_final[1] = base_variable[y->id]+j;
-							//cout << "Escribo en coordenadas: " << coordenadas_final[0] << " - " << coordenadas_final[1] << endl;
-							
-							matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
-							matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
-						}					
-				break;
-			} 
-		}
+				cout << "Not Equal (" << orden << ")" << endl;
+				for (int i = 0; i< rango_variable[x->id]; i++)
+					for (int j = 0; j < rango_variable[y->id]; j++)
+						if (!(valores_variable[x->id][i] != valores_variable[y->id][j]))
+							escribe_0_en_matriz(x->id,y->id,i,j);
+		} 
+	}
 
 
 
@@ -1747,36 +1558,38 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		for(int i=0;i<tree->arity();i++)
     	{
      		variable.push_back(tree->listOfVariables[i]);
+			// cout << tree->listOfVariables[i] << " ";
 			rango.push_back(rango_variable[tree->listOfVariables[i]]);
     	}
+		cout << endl;
 
-		if (tree->arity()==2)
+		if (tree->arity() == 2)
 		{
-			for (int i=0; i<rango[0];i++)
+			for (int i=0;  i < rango[0]; i++)
 			{
-				for(int j=0;j<rango[1];j++)
+				for(int j=0; j < rango[1]; j++)
 				{
-					tupla[variable[0]]=i;
-					tupla[variable[1]]=j;
+					// cout << "valores: " << valores_variable[variable[0]][i] << " " << valores_variable[variable[1]][j] << " ";
+					tupla[variable[0]]=valores_variable[variable[0]][i];
+					tupla[variable[1]]=valores_variable[variable[1]][j];
 					
 					resultado = tree->evaluate(tupla);
 					
-		#ifdef midebug
+	#ifdef midebug
+					cout << endl;
 					tree->prefixe();
-					cout << "=  " << resultado << endl << endl;
-		#endif
-
+					cout << "=  " << resultado << endl;
+	#endif
 					if (!resultado)
-					{		
-						//escribe_en_matriz_intensional(coordenadas_base, var_cero, var_uno,i,j);
-						coordenadas_final[0] = base_variable[variable[0]]+i;
-						coordenadas_final[1] = base_variable[variable[1]]+j;	
-						
-						matriz_datos[coordenadas_final[0]][coordenadas_final[1]] = 0;
-						matriz_datos[coordenadas_final[1]][coordenadas_final[0]] = 0;
-					}
+						escribe_0_en_matriz(variable[0],variable[1],i,j);			
 				}
 			}
+		}
+		else
+		{
+			throw runtime_error("FÓRMULA CON MÁS DE DOS VARIABLES, TODAVÍA NO IMPLEMENTADO ........");
+			exit(2); 
+
 		}
     	
 	}
@@ -2045,10 +1858,7 @@ int main(int argc, char **argv) {
 
 	
 	cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
-	//miparser.pongo_diagonal_matriz_a_cero();
-	//miparser.escribe_grafo();
-	
-	
+		
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo a fichero
 
 	cout << "La dimensión de la Matriz BINARIA: " << miparser.dimension_matriz << endl;
@@ -2084,7 +1894,7 @@ int main(int argc, char **argv) {
  
 	
 	//salida matriz de datos
-/* 	ofstream fmat("log_mat.txt", ios::out);
+ 	/* ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
 	fmat.close(); */
 
