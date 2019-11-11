@@ -439,9 +439,9 @@ public:
 		for (lista = lista_variables.begin(); lista != lista_variables.end(); lista++)
 				{
 					dimension_matriz += rango_variable[*lista];
-					// cout << "Variable: " << *lista << endl;
-					// cout << "Rango variable: " << rango_variable[*lista] << endl;
-					// cout << "Dimensión acumulada: " << dimension_matriz << endl;
+					cout << "Variable: " << *lista << endl;
+					cout << "Rango variable: " << rango_variable[*lista] << endl;
+					cout << "Dimensión acumulada: " << dimension_matriz << endl;
 				}		
 
 			
@@ -1200,7 +1200,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	//PSS calls here alsp for variables with singleton values (<var id="x0"> -1 <\var> )
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 		
-		//cout << "Primera Variable: " << primera_variable << " - Variable anterior: " << variable_anterior << endl;
+		cout << "Primera Variable: " << primera_variable;
 
 		if (primera_variable == "Si")
 		{
@@ -1212,6 +1212,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		{
 			variable_anterior = lista_variables.back();
 		}
+
+		cout << " - Variable anterior: " << variable_anterior << endl;
 		
 		lista_variables.push_back(id);
 				
@@ -1739,7 +1741,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		int coordenadas_final[2];
 		
 
-    	// cout << "\nFórmula compleja..............   \n";
+    	cout << "\nFórmula compleja..............   \n";
     	// tree->prefixe();
 
 		for(int i=0;i<tree->arity();i++)
@@ -1794,11 +1796,13 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 //////////////////////////////////
 
 
-void buildConstraintSum(string id, vector<XVariable *> &list, vector<int> &coeffs, XCondition &cond)
-{
 
-	XCSP3PrintCallbacks::buildConstraintSum(id,list,coeffs,cond);
+
+void buildConstraintPrimitive(string id, XVariable *x, bool in, int min, int max) {
+        cout << "\n  POLLÓN constraint  " << id << ":"<< x->id << (in ? " in " : " not in ") << min << ".." << max <<"\n";
 }
+
+
 
 
 
