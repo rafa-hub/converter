@@ -15,6 +15,7 @@
 #include <climits>
 #include <map>
 #include <math.h>
+#include <time.h>
 
 // #define mipause
 // #define midebug
@@ -135,7 +136,7 @@ public:
 
 		nombre_fichero_csp = strrchr(nombre_fichero, '.');
 		strcpy(nombre_fichero_csp, ".csp");
-		cout << "Nombre fichero CSP: " << nombre_fichero << endl;
+		cout << "Nombre fichero CSP: \"" << nombre_fichero << "\"" << endl;
 		ofstream fichero_salida(nombre_fichero);
 
 #ifdef midebug
@@ -450,7 +451,7 @@ public:
 
 
 
-
+	// REVISAR SI HAY QUE VOLVER A IMPLEMENTARLA.
 	// Funcion que escribe en la matriz reglas unarias. Hay que adaptarla a 
 	// no usar get_indice() o get_nombre()
 	void escribe_en_matriz_unaria(vector<int>& tuplas,string var_unaria, bool support)
@@ -502,6 +503,7 @@ public:
 						//Escritura en horizontal y vertical
 						for(int i=0;i<dimension_matriz;i++)
 						{
+							// REVISAR ESTA FÓRMULA SI HAY QUE VOLVER A IMPLEMENTAR ESTA FUNCIÓN.
 							coordenada_final[0] = base_variable[var_unaria]
 								+ (*itero_valores)
 								- minimo_variable[var_unaria];
@@ -526,12 +528,6 @@ public:
 						for (int j = 0; j < dimension_matriz; j++) {
 							coordenada_final[0] = base_variable[var_unaria] + i;
 							coordenada_final[1] = j;
-
-#ifdef midebug
-							cout << "writing-0-S en:(" << coordenada_final[0] << ","
-									<< coordenada_final[1] << ")" << endl;
-#endif
-
 							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
 							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
 							
@@ -539,9 +535,6 @@ public:
 							cout << "writing-0-S en:(" << coordenada_final[1] << ","
 										<< coordenada_final[0] << ")" << endl;
 #endif
-
-							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
 				}
 			}
 
@@ -566,12 +559,12 @@ public:
 				for (int i=0;i<dimension_matriz;i++)
 				{
 					coordenada_final[1] = i;
+					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+					matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 #ifdef midebug
 					cout << "writing-0-C en:(" << coordenada_final[0] << ","
 						<< coordenada_final[1] << ")" << endl;
 #endif
-					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-					matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 				}
 
 		
@@ -582,11 +575,12 @@ public:
 				for (int i=0;i<dimension_matriz;i++)
 				{
 					coordenada_final[0] = i;
+					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 #ifdef midebug
 					cout << "writing-0-C en:(" << coordenada_final[0] << ","
 						<< coordenada_final[1] << ")" << endl;
 #endif
-					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+					
 				} 
 			
 			}
@@ -926,6 +920,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
+
+
+
 	void endInstance() {
 		
 
@@ -934,6 +931,12 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		
 	}
+
+
+
+
+
+
 
 
 
@@ -1209,60 +1212,43 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
+
+
+
+
+
+
 	//Versión para restricciones binarias o superiores
 	void buildConstraintExtension(string id, vector<XVariable *> list,
 		vector<vector<int>> &tuples, bool support, bool hasStar) {
-	
 		
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
 
 		// Guardo el valor de las tuplas por si es una restriccion de grupo
 		las_tuplas=tuples;
+
+
+	#ifdef mydebug
+		cout << "Tamaño de la lista: " << list.size() << endl;
+		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+	#endif
+	
 		
-		// cout << "Número variables: " << list.size() << endl;
-		// cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
-		
-		
-		if(list.size()==0)
-		{
-			throw runtime_error("ERROR: Tamaño cero de tupla, no procesado.");
-			exit(2);
-		}
-
-
-
-		if (list.size() == 1)
-		{
-			cout << "Regla UNARIA:" << endl;
-			throw runtime_error("ERROR: Se debe invocar otra función........");
-			exit(2);
-		} 
-
-
 		if (list.size() == 2){
 			
 			cout << "Regla BINARIA:" << endl;
-			// cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-			// cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
+
+	#ifdef mydebug
+			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
+	#endif
 		}
-
-
-		if(list.size() == 3)
-		{
-			cout << "Regla TERNARIA:" << endl;
-			throw runtime_error("¡¡¡¡Funcionalidad no implementada en esta rama de código!!!! ........");
+		else {
+			cout << "Tamaño de la regla: " << list.size() << endl;
+			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
 			exit(2);
-			
 		}
-
-
-		if (list.size() > 3)
-		{
-			cout << "Regla N-ARIA > 3: " << endl;
-			throw runtime_error("¡¡¡¡Funcionalidad no implementada en esta rama de código!!!! ........");
-			exit(2); 
-		} 
 
 	}
 
@@ -1283,44 +1269,27 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	void buildConstraintExtensionAs(string id, vector<XVariable *> list,
 			bool support, bool hasStar) {
 		
-		
-
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
-		// cout << "Tamaño de la lista: " << list.size() << endl;
-		// cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
-		
-		if(list.size()==0)
-		{
-			throw runtime_error("ERROR: Tamaño cero de tupla, no procesado.");
-			exit(2);
-		}
 
-		if (list.size() == 1)
-		{
-			cout << "Regla UNARIA:" << endl;
-			throw runtime_error("ERROR: Se debe invocar otra función........");
-			exit(2);
-		} 
+	#ifdef mydebug
+		cout << "Tamaño de la lista: " << list.size() << endl;
+		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+	#endif
 		
-		if (list.size() == 2){
+		if (list.size() == 2)
+		{
 			cout << "Regla BINARIA:" << endl;
-			// cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-			// cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
 			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
-		}
 
-		if(list.size() == 3)
-		{
-			cout << "Regla TERNARIA:" << endl;
-			throw runtime_error("¡¡¡¡Funcionalidad no implementada en esta rama de código!!!! ........");
+	#ifdef mydebug
+			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
+			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
+	#endif
+		}
+		else {
+			cout << "Tamaño de la regla: " << list.size() << endl;
+			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
 			exit(2);
-		}
-
-		if (list.size() > 3)
-		{
-			cout << "Regla N-ARIA > 3: " << endl;
-			throw runtime_error("¡¡¡¡Funcionalidad no implementada cuando hay reglas ternarias!!!! ........");
-			exit(2); 
 		}
 
 	}
@@ -1387,19 +1356,24 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		int REGLA;
 
 		REGLA=DIFERENTE;		
-		//cout << "\n   Mi allDiff constraint " << id << "Tamaño de la tupla: "<< list.size() << endl;
-		//displayList(list);
+		cout << "\n   Mi allDiff constraint " << id << "Tamaño de la regla: "<< list.size() << endl;
+
+		if (list.size() != 2)
+		{
+			cout << "Tamaño de la regla: " << list.size() << endl;
+			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
+			exit(2);
+		}
 		
 		for (k=0;k<(list.size()-1);k++)
-		{
 			for(i=k,j=i+1; j<list.size();j++)
 			{
-#ifdef midebug
-				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
-#endif
 				escribe_regla_all(list[i]->id,list[j]->id,REGLA);
+	
+	#ifdef midebug
+				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
+	#endif
 			}
-		}		
 	}
 
 
@@ -1558,7 +1532,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				break;
 			case (NE):
 				cout << "Not Equal (" << orden << ")" << endl;
-				// cout << "Variables: " << x->id << " - " << y->id << endl; 
 				for (int i = 0; i< rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
 					{
@@ -1583,6 +1556,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
+
+
   	void buildConstraintIntension(string id, Tree *tree) {
 		vector<string> variable;
 		vector<int> rango;
@@ -1591,15 +1566,19 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		int coordenadas_final[2];
 		
 
-    	cout << "\nFórmula compleja..............   \n";
+    	cout << "\nFórmula compleja de orden: " << tree->arity() << " ..............   \n";
     	// tree->prefixe();
 
 		for(int i=0;i<tree->arity();i++)
     	{
      		variable.push_back(tree->listOfVariables[i]);
-			// cout << tree->listOfVariables[i] << " ";
 			rango.push_back(rango_variable[tree->listOfVariables[i]]);
+
+	#ifdef mydebug
+			cout << tree->listOfVariables[i] << " ";
+	#endif
     	}
+
 		cout << endl;
 
 		if (tree->arity() == 2)
@@ -1608,13 +1587,11 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			{
 				for(int j=0; j < rango[1]; j++)
 				{
-					// cout << "valores: " << valores_variable[variable[0]][i] << " " << valores_variable[variable[1]][j] << " ";
 					tupla[variable[0]]=valores_variable[variable[0]][i];
 					tupla[variable[1]]=valores_variable[variable[1]][j];
-					
-					resultado = tree->evaluate(tupla);
-					
+					resultado = tree->evaluate(tupla);				
 	#ifdef midebug
+					cout << "valores: " << valores_variable[variable[0]][i] << " " << valores_variable[variable[1]][j] << " ";
 					cout << endl;
 					tree->prefixe();
 					cout << "=  " << resultado << endl;
@@ -1626,7 +1603,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		}
 		else
 		{
-			throw runtime_error("FÓRMULA CON MÁS DE DOS VARIABLES, TODAVÍA NO IMPLEMENTADO ........");
+			throw runtime_error("FÓRMULA con más de dos variables, NO IMPLEMENTADO en esta versión del generador de grafos........");
 			exit(2); 
 
 		}
@@ -1928,11 +1905,21 @@ int main(int argc, char **argv) {
 	nombre_fichero_dimacs = strrchr(miparser.nombre_fichero, '.');
 	strcpy(nombre_fichero_dimacs, ".clq");
 
-	cout << "Escribiendo el grafo resultante al fichero " << miparser.nombre_fichero <<  " .......................\n\n\n";
+	
+	time_t hora = time(NULL);
+	printf("%s",ctime(&hora));
 
-	std::fstream f(miparser.nombre_fichero, ios::out);
+	cout << "Escribiendo el grafo resultante al fichero \"" << miparser.nombre_fichero 
+		<<  "\" .........\n";
+
+	const clock_t comienzo = clock();
+	
+	fstream f(miparser.nombre_fichero, ios::out);
 	ug.write_dimacs(f);
 	f.close();
+	
+	cout << "Tiempo empleado en escribir el fichero: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
+		<< " segundos." << endl;
  
 	//salida matriz de datos
  	/* ofstream fmat("log_mat.txt", ios::out);
