@@ -24,7 +24,7 @@
 #define __SIMPLE_UGRAPH_H__
 
 #include "simple_graph.h"
-#include "utils/prec_timer.h"
+
 
 template<class T>
 class Ugraph : public Graph<T>{
@@ -269,13 +269,13 @@ void Ugraph<T>::write_dimacs (ostream & o) {
 // writes file in dimacs format with timestamp
 		
 	//timestamp 
-	o<<"c File written by GRAPH:"<<PrecisionTimer::local_timestamp();
+	o<<"c File written by GRAPH: "<<PrecisionTimer::local_timestamp();
 
 	//name
 	if(!Graph<T>::m_name.empty())
 		o<<"c "<<Graph<T>::m_name.c_str()<<endl;
 
-	//tamaño del grafo
+	//tamaï¿½o del grafo
 	o<<"p edge "<<Graph<T>::m_size<<" "<<number_of_edges()<<endl<<endl;
 
 	//write DIMACS nodes n <v> <w>
@@ -307,7 +307,7 @@ void Ugraph<sparse_bitarray>::write_dimacs (ostream& o) {
 	if(!Graph<sparse_bitarray>::m_name.empty())
 		o<<"c "<<Graph<sparse_bitarray>::m_name.c_str()<<endl;
 
-	//tamaño del grafo
+	//tamaï¿½o del grafo
 	o<<"p edge "<<Graph<sparse_bitarray>::m_size<<" "<<number_of_edges()<<endl<<endl;
 	
 	//Escribir nodos

@@ -3,6 +3,7 @@
 #include "graph/algorithms/decode.h"
 #include "utils/common.h"
 #include "utils/logger.h"
+#include "utils/prec_timer.h"
 
 #include "XCSP3CoreParser.h"
 #include "XCSP3PrintCallbacks.h"
@@ -133,6 +134,7 @@ public:
 	void escribe_fichero_csp() {
 		string var;
 		char *nombre_fichero_csp;
+		time_t tiempo = time(NULL);
 
 		nombre_fichero_csp = strrchr(nombre_fichero, '.');
 		strcpy(nombre_fichero_csp, ".csp");
@@ -143,7 +145,9 @@ public:
 		cout<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
 		cout << "x " << lista_variables.size() << endl;
 #endif
-		fichero_salida<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
+		
+		fichero_salida<< "c Fichero creado a partir de un fichero XML \n" 
+			<< "c que expresa un problema CSP:  " << PrecisionTimer::local_timestamp()  << endl;
 		fichero_salida << "x " << lista_variables.size() << endl;
 
 		for (unsigned int j = 0; j < lista_variables.size(); j++)
@@ -1839,6 +1843,7 @@ int main(int argc, char **argv) {
 	MiSolverPrintCallbacks miparser;
 	char *nombre_fichero_dimacs;
 	int dimension = 0;
+	time_t hora = time(NULL);
 
 	
 
@@ -1881,7 +1886,10 @@ int main(int argc, char **argv) {
 		
 	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo a fichero
 
+	printf("%s",ctime(&hora));
 	cout << "La dimensión de la Matriz BINARIA: " << miparser.dimension_matriz << endl;
+	cout << "Generando el grafo en memoria .................." << endl;
+	
 	// Escribir matriz intensional BINARIA
 	ugraph ug(miparser.dimension_matriz);
 	for (int i=0;i< miparser.dimension_matriz-1;i++)
@@ -1895,7 +1903,7 @@ int main(int argc, char **argv) {
 			}
 				
 		}
-	} 
+	}  
 
 	// Removes incompatible edges between values of the same variable-  MUST BE!
 	// miparser.pongo_diagonal_matriz_a_cero();
@@ -1905,15 +1913,15 @@ int main(int argc, char **argv) {
 	nombre_fichero_dimacs = strrchr(miparser.nombre_fichero, '.');
 	strcpy(nombre_fichero_dimacs, ".clq");
 
-	
-	time_t hora = time(NULL);
 	printf("%s",ctime(&hora));
 
+	
 	cout << "Escribiendo el grafo resultante al fichero \"" << miparser.nombre_fichero 
 		<<  "\" .........\n";
 
 	const clock_t comienzo = clock();
-	
+
+
 	fstream f(miparser.nombre_fichero, ios::out);
 	ug.write_dimacs(f);
 	f.close();
