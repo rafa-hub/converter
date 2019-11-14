@@ -170,6 +170,65 @@ public:
 
 
 
+	// Genera el fichero .clq sin usar la clase UG (Undirected Graph)
+	void escribe_grafo_clq()
+	{
+		string var;
+		char *nombre_fichero_csp;
+		char *nombre_fichero_dimacs;
+		FILE * fichero_clq;
+		time_t hora = time(NULL);
+		long int numero_aristas = 0;
+		int cuento_vertices[dimension_matriz];
+		long int numero_vertices = 0;
+
+		const clock_t comienzo = clock();
+	
+		for (int i = 0; i < (dimension_matriz - 1); i++)
+		{
+			cuento_vertices[i] = 0;
+			for (int j = i + 1; j < dimension_matriz; j++)
+				if (matriz_datos[i][j] == 1)
+				{
+					numero_aristas++;
+					cuento_vertices[i] = 1;
+				}
+		}
+		
+		for (int i=0; i < dimension_matriz; i++)
+			if(cuento_vertices[i] == 1)
+				numero_vertices++;
+
+
+		cout << "Tiempo empleado en pre-procesar la matriz: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
+			<< " segundos." << endl;
+
+		nombre_fichero_dimacs = strrchr(nombre_fichero, '.');
+		strcpy(nombre_fichero_dimacs, ".clq");
+		fichero_clq = fopen(nombre_fichero,"w");
+		cout << "Nombre fichero .CLQ: " << nombre_fichero << endl;
+		
+		fprintf(fichero_clq,"c Fichero creado a partir de un fichero XML que expresa un problema CSP\n");
+		fprintf(fichero_clq,"c Fichero: %s - creado: %s\n", nombre_fichero,ctime(&hora));
+		fprintf(fichero_clq,"p edge\t%li\t%li\n",numero_vertices,numero_aristas);
+
+		cout << "Numero vértices: " << numero_vertices << " - aristas: " << numero_aristas << endl;
+
+		for (int i = 0; i < (dimension_matriz - 1); i++)
+			for (int j = i + 1; j < dimension_matriz; j++)
+				if (matriz_datos[i][j] == 1)
+					fprintf(fichero_clq,"e %d %d\n",(i+1),j);
+
+		fclose(fichero_clq);
+	}
+
+
+
+
+
+
+
+
 
 
 
@@ -288,6 +347,51 @@ public:
 
 
 	
+
+	void mi_remove_edges_same_var()
+	{
+		cout<<"REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
+		for (vector<string>::iterator it = lista_variables.begin();
+				it != lista_variables.end(); it++) {
+			
+			int row = base_variable[*it];
+
+			const int NUM_VAL = rango_variable[*it];
+			const int MAX_ROWS_ARRAY_VAR = row + NUM_VAL;
+#ifdef midebug
+			// cout << array_var_name << " row:" << row << " range:" << NUM_VAL
+			// 		<< " nb_var:" << numero_variable[array_var_name]
+			// 		<< endl;
+#endif
+
+			while (true) {
+				for (int i = row; i < (row + NUM_VAL - 1); i++) {
+					for (int j = i + 1; j < (row + NUM_VAL); j++) {
+						matriz_datos[i][j] = 0;
+						matriz_datos[j][i] = 0;
+#ifdef midebug
+/* 						cout<<"edge:"<<"("<<i<<","<<j<<")";
+						cout<<"var:"<<array_var_name<<" base_array:"<<base_array[array_var_name]<<endl;
+						cout<<"range: "<<NUM_VAL<<" MAX ROW:"<<MAX_ROWS_ARRAY_VAR<<endl;
+						cout<<"--------------------------"<<endl; */
+#endif
+					}
+				}
+				//new var inside var array
+				row += NUM_VAL;
+				if (row >= MAX_ROWS_ARRAY_VAR)
+					break;
+			}
+		}
+		cout<<"FINISHED REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
+	}
+
+
+
+
+
+
+
 
 
 
@@ -928,10 +1032,31 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 	void endInstance() {
+		time_t hora = time(NULL);
 		
 
 		cout << endl;
 		cout << "FIN del parsing----------------" << endl;
+
+		// Pre-proceso final de la matriz.
+		pongo_diagonal_matriz_a_cero();
+		mi_remove_edges_same_var();
+
+		// Escribo fichero de variables.
+		cout << "Creando el fichero de Variables (.csp) ............" << endl;	
+		escribe_fichero_csp();			
+
+		cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
+
+		printf("%s",ctime(&hora));
+		cout << "La dimensión de la Matriz BINARIA: " << dimension_matriz << endl;
+
+		// Escribo grafo.
+		const clock_t comienzo = clock();
+		escribe_grafo_clq();
+		cout << "Tiempo empleado en escribir el fichero: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
+			<< " segundos." << endl;
+
 
 		
 	}
@@ -1843,7 +1968,7 @@ int main(int argc, char **argv) {
 	MiSolverPrintCallbacks miparser;
 	char *nombre_fichero_dimacs;
 	int dimension = 0;
-	time_t hora = time(NULL);
+	
 
 	
 
@@ -1869,83 +1994,16 @@ int main(int argc, char **argv) {
 	}
 
 
-	cout << "\n\n- SEGUNDA FASE -" << endl;
 
-///////////////////
-// GENERACION DEL FICHERO .csp
-
-	cout << "\nCreando el fichero (.csp) .....................\n";
-	miparser.escribe_fichero_csp();
-	
-
-///////////////////
-// GENERACION DE UGRAPH
-
-	
-	cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
-		
-	// Una vez leido el fichero y generada la matriz, se vuelca en un Grafo a fichero
-
-	printf("%s",ctime(&hora));
-	cout << "La dimensión de la Matriz BINARIA: " << miparser.dimension_matriz << endl;
-	cout << "Generando el grafo en memoria .................." << endl;
-	
-	// Escribir matriz intensional BINARIA
-	ugraph ug(miparser.dimension_matriz);
-	for (int i=0;i< miparser.dimension_matriz-1;i++)
-	{
-		for (int j=i+1;j<miparser.dimension_matriz;j++)
-		{
-			
-			if (miparser.matriz_datos[i][j]==1)
-			{
-				ug.add_edge(i,j);
-			}
-				
-		}
-	}  
-
-	// Removes incompatible edges between values of the same variable-  MUST BE!
-	// miparser.pongo_diagonal_matriz_a_cero();
-	// miparser.remove_edges_same_var(ug);
-	ug.set_name(miparser.nombre_fichero, false);
-	
-	nombre_fichero_dimacs = strrchr(miparser.nombre_fichero, '.');
-	strcpy(nombre_fichero_dimacs, ".clq");
-
-	printf("%s",ctime(&hora));
-
-	
-	cout << "Escribiendo el grafo resultante al fichero \"" << miparser.nombre_fichero 
-		<<  "\" .........\n";
-
-	const clock_t comienzo = clock();
-
-
-	fstream f(miparser.nombre_fichero, ios::out);
-	ug.write_dimacs(f);
-	f.close();
-	
-	cout << "Tiempo empleado en escribir el fichero: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
-		<< " segundos." << endl;
- 
 	//salida matriz de datos
- 	/* ofstream fmat("log_mat.txt", ios::out);
-	miparser.imprime_matriz("datos",fmat);
-	fmat.close(); */
+ 	// ofstream fmat("log_mat.txt", ios::out);
+	// miparser.imprime_matriz("datos",fmat);
+	// fmat.close();
 
-	//cout << "\n\nEl resultado de la matriz de DATOS ......................\n " << endl;
-	//ostream & terminal=cout;
-	//miparser.imprime_matriz("datos", terminal);
-
-	/*cout << "\n\nEl resultado de la matriz SHADOW ......................\n " << endl;
-	miparser.imprime_matriz("shadow", terminal); */
-
-	
-    // Para reglas binarias
+		
+    // Liberamos memoria
     delete [] miparser.matriz_datos;
 	
-	// Para reglas n-arias
 	
 	return 0;
 }
