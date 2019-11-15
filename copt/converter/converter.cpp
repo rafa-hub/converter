@@ -40,14 +40,8 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 private:
 
 	vector<string> 	lista_arrays;    	// Guarda la lista de arrays. Los arrays ya no se usan.
-	vector<string>	lista_variables_singleton;	// Guarda la lista de variables singleton. 
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
-
-						// Todas las variables ahora se tratan como singleton. 
-						// Van a quedar deprecated todas las variables antiriores.
-
-
-
+										// Todas las variables ahora se tratan como singleton. 
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable.
 	map<string, vector<int>> valores_variable;	// Guarda los valores discretos de una variable.
 	string primera_variable = "Si";		// Permite calcular la base de las variables en la matriz, según se leen.
@@ -116,6 +110,7 @@ public:
 
 
 
+
 	void set_nombre_fichero(char *nombre) {
 		strcpy(nombre_fichero, nombre);
 	}
@@ -170,6 +165,11 @@ public:
 
 
 
+
+
+
+
+
 	// Genera el fichero .clq sin usar la clase UG (Undirected Graph)
 	void escribe_grafo_clq()
 	{
@@ -183,7 +183,8 @@ public:
 		long int numero_vertices = 0;
 
 		const clock_t comienzo = clock();
-	
+		
+		// Cálculo del número de véritces y aristas.
 		for (int i = 0; i < (dimension_matriz - 1); i++)
 		{
 			cuento_vertices[i] = 0;
@@ -194,26 +195,28 @@ public:
 					cuento_vertices[i] = 1;
 				}
 		}
-		
+		// Ya he anotado todos los vértices, ahora los cuento.
 		for (int i=0; i < dimension_matriz; i++)
 			if(cuento_vertices[i] == 1)
 				numero_vertices++;
 
-
 		cout << "Tiempo empleado en pre-procesar la matriz: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
 			<< " segundos." << endl;
 
+		// Procedo a escribir el fichero.
 		nombre_fichero_dimacs = strrchr(nombre_fichero, '.');
 		strcpy(nombre_fichero_dimacs, ".clq");
 		fichero_clq = fopen(nombre_fichero,"w");
 		cout << "Nombre fichero .CLQ: " << nombre_fichero << endl;
 		
+		// Escribo la cabecera del fichero.
 		fprintf(fichero_clq,"c Fichero creado a partir de un fichero XML que expresa un problema CSP\n");
 		fprintf(fichero_clq,"c Fichero: %s - creado: %s\n", nombre_fichero,ctime(&hora));
 		fprintf(fichero_clq,"p edge\t%li\t%li\n",numero_vertices,numero_aristas);
 
 		cout << "Numero vértices: " << numero_vertices << " - aristas: " << numero_aristas << endl;
 
+		// Recorro la matriz y voy escribiendo todas las aristas.
 		for (int i = 0; i < (dimension_matriz - 1); i++)
 			for (int j = i + 1; j < dimension_matriz; j++)
 				if (matriz_datos[i][j] == 1)
@@ -236,118 +239,10 @@ public:
 
 
 
-	// Función deprecated, ahora se tratan todas las variables como variables individuales
-	int es_singleton(string variable)
-	{
-		if(lista_variables_singleton.size()>0)
-		{
-			for (int i=0;i<lista_variables_singleton.size();i++)
-			{
-				if (lista_variables_singleton[i]==variable)
-					return 1;
-			}
-		}
-		return 0;
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// Extrae y devuelve el indice de una variable. Deprecated, a dejar de usar.
-	// Se han dejado de usar los arrays.
-	int get_indice(XVariable variable) {
-		string valor;
-		int indice;
-
-		valor = variable.id;
-		if (es_singleton(valor))
-		{
-			return 1;
-		}
-		indice = mapa_indices[valor];
-
-#ifdef midebug
-		cout << "En get_indice(), id variable: " << valor << " es: " << indice<< endl;
-#endif
-
-		return(indice);
-// 		return(mapa_indices[variable.id]);  //Toda la función
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// Extrae y devuelve el indice de una variable. Deprecated, a dejar de usar.
-	// Se han dejado de usar los arrays.
-	int get_indice_ternario(string variable) {
-
-		int pos_uno,pos_dos;
-		string indice;
-		
-		if (variable.find(']') != std::string::npos)
-		{
-			pos_uno = variable.find('[');
-			pos_dos = variable.find(']');
-
-			//cout << "pos uno: " << pos_uno << " - pos dos: " << pos_dos << endl;
-			indice = variable.substr(pos_uno+1,(pos_dos-pos_uno)-1);
-
-			return stoi(indice);
-		}
-		else{
-			// Es singleton:
-			return 1;
-			//cout << "Variable porculera: " << variable << endl;
-			//throw runtime_error("Variable singleton, todavía no implementado.");
-		}
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	
-
-
-
-
-
-
-
-
-	
-
+	//removes edges corresponding to values of the same variable, from ug and matriz_datos
+	//(all incompatible since a variable may only have one value)
 	void mi_remove_edges_same_var()
 	{
 		cout<<"REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
@@ -396,49 +291,7 @@ public:
 
 
 
-	//removes edges corresponding to values of the same variable, from ug and matriz_datos
-	//(all incompatible since a variable may only have one value)
-	int remove_edges_same_var(ugraph& ug) {
-//		com::stl::print_collection(miparser.lista_arrays, cout); cout<<endl;
-		cout<<"REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
-		for (vector<string>::iterator it = lista_variables.begin();
-				it != lista_variables.end(); it++) {
-			
-			int row = base_variable[*it];
-
-			const int NUM_VAL = rango_variable[*it];
-			const int MAX_ROWS_ARRAY_VAR = row + NUM_VAL;
-#ifdef midebug
-			// cout << array_var_name << " row:" << row << " range:" << NUM_VAL
-			// 		<< " nb_var:" << numero_variable[array_var_name]
-			// 		<< endl;
-#endif
-
-			while (true) {
-				for (int i = row; i < (row + NUM_VAL - 1); i++) {
-					for (int j = i + 1; j < (row + NUM_VAL); j++) {
-						ug.remove_edge(i, j);
-						matriz_datos[i][j] = 0;
-						matriz_datos[j][i] = 0;
-#ifdef midebug
-/* 						cout<<"edge:"<<"("<<i<<","<<j<<")";
-						cout<<"var:"<<array_var_name<<" base_array:"<<base_array[array_var_name]<<endl;
-						cout<<"range: "<<NUM_VAL<<" MAX ROW:"<<MAX_ROWS_ARRAY_VAR<<endl;
-						cout<<"--------------------------"<<endl; */
-#endif
-					}
-				}
-
-				//new var inside var array
-				row += NUM_VAL;
-				if (row >= MAX_ROWS_ARRAY_VAR)
-					break;
-			}
-		}
-		cout<<"FINISHED REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
-		return 0;
-	}
-
+	
 
 
 
@@ -1010,65 +863,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-	void beginInstance(InstanceType type) {
-
-#ifdef midebug
-		cout << "Empieza Instancia tipo: " << type << endl;
-#endif
-
-		//XCSP3PrintCallbacks::beginInstance(type);
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-	void endInstance() {
-		time_t hora = time(NULL);
-		
-
-		cout << endl;
-		cout << "FIN del parsing----------------" << endl;
-
-		// Pre-proceso final de la matriz.
-		pongo_diagonal_matriz_a_cero();
-		mi_remove_edges_same_var();
-
-		// Escribo fichero de variables.
-		cout << "Creando el fichero de Variables (.csp) ............" << endl;	
-		escribe_fichero_csp();			
-
-		cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
-
-		printf("%s",ctime(&hora));
-		cout << "La dimensión de la Matriz BINARIA: " << dimension_matriz << endl;
-
-		// Escribo grafo.
-		const clock_t comienzo = clock();
-		escribe_grafo_clq();
-		cout << "Tiempo empleado en escribir el fichero: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
-			<< " segundos." << endl;
-
-
-		
-	}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1114,8 +908,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		base_siguiente_array += (numero_variables * rango_variables);
 		numero_variable[array_actual] = numero_variables;
-		if (numero_variables == 1)
-			lista_variables_singleton.push_back(array_actual);
 		rango_array[array_actual] = rango_variables;
 		minimo_variable[array_actual] = minimo_variables;
 
@@ -1200,7 +992,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-	//PSS calls here alsp for variables with singleton values (<var id="x0"> -1 <\var> )
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 		
 		// cout << "Primera Variable: " << primera_variable;
@@ -1228,7 +1019,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		// Para tratar los arrays actualmente deprecated, sin uso
 		rango_variables = (maxValue - minValue) + 1;
-		minimo_variables = minValue;					/*TODO-hay variables (singleton) con valor -1!!*/
+		minimo_variables = minValue;			
 		numero_variables++;
 		
 		// Para tratar cada variable de manera individual
@@ -1375,7 +1166,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		}
 		else {
 			cout << "Tamaño de la regla: " << list.size() << endl;
-			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
+			throw runtime_error("ERROR: Tamaño de Regla no procesado con esta versión del generador de grafos.");
 			exit(2);
 		}
 
@@ -1431,33 +1222,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-////////////////////
-//
-// PROCESSING Group
-//
-///////////////////
-
-// Sin uso de momento
-
-	void beginGroup(string id) {
-
-
-		cout << "Comienzo Grupo ....... " << id << endl;
-
-
-		
-	}
-
-
-
-
-
-	void endGroup() {
-
-
-		cout << "Fin Grupo .......\n\n " << endl;
-		
-	}
 
 
 
@@ -1471,11 +1235,11 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-////////////////////
+///////////////////////////
 //
 // PROCESSING ALL DIFFERENT
 //
-///////////////////
+///////////////////////////
 
 
 
@@ -1532,9 +1296,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-
-
-
 	void buildConstraintAlldifferentList(string id, vector<vector<XVariable *>> &lists) {
     	cout << "\n  ¡Mi!  allDiff list constraint" << id << endl;
     	for(unsigned int i = 0 ; i < (lists.size() < 4 ? lists.size() : 3) ; i++) {
@@ -1542,9 +1303,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
         	displayList(lists[i]);
     	}
 	}
-
-
-
 
 
 
@@ -1594,11 +1352,12 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-	////////////////////
+	////////////////////////////////////
 	//
-	// PROCESSING FORMULAS
+	// PROCESSING FORMULAS INTENSIONALES
 	//
-	///////////////////
+	////////////////////////////////////
+
 
 
 	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
@@ -1769,39 +1528,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-
-
-
-
-	void beginConstraints() {
-		cout << "\nComienza la declaración de las Restricciones (Constraints) ..............\n" << endl;
-		
-	}
-
-
-
-
-
-
-
-
-
-
-	void endConstraints() {
-		cout << "Fin declaración Constraints .................." << endl << endl;
-	}
-	
-	
-
-
-
-
-
-
-
-
-
-
 //////////////////////////////////
 //
 // 	PROCESANDO REGLAS CHANNEL
@@ -1909,16 +1635,64 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
+///////////////////////////////////
+//
+// COMIENZO Y FIN DE RESTRICCIONES
+//
+///////////////////////////////////
 
-	//////////////////////////////////
-	//
-	// 	PROCESANDO REGLAS SLIDE
-	//
-	//////////////////////////////////
 
 
-	void beginSlide(string id, bool) {
-		cout << "Empieza un slide.............." << id << endl;
+
+
+	void beginConstraints() {
+		cout << "\nComienza la declaración de las Restricciones (Constraints) ..............\n" << endl;
+		
+	}
+
+
+
+
+
+
+
+
+
+
+	void endConstraints() {
+		cout << "Fin declaración Constraints .................." << endl << endl;
+	}
+	
+	
+
+
+
+////////////////////////
+//
+// PROCESSING GROUP
+//
+////////////////////////
+
+// Sin uso de momento
+
+	void beginGroup(string id) {
+
+
+		cout << "Comienzo Grupo ....... " << id << endl;
+
+
+		
+	}
+
+
+
+
+
+	void endGroup() {
+
+
+		cout << "Fin Grupo .......\n\n " << endl;
+		
 	}
 
 
@@ -1933,9 +1707,67 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-	void endSlide() {
-		cout << "\nFin slide..............." << endl;
+
+////////////////////////
+//
+// PROCESSING INSNTACE
+//
+////////////////////////
+
+
+
+	void beginInstance(InstanceType type)
+	{
+
+#ifdef midebug
+		cout << "Empieza Instancia tipo: " << type << endl;
+#endif
+
+		//XCSP3PrintCallbacks::beginInstance(type);
 	}
+
+
+
+
+
+
+
+
+
+
+
+	void endInstance() 
+	{
+		time_t hora = time(NULL);
+		
+
+		cout << endl;
+		cout << "FIN del parsing----------------" << endl;
+
+		// Pre-proceso final de la matriz.
+		pongo_diagonal_matriz_a_cero();
+		mi_remove_edges_same_var();
+
+		// Escribo fichero de variables.
+		cout << "Creando el fichero de Variables (.csp) ............" << endl;	
+		escribe_fichero_csp();			
+
+		cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
+
+		printf("%s",ctime(&hora));
+		cout << "La dimensión de la Matriz BINARIA: " << dimension_matriz << endl;
+
+		// Escribo grafo.
+		const clock_t comienzo = clock();
+		escribe_grafo_clq();
+		cout << "Tiempo empleado en escribir el fichero: " << float( clock () - comienzo ) /  (CLOCKS_PER_SEC * 60) 
+			<< " minutos." << endl;
+		
+	}
+
+
+
+
 
 
 
@@ -1996,9 +1828,9 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	// ofstream fmat("log_mat.txt", ios::out);
-	// miparser.imprime_matriz("datos",fmat);
-	// fmat.close();
+ 	//  ofstream fmat("log_mat.txt", ios::out);
+	//  miparser.imprime_matriz("datos",fmat);
+	//  fmat.close();
 
 		
     // Liberamos memoria
