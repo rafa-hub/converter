@@ -1,14 +1,9 @@
-// #include "../gtest/gtest.h"
-#include "graph/graph.h"
-#include "graph/algorithms/decode.h"
-#include "utils/common.h"
-#include "utils/logger.h"
-#include "utils/prec_timer.h"
-
 #include "XCSP3CoreParser.h"
 #include "XCSP3PrintCallbacks.h"
 #include "XCSP3Tree.h"
 #include "XCSP3TreeNode.h"
+
+#include "utils/prec_timer.h"
 
 #include <fstream>
 #include <string.h>
@@ -737,9 +732,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	{
 		int coordenada_final[2];
 
-// #ifdef midebug
+#ifdef midebug
 			cout << "Escribo 0 en: " << base_variable[var_cero]+i << " - " << j+base_variable[var_uno]+j << endl;
-// #endif
+#endif
 		coordenada_final[0] = base_variable[var_cero]+i;
 		coordenada_final[1] = base_variable[var_uno]+j;
 		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
@@ -1364,11 +1359,12 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
     	
 
 		cout << "\nFórmula simple.............. \n  " << id;
+		cout << "\nVERSIÓN ESPECÍFICA PARA FICHEROS Shceduling .............. \n  " << id;
 			
 	#ifdef midebug
-			cout << "\n   OPERACIONES BINARIAS............... Order Type: " << orden <<endl;
-			cout << "PRIMITIVA .....................\n";
+			cout << "\n   OPERACIONES BINARIAS ............... Order Type: " << orden <<endl;
 			cout << x->id << " base: " << base_variable[x->id] << " - Rango: " << rango_variable[x->id] << endl; 
+			cout << "Entero :" << k << endl;
 			cout << y->id << " base: " << base_variable[y->id] << " - Rango: " << rango_variable[x->id] << endl; 
 			cout <<  " : Operación: " << orden << endl; 
 	#endif
@@ -1379,7 +1375,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				cout << "Less or Equal (" << orden << ")" << endl;
 				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] <= valores_variable[y->id][j]))
+						if (!(valores_variable[x->id][i] + k <= valores_variable[y->id][j]))
 							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (LT):
@@ -1453,8 +1449,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		
 
     	cout << "\nFórmula compleja de orden: " << tree->arity() << " ..............   \n";
-    	// tree->prefixe();
-
+    	
 		for(int i=0;i<tree->arity();i++)
     	{
      		variable.push_back(tree->listOfVariables[i]);
@@ -1517,7 +1512,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		
 		int coordenada_final[2];
 
-		cout << "\n  FOLLÓN constraint: " << x->id << (in ? " in " : " not in ") << min << ".." << max <<"\n";
+		cout << "\n  Constraint simple, PENDIENTE DE IMPLEMENTAR: " 
+			<< x->id << (in ? " in " : " not in ") << min << ".." << max <<"\n";
 
 
 #ifdef midebug
@@ -1839,9 +1835,9 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	ofstream fmat("log_mat.txt", ios::out);
-	miparser.imprime_matriz("datos",fmat);
-	fmat.close();
+ 	// ofstream fmat("log_mat.txt", ios::out);
+	// miparser.imprime_matriz("datos",fmat);
+	// fmat.close();
 
 		
     // Liberamos memoria
