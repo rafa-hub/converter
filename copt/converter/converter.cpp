@@ -737,9 +737,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	{
 		int coordenada_final[2];
 
-#ifdef midebug
+// #ifdef midebug
 			cout << "Escribo 0 en: " << base_variable[var_cero]+i << " - " << j+base_variable[var_uno]+j << endl;
-#endif
+// #endif
 		coordenada_final[0] = base_variable[var_cero]+i;
 		coordenada_final[1] = base_variable[var_uno]+j;
 		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
@@ -1361,46 +1361,44 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
-    	string var_cero,var_uno;
-		int dimension=2; 
-		int coordenadas_final[2]={0,0};
-
+    	
 
 		cout << "\nFórmula simple.............. \n  " << id;
 			
 	#ifdef midebug
 			cout << "\n   OPERACIONES BINARIAS............... Order Type: " << orden <<endl;
 			cout << "PRIMITIVA .....................\n";
-			cout << x->id << " base: " << base_variable[x->id] << " - " << y->id << " base: " 
-				<< base_variable[y->id] << " : Operación: " << orden << endl; 
+			cout << x->id << " base: " << base_variable[x->id] << " - Rango: " << rango_variable[x->id] << endl; 
+			cout << y->id << " base: " << base_variable[y->id] << " - Rango: " << rango_variable[x->id] << endl; 
+			cout <<  " : Operación: " << orden << endl; 
 	#endif
 		
 		switch(orden)
 		{
 			case (LE):
 				cout << "Less or Equal (" << orden << ")" << endl;
-				for (int i = 0; i< rango_variable[x->id]; i++)
+				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
 						if (!(valores_variable[x->id][i] <= valores_variable[y->id][j]))
 							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (LT):
 				cout << "Less Than (" << orden << ")" << endl;
-				for (int i = 0; i< rango_variable[x->id]; i++)
+				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
 						if (!(valores_variable[x->id][i] < valores_variable[y->id][j]))
 							escribe_0_en_matriz(x->id,y->id,i,j); 
 				break;
 			case (GE):
 				cout << "Greater or Equal (" << orden << ")" << endl;
-				for (int i = 0; i< rango_variable[x->id]; i++)
+				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
 						if (!(valores_variable[x->id][i] >= valores_variable[y->id][j]))
 							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (GT):
 				cout << "Greater Than (" << orden << ")" << endl;
-				for (int i = 0; i< rango_variable[x->id]; i++)
+				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
 						if (!(valores_variable[x->id][i] > valores_variable[y->id][j]))
 							escribe_0_en_matriz(x->id,y->id,i,j);
@@ -1413,14 +1411,14 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				
 			case (EQ):
 				cout << "Equal (" << orden << ")" << endl;
-				for (int i = 0; i< rango_variable[x->id]; i++)
+				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
 						if (!(valores_variable[x->id][i] == valores_variable[y->id][j]))
 							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (NE):
 				cout << "Not Equal (" << orden << ")" << endl;
-				for (int i = 0; i< rango_variable[x->id]; i++)
+				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
 					{
 						//cout << "Valores: " << valores_variable[x->id][i] << " " << valores_variable[y->id][j] << endl;
@@ -1516,7 +1514,20 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 	void buildConstraintPrimitive(string id, XVariable *x, bool in, int min, int max) {
-			cout << "\n  FOLLÓN constraint  " << id << ":"<< x->id << (in ? " in " : " not in ") << min << ".." << max <<"\n";
+		
+		int coordenada_final[2];
+
+		cout << "\n  FOLLÓN constraint: " << x->id << (in ? " in " : " not in ") << min << ".." << max <<"\n";
+
+
+#ifdef midebug
+			cout << "Escribo 0 en: " << base_variable[x->id] << " - " << base_variable[x->id] << endl;
+#endif
+		// PENDIENTE DE IMPLEMENTAR 
+		/* coordenada_final[0] = base_variable[x->id]+min;
+		coordenada_final[1] = base_variable[x->id]+max;
+		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1; */
 	}
 
 
@@ -1828,9 +1839,9 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	//  ofstream fmat("log_mat.txt", ios::out);
-	//  miparser.imprime_matriz("datos",fmat);
-	//  fmat.close();
+ 	ofstream fmat("log_mat.txt", ios::out);
+	miparser.imprime_matriz("datos",fmat);
+	fmat.close();
 
 		
     // Liberamos memoria
