@@ -79,7 +79,7 @@ public:
 	int dimension_ternaria = 0;			// Guarda la dimensión de la matriz de vértices.
 	
 	int **matriz_datos; 	// Matriz donde se almacena el resultado.
-	//int **matriz_shadow; 	// Matriz donde se almacenan las escrituras. (Deprecated)
+	
 	
 	
 
@@ -165,22 +165,23 @@ public:
 
 
 
+
 	// Genera el fichero .clq sin usar la clase UG (Undirected Graph)
 	void escribe_grafo_clq()
 	{
 		string var;
 		char *nombre_fichero_csp;
 		char *nombre_fichero_dimacs;
-		FILE * fichero_clq;
+		FILE *fichero_clq;
 		time_t hora = time(NULL);
 		long int numero_aristas = 0;
-		int cuento_vertices[dimension_matriz];
+		int cuento_vertices[dimension_matriz], i = 0;
 		long int numero_vertices = 0;
 
 		const clock_t comienzo = clock();
 		
 		// Cálculo del número de véritces y aristas.
-		for (int i = 0; i < (dimension_matriz - 1); i++)
+		for (i = 0; i < (dimension_matriz - 1); i++)
 		{
 			cuento_vertices[i] = 0;
 			for (int j = i + 1; j < dimension_matriz; j++)
@@ -190,7 +191,14 @@ public:
 					cuento_vertices[i] = 1;
 				}
 		}
-		// Ya he anotado todos los vértices, ahora los cuento.
+
+		// Veo si el último vértice existe
+		cuento_vertices[i] = 0;
+		for (int k = 0; k < dimension_matriz-1 ; k++)
+			if(matriz_datos[i][k] == 1)
+				cuento_vertices[i] = 1;
+
+		// Ya he anotado todos los vértices con al menos una arista, ahora los cuento.
 		for (int i=0; i < dimension_matriz; i++)
 			if(cuento_vertices[i] == 1)
 				numero_vertices++;
@@ -1007,7 +1015,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		lista_variables.push_back(id);			
 		mapa_indices[id]=numero_variables;
 
-		for (int i = minValue; i<= maxValue; i++)
+		for (int i = minValue; i <= maxValue; i++)
 		{
 			valores_variable[id].push_back(i);
 		}
@@ -1027,7 +1035,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			base_variable[id] = base_variable[variable_anterior] + rango_variable[variable_anterior];
 		
 		
-		cout << "Variable: " << id << " indice: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
+		cout << "Variable POLLÓN: " << id << " indice: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
 				<< maxValue << " - Base variable en la matriz: " << base_variable[id] << " - Rango: " << rango_variable[id] << endl;
 
 		}
@@ -1375,7 +1383,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				cout << "Less or Equal (" << orden << ")" << endl;
 				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] + k <= valores_variable[y->id][j]))
+						if (!(valores_variable[x->id][i] + k <= valores_variable[y->id][j])) // (+ k), versión específica para familia Scheduling
 							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (LT):
@@ -1514,6 +1522,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		cout << "\n  Constraint simple, PENDIENTE DE IMPLEMENTAR: " 
 			<< x->id << (in ? " in " : " not in ") << min << ".." << max <<"\n";
+		
+		cout << "Para el fichero Sadeh, son todo unos.\n";
 
 
 #ifdef midebug
@@ -1835,9 +1845,9 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	// ofstream fmat("log_mat.txt", ios::out);
-	// miparser.imprime_matriz("datos",fmat);
-	// fmat.close();
+ 	//  ofstream fmat("log_mat.txt", ios::out);
+	//  miparser.imprime_matriz("datos",fmat);
+	//  fmat.close();
 
 		
     // Liberamos memoria
