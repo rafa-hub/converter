@@ -136,8 +136,9 @@ public:
 		cout << "x " << lista_variables.size() << endl;
 #endif
 		
-		fichero_salida<< "c Fichero creado a partir de un fichero XML \n" 
-			<< "c que expresa un problema CSP:  " << PrecisionTimer::local_timestamp()  << endl;
+		fichero_salida << "c Fichero creado a partir de un fichero XML \n" 
+			<< "c que expresa un problema CSP  -  Creado: " << PrecisionTimer::local_timestamp()  << endl;
+		
 		fichero_salida << "x " << lista_variables.size() << endl;
 
 		for (unsigned int j = 0; j < lista_variables.size(); j++)
@@ -170,38 +171,24 @@ public:
 	void escribe_grafo_clq()
 	{
 		string var;
-		char *nombre_fichero_csp;
 		char *nombre_fichero_dimacs;
 		FILE *fichero_clq;
 		time_t hora = time(NULL);
 		long int numero_aristas = 0;
 		int cuento_vertices[dimension_matriz], i = 0;
-		long int numero_vertices = 0;
+		
 
 		const clock_t comienzo = clock();
 		
 		// Cálculo del número de véritces y aristas.
-		for (i = 0; i < (dimension_matriz - 1); i++)
-		{
-			cuento_vertices[i] = 0;
+
+		for (int i = 0; i < (dimension_matriz - 1); i++)
 			for (int j = i + 1; j < dimension_matriz; j++)
 				if (matriz_datos[i][j] == 1)
-				{
 					numero_aristas++;
-					cuento_vertices[i] = 1;
-				}
-		}
 
-		// Veo si el último vértice existe
-		cuento_vertices[i] = 0;
-		for (int k = 0; k < dimension_matriz-1 ; k++)
-			if(matriz_datos[i][k] == 1)
-				cuento_vertices[i] = 1;
 
-		// Ya he anotado todos los vértices con al menos una arista, ahora los cuento.
-		for (int i=0; i < dimension_matriz; i++)
-			if(cuento_vertices[i] == 1)
-				numero_vertices++;
+
 
 		cout << "Tiempo empleado en pre-procesar la matriz: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
 			<< " segundos." << endl;
@@ -215,9 +202,9 @@ public:
 		// Escribo la cabecera del fichero.
 		fprintf(fichero_clq,"c Fichero creado a partir de un fichero XML que expresa un problema CSP\n");
 		fprintf(fichero_clq,"c Fichero: %s - creado: %s\n", nombre_fichero,ctime(&hora));
-		fprintf(fichero_clq,"p edge\t%li\t%li\n",numero_vertices,numero_aristas);
+		fprintf(fichero_clq,"p edge\t%i\t%li\n",dimension_matriz,numero_aristas);
 
-		cout << "Numero vértices: " << numero_vertices << " - aristas: " << numero_aristas << endl;
+		cout << "Numero vértices: " << dimension_matriz << " - aristas: " << numero_aristas << endl;
 
 		// Recorro la matriz y voy escribiendo todas las aristas.
 		for (int i = 0; i < (dimension_matriz - 1); i++)
@@ -248,21 +235,26 @@ public:
 	//(all incompatible since a variable may only have one value)
 	void mi_remove_edges_same_var()
 	{
-		cout<<"REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
+		cout<<"REMOVING EDGES FROM VALUES OF SAME VARIABLE ---------- TOTAL: " << lista_variables.size() 
+			<< " variables." << endl;
+
 		for (vector<string>::iterator it = lista_variables.begin();
-				it != lista_variables.end(); it++) {
+				it != lista_variables.end(); it++) 
+		{
 			
 			int row = base_variable[*it];
 
 			const int NUM_VAL = rango_variable[*it];
 			const int MAX_ROWS_ARRAY_VAR = row + NUM_VAL;
+			
 #ifdef midebug
-			// cout << array_var_name << " row:" << row << " range:" << NUM_VAL
-			// 		<< " nb_var:" << numero_variable[array_var_name]
-			// 		<< endl;
+			cout << array_var_name << " row:" << row << " range:" << NUM_VAL
+				<< " nb_var:" << numero_variable[array_var_name]
+			 		<< endl;
 #endif
 
-			while (true) {
+			while (true) 
+			{
 				for (int i = row; i < (row + NUM_VAL - 1); i++) {
 					for (int j = i + 1; j < (row + NUM_VAL); j++) {
 						matriz_datos[i][j] = 0;
@@ -280,6 +272,7 @@ public:
 				if (row >= MAX_ROWS_ARRAY_VAR)
 					break;
 			}
+
 		}
 		cout<<"FINISHED REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
 	}
@@ -1367,7 +1360,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
     	
 
 		cout << "\nFórmula simple.............. \n  " << id;
-		cout << "\nVERSIÓN ESPECÍFICA PARA FICHEROS Shceduling .............. \n  " << id;
+		cout << "\nVERSIÓN ESPECÍFICA .............. \n  " << id;
 			
 	#ifdef midebug
 			cout << "\n   OPERACIONES BINARIAS ............... Order Type: " << orden <<endl;
