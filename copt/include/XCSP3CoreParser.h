@@ -36,7 +36,7 @@
 #include "XCSP3CoreCallbacks.h"
 #include "XCSP3Constants.h"
 #include "UTF8String.h"
-// #define debug
+//#define debug
 
 namespace XCSP3Core {
     using namespace std;

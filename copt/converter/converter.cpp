@@ -180,15 +180,11 @@ public:
 
 		const clock_t comienzo = clock();
 		
-		// Cálculo del número de véritces y aristas.
-
+		// Cálculo del número de aristas.
 		for (int i = 0; i < (dimension_matriz - 1); i++)
 			for (int j = i + 1; j < dimension_matriz; j++)
 				if (matriz_datos[i][j] == 1)
 					numero_aristas++;
-
-
-
 
 		cout << "Tiempo empleado en pre-procesar la matriz: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
 			<< " segundos." << endl;
@@ -210,7 +206,7 @@ public:
 		for (int i = 0; i < (dimension_matriz - 1); i++)
 			for (int j = i + 1; j < dimension_matriz; j++)
 				if (matriz_datos[i][j] == 1)
-					fprintf(fichero_clq,"e %d %d\n",(i+1),j);
+					fprintf(fichero_clq,"e %d %d\n",(i+1),(j+1));
 
 		fclose(fichero_clq);
 	}
@@ -260,10 +256,10 @@ public:
 						matriz_datos[i][j] = 0;
 						matriz_datos[j][i] = 0;
 #ifdef midebug
-/* 						cout<<"edge:"<<"("<<i<<","<<j<<")";
-						cout<<"var:"<<array_var_name<<" base_array:"<<base_array[array_var_name]<<endl;
+						cout<<"edge:"<<"("<<i<<","<<j<<")";
 						cout<<"range: "<<NUM_VAL<<" MAX ROW:"<<MAX_ROWS_ARRAY_VAR<<endl;
-						cout<<"--------------------------"<<endl; */
+						cout<<"--------------------------"<<endl; 
+						//cin.get();
 #endif
 					}
 				}
@@ -288,6 +284,7 @@ public:
 
 
 	
+
 
 
 
@@ -480,8 +477,8 @@ public:
 #endif
 					}
 
-					// Borro el resto de restricciones
-					for (int i = 0; i < rango_variable[var_unaria]; i++)
+					// Borro el resto de restricciones. REVISAR, parece que no está bien esta parte del código.
+					/* for (int i = 0; i < rango_variable[var_unaria]; i++)
 						for (int j = 0; j < dimension_matriz; j++) {
 							coordenada_final[0] = base_variable[var_unaria] + i;
 							coordenada_final[1] = j;
@@ -492,7 +489,7 @@ public:
 							cout << "writing-0-S en:(" << coordenada_final[1] << ","
 										<< coordenada_final[0] << ")" << endl;
 #endif
-				}
+				} */
 			}
 
 		} else {
@@ -699,7 +696,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 	// Para el caso de reglas intensionales binarias, escribe 1 en la matriz 
-	void escribe_1__en_matriz(string var_cero, string var_uno,int i, int j)
+	void escribe_1_en_matriz(string var_cero, string var_uno,int i, int j)
 	{
 		int coordenada_final[2];
 
@@ -1028,8 +1025,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			base_variable[id] = base_variable[variable_anterior] + rango_variable[variable_anterior];
 		
 		
-		cout << "Variable POLLÓN: " << id << " indice: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
-				<< maxValue << " - Base variable en la matriz: " << base_variable[id] << " - Rango: " << rango_variable[id] << endl;
+		// cout << "Variable: " << id << " indice: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
+		//		<< maxValue << " - Base variable en la matriz: " << base_variable[id] << " - Rango: " << rango_variable[id] << endl;
 
 		}
 
@@ -1114,7 +1111,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
 		
 		
-		cout << "Regla UNARIA: " << endl;
+		cout << "Regla UNARIA: "<< support << endl;
 		escribe_en_matriz_unaria(tuples,variable->id,support);
 	}
 
@@ -1376,28 +1373,36 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				cout << "Less or Equal (" << orden << ")" << endl;
 				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] + k <= valores_variable[y->id][j])) // (+ k), versión específica para familia Scheduling
+						if ((valores_variable[x->id][i] + k <= valores_variable[y->id][j])) // (+ k), versión específica para familia Scheduling
 							escribe_0_en_matriz(x->id,y->id,i,j);
+						else 
+							escribe_1_en_matriz(x->id,y->id,i,j);
 				break;
 			case (LT):
 				cout << "Less Than (" << orden << ")" << endl;
 				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] < valores_variable[y->id][j]))
+						if ((valores_variable[x->id][i] < valores_variable[y->id][j]))
+							escribe_1_en_matriz(x->id,y->id,i,j); 
+						else
 							escribe_0_en_matriz(x->id,y->id,i,j); 
 				break;
 			case (GE):
 				cout << "Greater or Equal (" << orden << ")" << endl;
 				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] >= valores_variable[y->id][j]))
-							escribe_0_en_matriz(x->id,y->id,i,j);
+						if ((valores_variable[x->id][i] >= valores_variable[y->id][j]))
+							escribe_1_en_matriz(x->id,y->id,i,j);
+						else
+							escribe_0_en_matriz(x->id,y->id,i,j); 
 				break;
 			case (GT):
 				cout << "Greater Than (" << orden << ")" << endl;
 				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] > valores_variable[y->id][j]))
+						if ((valores_variable[x->id][i] > valores_variable[y->id][j]))
+							escribe_1_en_matriz(x->id,y->id,i,j);
+						else
 							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			
@@ -1411,6 +1416,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 				for (int i = 0; i < rango_variable[x->id]; i++)
 					for (int j = 0; j < rango_variable[y->id]; j++)
 						if (!(valores_variable[x->id][i] == valores_variable[y->id][j]))
+							escribe_1_en_matriz(x->id,y->id,i,j);
+						else
 							escribe_0_en_matriz(x->id,y->id,i,j);
 				break;
 			case (NE):
@@ -1420,10 +1427,10 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 					{
 						//cout << "Valores: " << valores_variable[x->id][i] << " " << valores_variable[y->id][j] << endl;
 						if (!(valores_variable[x->id][i] != valores_variable[y->id][j]))
-						{
-						//	cout << " ¡SON IGUALES! Escribo cero \n";
+							escribe_1_en_matriz(x->id,y->id,i,j);
+						else				
 							escribe_0_en_matriz(x->id,y->id,i,j);
-						}
+						
 					}
 		} 
 	}
@@ -1575,65 +1582,89 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		vector<XVariable *>::iterator itero1,itero2;
 		int coordenada_final[2],coordenada_base[2];
 		int i = 0,j = 0, k=0;
-
-		
-		
-
+				
 		cout << "\n   Restricción de \"CANAL\": " << endl;
 		cout << "        list1 ";
 		displayList(list1);
 		cout << "        list2 ";
 		displayList(list2);
 
-		
-		// Pongo a cero las variables del canal
-
-		cout << "Poniendo a cero las variables del canal ............\n";
-  
-		for(k=0,itero1 = list1.begin(); itero1 != list1.end();itero1++)
+		for(int i = 0; i < list1.size(); i++)
 		{
-			//cout << "Variable1: " << (*itero1)->id << endl;
-			for (itero2 = list2.begin(); itero2 != list2.end(); itero2++)
-			{
-				//cout << "Variable2: " << (*itero2)->id << " " << endl;
-				coordenada_base[0] = base_variable[(*itero1)->id];
-				coordenada_base[1] = base_variable[(*itero2)->id];
+			cout << "Variable1: " << list1[i]->id << endl;
+			coordenada_base[0] = base_variable[list1[i]->id];
 
-				for(int i=0; i < rango_variable[(*itero1)->id]; i++)
-					for (int j=0; j < rango_variable[(*itero2)->id]; j++)
-					{
-						coordenada_final[0] = coordenada_base[0] + i;
-						coordenada_final[1] = coordenada_base[1] + j;	
-						// cout << "Coordenadas finales[" << k << "]: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;
-						k++;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-					}	
-			}
-			//cout << endl; 
-		} 
+			for (int j = 0; j < list1.size(); j++)
+			{	
+				cout << "Pongo columna " << j << " a cero." << endl;
 
-		// Pongo a Uno el canal    
-		for (k=0, itero1 = list1.begin(), i=0; itero1 != list1.end();itero1++,i++)
-		{
-			
-			coordenada_base[0] = base_variable[(*itero1)->id];
-			
-			for (itero2 = list2.begin(), j = 0; itero2 != list2.end(); itero2++, j++)
-			{
+				for (int k = 0; k < dimension_matriz; k++)
+				{
+					coordenada_final[0] = coordenada_base[0]+j;
+					coordenada_final[1] = k;
+
+					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+					matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+				}
+
+				cout << "Variable2: " << list2[i]->id << endl;
+				cout << "Pongo el uno de la columna " << j << endl;
+
+				coordenada_base[1] = base_variable[list2[j]->id];
+
 				coordenada_final[0] = coordenada_base[0]+j;
-				coordenada_final[1] = base_variable[(*itero2)->id]+i;
-				//cout << "Var1: " << (*itero1)->id << " - Var2: " << (*itero2)->id << " - ";
-				//cout << "Coordenadas finales[" << k << "]: " << coordenada_final[0] << " - " << coordenada_final[1] << endl;
-				
-				k++;
-					
+				coordenada_final[1] = coordenada_base[1]+i;
+
 				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
 				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-			}
+
+			}	
+				
 			
 		}
-		//cout << endl;
+
+		for(int i = 0; i < list2.size(); i++)
+		{
+			cout << "Variable1: " << list2[i]->id << endl;
+			coordenada_base[0] = base_variable[list2[i]->id];
+
+			for (int j = 0; j < list2.size(); j++)
+			{	
+				cout << "Pongo columna " << j << " a cero." << endl;
+
+				for (int k = 0; k < dimension_matriz; k++)
+				{
+					coordenada_final[0] = coordenada_base[0]+j;
+					coordenada_final[1] = k;
+
+					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
+					matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
+				}
+
+				cout << "Variable2: " << list1[i]->id << endl;
+				cout << "Pongo el uno de la columna " << j << endl;
+
+				coordenada_base[1] = base_variable[list1[j]->id];
+
+				coordenada_final[0] = coordenada_base[0]+j;
+				coordenada_final[1] = coordenada_base[1]+i;
+
+				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
+				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
+
+			}	
+				
+			
+		} 
+
+		
+
+		
+
+			
+
+
+
 	}
 
 
@@ -1772,6 +1803,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		escribe_grafo_clq();
 		cout << "Tiempo empleado en escribir el fichero: " << float( clock () - comienzo ) /  (CLOCKS_PER_SEC * 60) 
 			<< " minutos." << endl;
+
+		
 		
 	}
 
@@ -1838,10 +1871,13 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	//  ofstream fmat("log_mat.txt", ios::out);
-	//  miparser.imprime_matriz("datos",fmat);
-	//  fmat.close();
+ 	/* ofstream fmat("log_mat.txt", ios::out);
+	miparser.imprime_matriz("datos",fmat);
+	fmat.flush(); */
 
+	/* ostream terminal(cout.rdbuf());
+	miparser.imprime_matriz("datos",terminal);
+	terminal.flush();*/
 		
     // Liberamos memoria
     delete [] miparser.matriz_datos;
