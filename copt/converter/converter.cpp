@@ -719,7 +719,7 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 		
 		fichero_salida << "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
 		fichero_salida << "c " << nombre_fichero << endl;
-		fichero_salida << "p	edge\t" << indice_vertices << "\t" << contador_aristas << endl;
+		fichero_salida << "p	edge\t" << lista_vertices.size() << "\t" << contador_aristas << endl;
 
 		for (unsigned int j = 0; j < grafo.size(); j++)
 			fichero_salida << "e " << grafo[j][0]+1 << " " << grafo[j][1]+1 << endl;
