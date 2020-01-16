@@ -374,7 +374,7 @@ public:
 
 	//Vuelca en pantalla la matriz, solo útil para depuración, en casos reales
 	//la matriz suele ser demasiado grande
-	ostream& imprime_matriz(string matriz, ostream& o=cout) {
+	/* ostream& imprime_matriz(string matriz, ostream& o=cout) {
 		if (matriz == "datos") {
 			//cout<<"MATRIZ DE DATOS-----------------"<<endl;
 			for (int x = 0; x < dimension_matriz; x++) {
@@ -387,11 +387,43 @@ public:
 		}
 		
 		return o;
+	} */
+
+
+
+	ostream& imprime_matriz(string matriz, ostream& o=cout) {
+		int j = 0;
+		
+		if (matriz == "datos") {
+			//cout<<"MATRIZ DE DATOS-----------------"<<endl;
+			o << "    ";
+			for(int x = 0; x < lista_variables.size(); x++)
+			{
+				o << lista_variables[x] << "  ";
+			}
+
+			o << endl;
+
+			for (int x = 0; x < dimension_matriz; x++) 
+			{
+				if (x == (j*rango_variable[lista_variables[j]]))
+				{
+					o << lista_variables[j];
+					j++;
+				} else {
+					o << "    ";
+				}
+
+				for (int y = 0; y < dimension_matriz; y++){
+					o << matriz_datos[x][y] << " ";
+				}
+				o << endl;
+			}
+			o << "\n\n" << endl;
+		}
+		
+		return o;
 	}
-
-
-
-
 
 
 	
@@ -1823,9 +1855,9 @@ int main(int argc, char **argv) {
 	miparser.imprime_matriz("datos",fmat);
 	fmat.flush(); */
 
-	/* ostream terminal(cout.rdbuf());
+	ostream terminal(cout.rdbuf());
 	miparser.imprime_matriz("datos",terminal);
-	terminal.flush(); */
+	terminal.flush();
 		
     // Liberamos memoria
     delete [] miparser.matriz_datos;
