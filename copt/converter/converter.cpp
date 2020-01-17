@@ -1289,12 +1289,12 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		REGLA=DIFERENTE;		
 		cout << "\n   Mi allDiff constraint " << id << "Tamaño de la regla: "<< list.size() << endl;
 
-		if (list.size() != 2)
+		/* if (list.size() != 2)
 		{
 			cout << "Tamaño de la regla: " << list.size() << endl;
 			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
 			exit(2);
-		}
+		} */
 		
 		for (k=0;k<(list.size()-1);k++)
 			for(i=k,j=i+1; j<list.size();j++)
