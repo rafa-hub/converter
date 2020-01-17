@@ -1855,9 +1855,9 @@ int main(int argc, char **argv) {
 	miparser.imprime_matriz("datos",fmat);
 	fmat.flush(); */
 
-	ostream terminal(cout.rdbuf());
+	/* ostream terminal(cout.rdbuf());
 	miparser.imprime_matriz("datos",terminal);
-	terminal.flush();
+	terminal.flush(); */
 		
     // Liberamos memoria
     delete [] miparser.matriz_datos;
