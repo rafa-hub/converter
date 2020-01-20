@@ -149,8 +149,7 @@ public:
 		nombre_fichero_csp = strrchr(nombre_fichero, '.');
 		strcpy(nombre_fichero_csp, ".csp");
 		cout << "Nombre fichero .CSP: " << nombre_fichero << endl;
-		//cout << "Rango variables: " << lista_vertices.size() << endl;
-
+		
 		ofstream fichero_salida(nombre_fichero);
 
 		fichero_salida<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
@@ -708,24 +707,26 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 	void escribe_grafo()
 	{
 		string var;
-		char *nombre_fichero_csp;
-
-		nombre_fichero_csp = strrchr(nombre_fichero, '.');
-		strcpy(nombre_fichero_csp, ".clq");
+		char *nombre_fichero_dimacs;
+		FILE *fichero_clq;
+		time_t hora = time(NULL);
+		const clock_t comienzo = clock();
+		
+		// Procedo a escribir el fichero.
+		nombre_fichero_dimacs = strrchr(nombre_fichero, '.');
+		strcpy(nombre_fichero_dimacs, ".clq");
+		fichero_clq = fopen(nombre_fichero,"w");
 		cout << "Nombre fichero .CLQ: " << nombre_fichero << endl;
 		
-		ofstream fichero_salida(nombre_fichero);
-
-		
-		fichero_salida << "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
-		fichero_salida << "c " << nombre_fichero << endl;
-		fichero_salida << "p	edge\t" << lista_vertices.size() << "\t" << contador_aristas << endl;
+		// Escribo la cabecera del fichero.
+		fprintf(fichero_clq,"c Fichero creado a partir de un fichero XML que expresa un problema CSP\n");
+		fprintf(fichero_clq,"c Fichero: %s - creado: %s\n", nombre_fichero,ctime(&hora));
+		fprintf(fichero_clq,"p edge\t%i\t%i\n",indice_vertices,contador_aristas);
 
 		for (unsigned int j = 0; j < grafo.size(); j++)
-			fichero_salida << "e " << grafo[j][0]+1 << " " << grafo[j][1]+1 << endl;
-					
-		fichero_salida << endl;
-		fichero_salida.close();
+			fprintf(fichero_clq,"e %d %d\n",grafo[j][0]+1, grafo[j][1]+1);
+
+		fclose(fichero_clq);
 	}
 
 
@@ -769,47 +770,6 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 ////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-
-//////////////////////
-//
-//  COMIENZO Y FIN DE LA INSTANCIA
-//
-//////////////////////
-
-
-
-
-	void beginInstance(InstanceType type) 
-	{
-		cout << "Empieza Instancia................ " << type << endl;
-	}
-
-
-
-
-	void endInstance() {
-		
-		cout << "FIN del parsing ............." << endl;
-
-		// Generación del grafo:
-		
-		// genero_grafo_support();
-		// genero_grafo_conflict();
-		genero_grafo_sum();
-
-
-		cout << "Escribiendo los ficheros ........" << endl;
-		cout << "Número de vérices: " << indice_vertices << " Número aristas: "
-			<< contador_aristas << endl;	
-		escribe_grafo();
-		escribe_fichero_csp();
-
-		// Liberando la memoria.	
-		delete [] matriz_vertices;		
-	}
 
 
 
@@ -867,6 +827,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 // Sin uso de momento
 
+
+
 	void beginGroup(string id) {
 
 
@@ -875,6 +837,9 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 		
 	}
+
+
+
 
 
 
@@ -2022,6 +1987,8 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
 
 
 
+
+
 	// string id, vector<XVariable *> &list, int startIndex, XVariable *value
 	void buildConstraintChannel(string, vector<XVariable *> &list, int, XVariable *value) {
     	cout << "\n   3) channel constraint" << endl;
@@ -2048,6 +2015,55 @@ void ejecuto_comparacion_conflict(int indice_nueva_variable1, int indice_nueva_v
     	displayList(values);
 
 	}
+
+
+//////////////////////
+//
+//  COMIENZO Y FIN DE LA INSTANCIA
+//
+//////////////////////
+
+
+
+
+	void beginInstance(InstanceType type) 
+	{
+		cout << "Empieza Instancia................ " << type << endl;
+	}
+
+
+
+
+	void endInstance() {
+		
+		cout << "FIN del parsing ............." << endl;
+
+		// Generación del grafo:
+		
+		// genero_grafo_support();
+		genero_grafo_conflict();
+		// genero_grafo_sum();
+
+
+		cout << "Escribiendo los ficheros ........" << endl;
+		cout << "Número de vérices: " << indice_vertices << " Número aristas: "
+			<< contador_aristas << endl;	
+		escribe_grafo();
+		escribe_fichero_csp();
+
+		// Liberando la memoria.	
+		delete [] matriz_vertices;		
+	}
+
+
+
+
+
+
+
+
+
+
 
 
 	
@@ -2090,7 +2106,7 @@ int main(int argc, char **argv) {
 		parser.parse(argv[1]); // fileName is a string
 	} catch (exception &e) {
 		cout.flush();
-		cerr << "\n\tUnexpectedd exxception: \n";
+		cerr << "\n\tExcepción inesperada: \n";
 		cerr << "\t" << e.what() << endl;
 		exit(1);
 	}
