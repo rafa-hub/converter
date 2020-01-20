@@ -1404,13 +1404,13 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		cout << "\nFórmula simple.............. \n  " << id;
 		// cout << "\nVERSIÓN ESPECÍFICA .............. \n  " << id;
 			
-	#ifdef midebug
+	// #ifdef midebug
 			cout << "\n   OPERACIONES BINARIAS ............... Order Type: " << orden <<endl;
 			cout << x->id << " base: " << base_variable[x->id] << " - Rango: " << rango_variable[x->id] << endl; 
 			cout << "Entero :" << k << endl;
 			cout << y->id << " base: " << base_variable[y->id] << " - Rango: " << rango_variable[x->id] << endl; 
 			cout <<  " : Operación: " << orden << endl; 
-	#endif
+	// #endif
 		
 		switch(orden)
 		{
@@ -1549,8 +1549,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		
 		int coordenada_final[2];
 
-		cout << "\n  Constraint simple, PENDIENTE DE IMPLEMENTAR: " 
-			<< x->id << (in ? " in " : " not in ") << min << ".." << max <<"\n";
+		cout << "\n  Constraint simple," << x->id 
+			<< (in ? " in " : " not in ") << min << ".." << max <<"\n";
 		
 		cout << "Para el fichero Sadeh, son todo unos.\n";
 
@@ -1558,11 +1558,11 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 #ifdef midebug
 			cout << "Escribo 0 en: " << base_variable[x->id] << " - " << base_variable[x->id] << endl;
 #endif
-		// PENDIENTE DE IMPLEMENTAR 
-		/* coordenada_final[0] = base_variable[x->id]+min;
+		// PENDIENTE DE IMPLEMENTAR, SOLO VÁLIDA PARA FICHEROS SADEH.
+		coordenada_final[0] = base_variable[x->id]+min;
 		coordenada_final[1] = base_variable[x->id]+max;
 		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1; */
+		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1; 
 	}
 
 
@@ -1851,9 +1851,9 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	/* ofstream fmat("log_mat.txt", ios::out);
+ 	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.flush(); */
+	fmat.flush();
 
 	/* ostream terminal(cout.rdbuf());
 	miparser.imprime_matriz("datos",terminal);
