@@ -395,7 +395,7 @@ public:
 		int j = 0;
 		
 		if (matriz == "datos") {
-			//cout<<"MATRIZ DE DATOS-----------------"<<endl;
+			cout<<"MATRIZ DE DATOS-----------------"<<endl;
 			o << "    ";
 			for(int x = 0; x < lista_variables.size(); x++)
 			{
@@ -1851,13 +1851,13 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	ofstream fmat("log_mat.txt", ios::out);
+ 	/* ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.flush();
+	fmat.flush(); */
 
 	/* ostream terminal(cout.rdbuf());
 	miparser.imprime_matriz("datos",terminal);
-	terminal.flush(); */
+	terminal.flush();  */
 		
     // Liberamos memoria
     delete [] miparser.matriz_datos;
