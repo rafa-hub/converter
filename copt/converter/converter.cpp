@@ -17,6 +17,12 @@
 // #define midebug
 // #define mitest
 
+
+#define EXIT_CODE_SUCCESS 0
+#define EXIT_CODE_ERROR_COMMAND 1
+#define EXIT_CODE_NOT_IMPLEMENTED 2
+#define EXIT_CODE_NUM_VAR_EXCEEDED 4
+#define LIMITE_VARIABLES 8000
 #define BUFFER_PUNTEROS 10*1024
 #define TERNARIA 3
 #define RESTRICCION 0
@@ -71,12 +77,12 @@ public:
 	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
 												// en cada posición se guarda el "número" de variables.
 												// Sirve para generar el fichero CSP
-	int indice_var_ternarias_con_ceros = 0;		// Va indexando las variables ternarias. (a substituir por algo más consistente)
-	vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
+	// int indice_var_ternarias_con_ceros = 0;		// Va indexando las variables ternarias. (a substituir por algo más consistente)
+	// vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
 	int **matriz_ternaria;
 
 	int dimension_matriz = 0; 			//Guarda la dimension definitiva de la matriz creada.
-	int dimension_ternaria = 0;			// Guarda la dimensión de la matriz de vértices.
+	// int dimension_ternaria = 0;			// Guarda la dimensión de la matriz de vértices.
 	
 	int **matriz_datos; 	// Matriz donde se almacena el resultado.
 	
@@ -226,6 +232,7 @@ public:
 
 
 
+
 	
 	//removes edges corresponding to values of the same variable, from ug and matriz_datos
 	//(all incompatible since a variable may only have one value)
@@ -297,7 +304,13 @@ public:
 	void genera_matriz() {
 		vector<string>::iterator lista;
 
-		
+		if(dimension_matriz >= LIMITE_VARIABLES)
+			{
+				cout << "Número máximo de variables " << LIMITE_VARIABLES << " excedido."  << endl;
+				throw runtime_error("ERROR: Número máximo de variables excedido.......");
+				exit(EXIT_CODE_NUM_VAR_EXCEEDED);
+				
+			}
 
 		for (lista = lista_variables.begin(); lista != lista_variables.end(); lista++)
 				{
@@ -1196,7 +1209,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		else {
 			cout << "Tamaño de la regla: " << list.size() << endl;
 			throw runtime_error("ERROR: Tamaño de Regla no procesado con esta versión del generador de grafos.");
-			exit(2);
+			exit(EXIT_CODE_NOT_IMPLEMENTED);
 		}
 
 	}
@@ -1247,7 +1260,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		else {
 			cout << "Tamaño de la regla: " << list.size() << endl;
 			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
-			exit(2);
+			exit(EXIT_CODE_NOT_IMPLEMENTED);
 		}
 
 	}
@@ -1293,7 +1306,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		{
 			cout << "Tamaño de la regla: " << list.size() << endl;
 			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
-			exit(2);
+			exit(EXIT_CODE_NOT_IMPLEMENTED);
 		} */
 		
 		for (k=0;k<(list.size()-1);k++)
@@ -1446,7 +1459,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			case (IN):
 				cout << "Contenido en (" << orden << ")" << endl;
 				throw runtime_error("Pendiente de implementar ........\n");
-				exit(2); 
+				exit(EXIT_CODE_NOT_IMPLEMENTED); 
 				
 			case (EQ):
 				cout << "Equal (" << orden << ")" << endl;
@@ -1522,7 +1535,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		else
 		{
 			throw runtime_error("FÓRMULA con más de dos variables, NO IMPLEMENTADO en esta versión del generador de grafos........");
-			exit(2); 
+			exit(EXIT_CODE_NOT_IMPLEMENTED); 
 
 		}
     	
@@ -1845,7 +1858,7 @@ int main(int argc, char **argv) {
 		cout.flush();
 		cerr << "\n\tUnexpectedd exxception: \n";
 		cerr << "\t" << e.what() << endl;
-		exit(1);
+		exit(EXIT_CODE_ERROR_COMMAND);
 	}
 
 
@@ -1863,6 +1876,6 @@ int main(int argc, char **argv) {
     delete [] miparser.matriz_datos;
 	
 	
-	return 0;
+	exit(EXIT_CODE_SUCCESS);
 }
 
