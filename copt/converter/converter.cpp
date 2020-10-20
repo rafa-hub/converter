@@ -22,8 +22,7 @@
 #define EXIT_CODE_ERROR_COMMAND 1
 #define EXIT_CODE_NOT_IMPLEMENTED 2
 #define EXIT_CODE_NUM_VAR_EXCEEDED 4
-#define LIMITE_VARIABLES 8000
-#define BUFFER_PUNTEROS 10*1024
+#define LIMITE_NUM_VARIABLES 8000
 #define TERNARIA 3
 #define RESTRICCION 0
 #define SOPORTE 1
@@ -303,14 +302,7 @@ public:
 	// Genera la matriz
 	void genera_matriz() {
 		vector<string>::iterator lista;
-
-		if(dimension_matriz >= LIMITE_VARIABLES)
-			{
-				cout << "Número máximo de variables " << LIMITE_VARIABLES << " excedido."  << endl;
-				throw runtime_error("ERROR: Número máximo de variables excedido.......");
-				exit(EXIT_CODE_NUM_VAR_EXCEEDED);
-				
-			}
+	
 
 		for (lista = lista_variables.begin(); lista != lista_variables.end(); lista++)
 				{
@@ -319,7 +311,15 @@ public:
 					cout << "Rango variable: " << rango_variable[*lista] << endl;
 					cout << "Dimensión acumulada: " << dimension_matriz << endl;
 				}		
-
+		
+	
+		if(dimension_matriz >= LIMITE_NUM_VARIABLES)
+			{
+				cout << "Número máximo de variables " << LIMITE_NUM_VARIABLES << " excedido."  << endl;
+				throw runtime_error("ERROR: Número máximo de variables excedido.......");
+				exit(EXIT_CODE_NUM_VAR_EXCEEDED);
+				
+			}
 			
 
 		matriz_datos = new int* [dimension_matriz];
@@ -401,6 +401,10 @@ public:
 		
 		return o;
 	} */
+
+
+
+
 
 
 
@@ -513,10 +517,6 @@ public:
 							}
 							// cout << endl;
 						}
-						
-
-
-
 
 #ifdef midebug
 						/* cout << "Coordenada base variable: "<< variable << "-> (" << 
@@ -673,7 +673,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 							<< "," << coordenada_final[1] << ")" << endl;
 #endif			
 				}
-		
 			}
 		} else {
 
@@ -891,9 +890,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 //
 //	 =========Comienzo de las funciones que invoca el parser ===
 ////////////////////////////////////////////
-
-
-
 
 
 
@@ -1194,7 +1190,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	#endif
 	
 		
-		cout << "Fin variables." << endl;		
+		// cout << "Fin variables." << endl;		
 		
 		if (list.size() == 2){
 			
@@ -1243,9 +1239,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			cout << (*itero)->id << endl;
 		}
 	#endif
-
-		
-
 		
 		if (list.size() == 2)
 		{
