@@ -39,6 +39,16 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 
 private:
 
+	int minimo_variables = 0;        	// Guarda el minimo valor de cada array
+	int maximo_variables = 0;        	// Guarda el minimo valor de cada array
+	vector<vector<int>> las_tuplas;   	// Guarda las tuplas, puesto que en
+	int indice_tabla = 0;				// Índice de las tablas que se van creando
+	string tabla_actual;				// Apunta a la tabla que se está utilizando en el momento
+
+
+
+
+
 	vector<string> 	lista_arrays;    	// Guarda la lista de arrays. Los arrays ya no se usan.
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
 										// Todas las variables ahora se tratan como singleton. 
@@ -56,12 +66,11 @@ private:
 										// de variables del array.
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
 	int base_siguiente_array = 0; 		// Guarda el valor para calcular la posicion en la matriz del siguiente array
-	int minimo_variables = 0;        	// Guarda el minimo valor de cada array
-	int maximo_variables = 0;        	// Guarda el minimo valor de cada array
+	
 	int rango_variables = 0; 			// Guarda el rango de valores de las variables de un array
 	int numero_variables = 0;      		// Guarda el numero de variables de un array
 
-	vector<vector<int>> las_tuplas;   	// Guarda las tuplas, puesto que en
+	
 									  	// buildConstraintExtensionAs() no me las pasan como argumento
 	vector<int> tuplas_unarias;			// Lo mismo, pero para variables unarias
 	vector<int> tamano_tuplas;			// Vector que almacena el tamaño de las tuplas: (número de tuplas)
@@ -99,20 +108,6 @@ public:
 
 
 
-
-
-
-#ifdef mitest
-	vector<vector<int>> matriz_check; 	// Matriz donde se almacena el resultado
-#endif
-
-
-
-
-
-
-
-
 	void set_nombre_fichero(char *nombre) {
 		strcpy(nombre_fichero, nombre);
 	}
@@ -125,10 +120,6 @@ public:
 		
 	}
 
-
-
-
-
 	// Genera el fichero .clq sin usar la clase UG (Undirected Graph)
 	void escribe_grafo_clq()
 	{
@@ -138,11 +129,10 @@ public:
 
 
 
-
-
 void crea_fichero_mzn()
 	{
-		string var;
+		string var = nombre_fichero;
+		string myText;
 		
 		
 		// Procedo a escribir el fichero.
@@ -153,9 +143,11 @@ void crea_fichero_mzn()
 		
 		// Escribo la cabecera del fichero.
 
-		fprintf(fichero_mzn,"%\tFichero en formato MINIZINC creado a partir de un fichero XCSP3\n\n");	
+		myText = "% \\ Fichero en formato MINIZINC creado a partir del fichero XCSP3 " + var + "\n\n";
+
+		fprintf(fichero_mzn,myText.c_str());	
 		fprintf(fichero_mzn,"include \"table.mzn\";\n\n\n");
-		fprintf(fichero_mzn,"%\tDeclaración de variables: \n\n");
+		fprintf(fichero_mzn,"%\\ Declaración de variables: \n\n");
 		
 	}
 
@@ -168,7 +160,7 @@ void crea_fichero_mzn()
 	void escribe_fichero_mzn(string texto)
 	{
 
-		// fprintf(fichero_mzn,texto);
+		fprintf(fichero_mzn,texto.c_str());
 
 	}
 
@@ -177,6 +169,18 @@ void crea_fichero_mzn()
 
 	void cierra_fichero_mzn()
 	{
+		int i=0;
+		string aux;
+
+		fprintf(fichero_mzn,"\n\nsolve satisfy;\n\n");
+		fprintf(fichero_mzn,"output [\"black-hole: \",");
+		for (i=0;i<lista_arrays.size();i++){
+			aux = "show(" + lista_arrays[i] + "),";
+			fprintf(fichero_mzn, aux.c_str());
+		}
+
+		fprintf(fichero_mzn,"\\n,];\n");
+
 		fclose(fichero_mzn);
 	}
 
@@ -272,30 +276,11 @@ void crea_fichero_mzn()
 	void beginVariableArray(string id) {
 
 		cout << "Empiezo con el Array, reseteo los valores para el array:  " << id << endl;
-
-		lista_arrays.push_back(id);
-		
-
 		array_actual = id;
-		base_array[id] = base_siguiente_array;
-		rango_array[id] = 0;
-
 		numero_variables = 0;
-		rango_variables = 0;
-
-
-		is_array=true;
 
 		
 	}
-
-
-
-
-
-
-
-
 
 
 
@@ -305,20 +290,19 @@ void crea_fichero_mzn()
 	// Deprecated, ahora se calcula de otra manera.
 	void endVariableArray() {
 
-		base_siguiente_array += (numero_variables * rango_variables);
-		numero_variable[array_actual] = numero_variables;
-		rango_array[array_actual] = rango_variables;
-		minimo_variable[array_actual] = minimo_variables;
+		string var_line = "array[0..";
 
-		is_array=false;
+		
+		cout << "Fin array .......... " << array_actual  << endl;
+		cout << "Número variables array .......... " << numero_variables  << endl;
+		cout << "Rango:  " << minimo_variables << ".." << maximo_variables << endl;
 
-		cout << "Fin array .........." << endl;
-
-#ifdef midebug
-/* 		cout << "Base siguiente array: " << base_siguiente_array << endl;
-		cout << "Numero variables: " << numero_variables << " - Rango: "
-				<< rango_array << endl; */
-#endif
+		
+		
+		var_line = var_line + to_string(numero_variables-1) +"] of var " + to_string(minimo_variables) + ".." 
+			+ to_string(maximo_variables) + ": " + array_actual + ";\n";
+		
+		escribe_fichero_mzn(var_line);
 
 	}
 
@@ -335,15 +319,10 @@ void crea_fichero_mzn()
 	// Comienza el proceso de variables. De momento no se hace nada.
 	void beginVariables() {
 
-		
+		cout << "Empiezo con las Variables  ................" << endl;
 		cout << "Creo el fichero MiniZinc ................" << endl;
 
 		crea_fichero_mzn();
-
-
-#ifdef midebug
-		cout << "COMIENZA la declaracion de variables............. " << endl;
-#endif
 
 	}
 
@@ -365,16 +344,12 @@ void crea_fichero_mzn()
 	// Genera la matriz, que una vez escrita, servirá para generar el grafo.
 	void endVariables() {
 
-		//Escribo el fichero .csp
-		//escribe_fichero_csp();
 		
+		cout << " - FIN declaracion variables - " << endl << endl;
 
+		escribe_fichero_mzn("\n\n");
 		
-		//cout << "Genero la matriz Binaria............." << endl;
-		genera_matriz();
-		//cout << "Dimensión de la matriz: " << dimension_matriz << endl;		
-		//cout << "Matriz generada .............." << endl;
-
+		
 
 #ifdef midebug
 		cout << " - FIN declaracion variables - " << endl << endl;
@@ -400,46 +375,13 @@ void crea_fichero_mzn()
 
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 		
-		// cout << "Primera Variable: " << primera_variable;
-
-		if (primera_variable == "Si")
-		{
-			
-			base_variable[id] = 0;
-			primera_variable = "No";
-		}
-		else
-		{
-			variable_anterior = lista_variables.back();
-		}
-
-		// cout << " - Variable anterior: " << variable_anterior << endl;
-		
-		lista_variables.push_back(id);			
-		mapa_indices[id]=numero_variables;
-
-		for (int i = minValue; i <= maxValue; i++)
-		{
-			valores_variable[id].push_back(i);
-		}
-
-		// Para tratar los arrays actualmente deprecated, sin uso
-		rango_variables = (maxValue - minValue) + 1;
-		minimo_variables = minValue;			
+		cout << "Variable: " << id << " - Min value: " << minValue << " - Max vlue: " << maxValue << endl;
 		numero_variables++;
-		
-		// Para tratar cada variable de manera individual
-		rango_variable[id] = (maxValue - minValue) + 1;
-		maximo_variable[id] = maxValue;
-		minimo_variable[id] = minValue;
+		lista_arrays.push_back(id);
 
-
-		if (primera_variable == "No")	
-			base_variable[id] = base_variable[variable_anterior] + rango_variable[variable_anterior];
-		
-		
-		// cout << "Variable: " << id << " indice: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
-		//		<< maxValue << " - Base variable en la matriz: " << base_variable[id] << " - Rango: " << rango_variable[id] << endl;
+		minimo_variables = minValue;
+		maximo_variables = maxValue;
+	
 
 		}
 
@@ -459,6 +401,7 @@ void crea_fichero_mzn()
 	//called for stand-alone values independent of a range: we assume they DO belong to a range
 	void buildVariableInteger(string id, vector<int> &values) override {
 
+		/* 
 		vector<int>::iterator itero_values;
 
 		if (primera_variable == "Si")
@@ -478,7 +421,7 @@ void crea_fichero_mzn()
 		rango_variable[id] = values.size();
 
 		rango_variables = values.size();
-		minimo_variables = values.front(); 		/*TODO-extend to non-index values */
+		minimo_variables = values.front(); 		
 		maximo_variables = values.back();
 		mapa_indices[id] = numero_variables;
 		numero_variables++;
@@ -504,7 +447,7 @@ void crea_fichero_mzn()
 		{
 			cout << valores_variable[id][i] << " ";
 		}
-		cout << endl;
+		cout << endl; */
 	}
 
 
@@ -549,40 +492,48 @@ void crea_fichero_mzn()
 		vector<vector<int>> &tuples, bool support, bool hasStar) {
 
 		vector<XVariable *>::iterator itero;
+		string aux;
 		
+
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
+
+		cout << "Support: " << support << endl;
+
+		
+		if (support)
+		{
+			aux = "constraint table([";
+		} else 
+		{
+			aux = "constraint not table([";
+		}
 
 		// Guardo el valor de las tuplas por si es una restriccion de grupo
 		las_tuplas=tuples;
 
 
-	#ifdef mydebug
 		cout << "Tamaño de la lista: " << list.size() << endl;
 		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
-		for (itero = list.begin(); itero != list.end(); itero++)
-		{
-			cout << (*itero)->id << endl;
-		}
-	#endif
-	
-		
-		// cout << "Fin variables." << endl;		
-		
-		if (list.size() == 2){
-			
-			cout << "Regla BINARIA:" << endl;
-			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
 
-	#ifdef mydebug
-			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
-	#endif
-		}
-		else {
-			cout << "Tamaño de la regla: " << list.size() << endl;
-			throw runtime_error("ERROR: Tamaño de Regla no procesado con esta versión del generador de grafos.");
-			exit(EXIT_CODE_NOT_IMPLEMENTED);
-		}
+		tabla_actual = "tabla" + to_string(indice_tabla);
+		indice_tabla++;
+
+		itero = list.begin();
+		aux = aux + (*itero)->id + ",";
+		
+		itero++;
+		aux = aux + (*itero)->id + "], "+ tabla_actual + ");\n";
+		
+		cout << aux << endl;
+		escribe_fichero_mzn(aux);
+
+		// Genero la tabla
+		//for (i )
+
+		
+		aux = tabla_actual + " = array2d(1.."+ to_string(tuples.size()) + ", 1..2, [\n";
+		escribe_fichero_mzn(aux);
+
 
 	}
 
@@ -604,9 +555,60 @@ void crea_fichero_mzn()
 			bool support, bool hasStar) {
 		
 		vector<XVariable *>::iterator itero;
+		string aux;
+
 
 		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
 
+	
+		 // las_tuplas,list[0]->id,list[1]->id,support
+
+
+		cout << "Support: " << support << endl;
+
+		
+		if (support)
+		{
+			aux = "constraint table([";
+		} else 
+		{
+			aux = "constraint not table([";
+		}
+
+
+		cout << "Tamaño de la lista: " << list.size() << endl;
+		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+		cout << "Tabla actual: " << tabla_actual << endl;
+
+
+		
+		itero = list.begin();
+		aux = aux + (*itero)->id + ",";
+		
+		itero++;
+		aux = aux + (*itero)->id + "], " + tabla_actual + ");\n";
+		
+		cout << aux << endl;
+		escribe_fichero_mzn(aux);
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	#ifdef mydebug
 		cout << "Tamaño de la lista: " << list.size() << endl;
 		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
