@@ -69,7 +69,9 @@ private:
 
 public:
 
-	char nombre_fichero[256]; 			// Nombre del fichero XML a procesar
+	char nombre_fichero[256]; 			// Nombre del fichero MINIZINC a procesar
+	char *nombre_fichero_mzn;			// Puntero al nombre del fichero
+	FILE *fichero_mzn;					// Puntero a la estructura del fichero
 
 	vector<string> lista_variables; 			// Guarda la lista de variables.
 	vector<string> lista_variables_discretas;	// Guarda la lista de variables con rango discreto.
@@ -118,55 +120,10 @@ public:
 
 
 
-
-
-
-
-
-
-
 	// Escribe los resultados en un fichero
 	void escribe_fichero_csp() {
-		string var;
-		char *nombre_fichero_csp;
-		time_t tiempo = time(NULL);
-
-		nombre_fichero_csp = strrchr(nombre_fichero, '.');
-		strcpy(nombre_fichero_csp, ".csp");
-		cout << "Nombre fichero CSP: \"" << nombre_fichero << "\"" << endl;
-		ofstream fichero_salida(nombre_fichero);
-
-#ifdef midebug
-		cout<< "c Fichero creado a partir de un fichero XML que expresa un problema CSP"<< endl;
-		cout << "x " << lista_variables.size() << endl;
-#endif
 		
-		fichero_salida << "c Fichero creado a partir de un fichero XML \n" 
-			<< "c que expresa un problema CSP  -  Creado: " << PrecisionTimer::local_timestamp()  << endl;
-		
-		fichero_salida << "x " << lista_variables.size() << endl;
-
-		for (unsigned int j = 0; j < lista_variables.size(); j++)
-		{
-			fichero_salida << "v " << (j + 1) << " " << rango_variable[lista_variables[j]]	<< endl;
-
-#ifdef midebug
-			cout << lista_variables[j] << endl;
-			cout << "v " << (j + 1) << " " << rango_variable[lista_variables[j]] << endl;
-#endif
-		}
-
-		fichero_salida.close();
 	}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -175,45 +132,31 @@ public:
 	// Genera el fichero .clq sin usar la clase UG (Undirected Graph)
 	void escribe_grafo_clq()
 	{
+		
+	}
+
+
+
+
+
+
+void crea_fichero_mzn()
+	{
 		string var;
-		char *nombre_fichero_dimacs;
-		FILE *fichero_clq;
-		time_t hora = time(NULL);
-		long int numero_aristas = 0;
-		int cuento_vertices[dimension_matriz], i = 0;
 		
-
-		const clock_t comienzo = clock();
 		
-		// Cálculo del número de aristas.
-		for (int i = 0; i < (dimension_matriz - 1); i++)
-			for (int j = i + 1; j < dimension_matriz; j++)
-				if (matriz_datos[i][j] == 1)
-					numero_aristas++;
-
-		cout << "Tiempo empleado en pre-procesar la matriz: " << float( clock () - comienzo ) /  CLOCKS_PER_SEC 
-			<< " segundos." << endl;
-
 		// Procedo a escribir el fichero.
-		nombre_fichero_dimacs = strrchr(nombre_fichero, '.');
-		strcpy(nombre_fichero_dimacs, ".clq");
-		fichero_clq = fopen(nombre_fichero,"w");
-		cout << "Nombre fichero .CLQ: " << nombre_fichero << endl;
+		nombre_fichero_mzn = strrchr(nombre_fichero, '.');
+		strcpy(nombre_fichero_mzn, ".mzn");
+		fichero_mzn = fopen(nombre_fichero,"w");
+		cout << "Nombre fichero .MZN: " << nombre_fichero << endl;
 		
 		// Escribo la cabecera del fichero.
-		fprintf(fichero_clq,"c Fichero creado a partir de un fichero XML que expresa un problema CSP\n");
-		fprintf(fichero_clq,"c Fichero: %s - creado: %s\n", nombre_fichero,ctime(&hora));
-		fprintf(fichero_clq,"p edge\t%i\t%li\n",dimension_matriz,numero_aristas);
 
-		cout << "Numero vértices: " << dimension_matriz << " - aristas: " << numero_aristas << endl;
-
-		// Recorro la matriz y voy escribiendo todas las aristas.
-		for (int i = 0; i < (dimension_matriz - 1); i++)
-			for (int j = i + 1; j < dimension_matriz; j++)
-				if (matriz_datos[i][j] == 1)
-					fprintf(fichero_clq,"e %d %d\n",(i+1),(j+1));
-
-		fclose(fichero_clq);
+		fprintf(fichero_mzn,"%\tFichero en formato MINIZINC creado a partir de un fichero XCSP3\n\n");	
+		fprintf(fichero_mzn,"include \"table.mzn\";\n\n\n");
+		fprintf(fichero_mzn,"%\tDeclaración de variables: \n\n");
+		
 	}
 
 
@@ -222,8 +165,20 @@ public:
 
 
 
+	void escribe_fichero_mzn(string texto)
+	{
+
+		// fprintf(fichero_mzn,texto);
+
+	}
 
 
+
+
+	void cierra_fichero_mzn()
+	{
+		fclose(fichero_mzn);
+	}
 
 
 
@@ -237,221 +192,22 @@ public:
 	//(all incompatible since a variable may only have one value)
 	void mi_remove_edges_same_var()
 	{
-		cout<<"REMOVING EDGES FROM VALUES OF SAME VARIABLE ---------- TOTAL: " << lista_variables.size() 
-			<< " variables." << endl;
-
-		for (vector<string>::iterator it = lista_variables.begin();
-				it != lista_variables.end(); it++) 
-		{
-			
-			int row = base_variable[*it];
-
-			const int NUM_VAL = rango_variable[*it];
-			const int MAX_ROWS_ARRAY_VAR = row + NUM_VAL;
-			
-#ifdef midebug
-			//cout << array_var_name << " row:" << row << " range:" << NUM_VAL
-			//	<< " nb_var:" << numero_variable[array_var_name]
-			 //		<< endl;
-#endif
-
-			while (true) 
-			{
-				for (int i = row; i < (row + NUM_VAL - 1); i++) {
-					for (int j = i + 1; j < (row + NUM_VAL); j++) {
-						matriz_datos[i][j] = 0;
-						matriz_datos[j][i] = 0;
-#ifdef midebug
-						cout<<"edge:"<<"("<<i<<","<<j<<")";
-						cout<<"range: "<<NUM_VAL<<" MAX ROW:"<<MAX_ROWS_ARRAY_VAR<<endl;
-						cout<<"--------------------------"<<endl; 
-						//cin.get();
-#endif
-					}
-				}
-				//new var inside var array
-				row += NUM_VAL;
-				if (row >= MAX_ROWS_ARRAY_VAR)
-					break;
-			}
-
-		}
-		cout<<"FINISHED REMOVING EDGES FROM VALUES OF SAME VARIABLE:-----------------"<<endl;
+		
 	}
-
-
-
-
-
-
-
-
-
-
-
-	
-
-
-
-
-
-
-
-
 
 	// Genera la matriz
 	void genera_matriz() {
-		vector<string>::iterator lista;
-	
 
-		for (lista = lista_variables.begin(); lista != lista_variables.end(); lista++)
-				{
-					dimension_matriz += rango_variable[*lista];
-					cout << "Variable: " << *lista << endl;
-					cout << "Rango variable: " << rango_variable[*lista] << endl;
-					cout << "Dimensión acumulada: " << dimension_matriz << endl;
-				}		
-		
-	
-		if(dimension_matriz >= LIMITE_NUM_VARIABLES)
-			{
-				cout << "Número máximo de variables " << LIMITE_NUM_VARIABLES << " excedido."  << endl;
-				throw runtime_error("ERROR: Número máximo de variables excedido.......");
-				exit(EXIT_CODE_NUM_VAR_EXCEEDED);
-				
-			}
-			
-
-		matriz_datos = new int* [dimension_matriz];
-		cout << "Espacio para punteros asignado ..................." << endl;
-		for (int i=0;i<dimension_matriz;i++)
-		{
-			matriz_datos[i]=new int[dimension_matriz];
-		}
-		
-		//matriz_datos[0]= new int[dimension_matriz*dimension_matriz];
-    	// for(int i = 1; i<dimension_matriz;i++)
-    	// {
-      	// 	matriz_datos[i] = matriz_datos[i-1]+dimension_matriz;
-		// }
-
-		// Inicializo los valores de la matriz a 1.
-		for (int i=0; i< dimension_matriz;i++)
-			for (int j=0;j<dimension_matriz;j++)
-				matriz_datos[i][j]=1 ;
-
-
-#ifdef midebug
-		//ofstream fmatriz("pocholo.txt", ios::out);
-		//imprime_matriz("datos",fmatriz);
-		//imprime_matriz("shadow",fmatriz); 
-#endif
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	// Certificacion de que la matriz tiene la diagonal principal a cero
 	void pongo_diagonal_matriz_a_cero() {
-		for (int x = 0; x < dimension_matriz; x++) {
-			matriz_datos[x][x] = 0;
-		}
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	//Vuelca en pantalla la matriz, solo útil para depuración, en casos reales
-	//la matriz suele ser demasiado grande
-	/* ostream& imprime_matriz(string matriz, ostream& o=cout) {
-		if (matriz == "datos") {
-			//cout<<"MATRIZ DE DATOS-----------------"<<endl;
-			for (int x = 0; x < dimension_matriz; x++) {
-				for (int y = 0; y < dimension_matriz; y++){
-					o << matriz_datos[x][y] << " ";
-				}
-				o << endl;
-			}
-			o << "\n\n" << endl;
-		}
-		
-		return o;
-	} */
-
-
-
-
-
-
 
 	ostream& imprime_matriz(string matriz, ostream& o=cout) {
-		int j = 0;
-		
-		if (matriz == "datos") {
-			cout<<"MATRIZ DE DATOS-----------------"<<endl;
-			o << "    ";
-			for(int x = 0; x < lista_variables.size(); x++)
-			{
-				o << lista_variables[x] << "  ";
-			}
-
-			o << endl;
-
-			for (int x = 0; x < dimension_matriz; x++) 
-			{
-				if (x == (j*rango_variable[lista_variables[j]]))
-				{
-					o << lista_variables[j];
-					j++;
-				} else {
-					o << "    ";
-				}
-
-				for (int y = 0; y < dimension_matriz; y++){
-					o << matriz_datos[x][y] << " ";
-				}
-				o << endl;
-			}
-			o << "\n\n" << endl;
-		}
-		
 		return o;
 	}
-
-
-	
-	
-
-
-
-
-
-
-
 
 
 	// REVISAR SI HAY QUE VOLVER A IMPLEMENTARLA.
@@ -459,418 +215,31 @@ public:
 	// no usar get_indice() o get_nombre()
 	void escribe_en_matriz_unaria(vector<int>& tuplas,string var_unaria, bool support)
 	{
-		std::vector<int>::iterator itero_valores;
-		int coordenada_final[2];
-
-
-
-		if (support) 
-		{
-			//cout << "Regla SUPPORT UNARIA....." << endl;
-
-#ifdef midebug	
-		/* 	cout << "Var:" << variable << " min var: "
-					<< minimo_variable[variable] << endl; */
-#endif	
-
-			if (tuplas.size()==0)
-			{
-				// No hay tuplas y es una regla support => todo a ceros
-				cout << "CONJUNTO DE TUPLAS VACIO: TODO A CEROS" << endl;
-				for (int i = 0; i < rango_variable[var_unaria]; i++)
-					for (int j = 0; j < rango_variable[var_unaria]; j++)
-					{
-						coordenada_final[0] = base_variable[var_unaria] + i;
-						coordenada_final[1] = base_variable[var_unaria] + j;
-#ifdef midebug
-							cout << "writing-0-S en:(" << coordenada_final[0] << ","
-								<< coordenada_final[1] << ")" << endl;
-#endif
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-					}
-			} else {
-					//La regla SUPPORT dice cuales son posibles (por tanto se ELIMINAN el RESTO de valores)
-
-					cout << "Escribiendo en la matriz una Regla SUPPORT UNARIA.........." << endl;
-
-					for (itero_valores = tuplas.begin(); itero_valores != tuplas.end();
-							++itero_valores)
-					{ 
-						
-#ifdef midebug
-						cout << "Valor Tupla: " << *itero_valores << endl;
-#endif
-						for (int i = 0; i < rango_variable[var_unaria]; i++)
-						{
-							// cout << var_unaria << ": " << i;
-							if( i != *itero_valores)
-							{
-								// cout << " Escribo la columna a cero.";
-								coordenada_final[0] = base_variable[var_unaria]+i;
-								for (int j=0; j < dimension_matriz; j++)
-								{	
-									coordenada_final[1] = j;
-									matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-									matriz_datos[coordenada_final[1]][coordenada_final[0]] =0; 
-								}
-							}
-							// cout << endl;
-						}
-
-#ifdef midebug
-						/* cout << "Coordenada base variable: "<< variable << "-> (" << 
-						coordenadas_base[0] << "," << coordenadas_base[1] << ")" << endl;
-						
-						cout << "Tupla support leida-coord:(" << coordenada_final[0]
-							<< "," << coordenada_final[1] << ")" << endl; */
-#endif
-					}
-
-			}
-
-		} else {
-
-			cout << "Escribiendo en la matriz una Regla CONFLICT UNARIA.........." << endl;
-
-			// Escribo una a una las tuplas correspondientes a cero.
-			for (itero_valores = tuplas_unarias.begin();
-					itero_valores != tuplas_unarias.end(); ++itero_valores) {
-								
-				cout << "Valor Unario: " << *itero_valores
-						<< endl;
-
-
-			// Escribo ceros en horizontal y vertical
-				coordenada_final[0] = base_variable[var_unaria]
-						+ (*itero_valores)
-						- minimo_variable[var_unaria];
-
-
-				for (int i=0;i<dimension_matriz;i++)
-				{
-					coordenada_final[1] = i;
-					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-					matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-#ifdef midebug
-					cout << "writing-0-C en:(" << coordenada_final[0] << ","
-						<< coordenada_final[1] << ")" << endl;
-#endif
-				}
-
-		
-			// Escribo ceros en vertical
-
-			 	coordenada_final[1] = coordenada_final[0];
-
-				for (int i=0;i<dimension_matriz;i++)
-				{
-					coordenada_final[0] = i;
-					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-#ifdef midebug
-					cout << "writing-0-C en:(" << coordenada_final[0] << ","
-						<< coordenada_final[1] << ")" << endl;
-#endif
-					
-				} 
-			
-			}
-		}
 	}
 
 
+	void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, string var_uno, bool support) 
+	{
 
-
-
-
-
-
-
-
-
-
-
-
-void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, string var_uno, bool support) 
-{
-		vector<vector<int>>::iterator itero_parejas;
-		vector<int>::iterator itero_dentro_de_la_pareja;
-		int coordenada_final[2];
-
-		//support
-
-		if (support)
-		{
-			if (tuplas.size()==0)
-			{
-				cout << "CONJUNTO DE TUPLAS VACIO: TODO A CEROS" << endl;
-				for (int i = 0; i < rango_variable[var_cero]; i++)
-					for (int j = 0; j < rango_variable[var_uno]; j++) 
-					{
-						coordenada_final[0] = base_variable[var_cero] + i;
-						coordenada_final[1] = base_variable[var_uno] + j;
-						
-#ifdef midebug
-							cout << "writing-0-S en:(" << coordenada_final[0] << ","
-								<< coordenada_final[1] << ")" << endl;
-#endif
-							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;	
-					}
-			
-		
-			} else {
-
-#ifdef midebug
-					cout << "Regla Support ......" << endl;
-#endif
-					// Borro el resto de restricciones
-					for (int i = 0; i < rango_variable[var_cero]; i++)
-						for (int j = 0; j < rango_variable[var_uno]; j++) 
-						{
-							coordenada_final[0] = base_variable[var_cero] + i;
-							coordenada_final[1] = base_variable[var_uno] + j;
-#ifdef midebug
-							cout << "writing-0-S en:(" << coordenada_final[0] << ","
-								<< coordenada_final[1] << ")" << endl;
-#endif
-							matriz_datos[coordenada_final[0]][coordenada_final[1]] =0;
-							matriz_datos[coordenada_final[1]][coordenada_final[0]] =0;
-
-#ifdef midebug
-					cout << "writing-0-S en:(" << coordenada_final[1] << ","
-								<< coordenada_final[0] << ")" << endl;
-#endif
-						}
-
-				// Y escribo las reglas support
-				for (itero_parejas = tuplas.begin(); itero_parejas != tuplas.end();++itero_parejas) 
-				{
-						itero_dentro_de_la_pareja = itero_parejas->begin();
-
-#ifdef midebug
-						cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
-							<< endl;
-#endif
-
-						coordenada_final[0] = base_variable[var_cero]
-							+ (*itero_dentro_de_la_pareja)
-							- minimo_variable[var_cero];
-
-						itero_dentro_de_la_pareja++;
-#ifdef midebug
-						cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
-							<< endl;
-#endif
-						coordenada_final[1] = base_variable[var_uno]
-							+ (*itero_dentro_de_la_pareja)
-							- minimo_variable[var_uno];
-
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;					
-#ifdef midebug
-						cout << "Tupla support escribo 1:(" << coordenada_final[0]
-							<< "," << coordenada_final[1] << ")" << endl;
-#endif			
-				}
-			}
-		} else {
-
-#ifdef midebug
-				cout << "Regla Conflict ......" << endl;
-#endif
-
-			// Escribo las tuplas correspondientes a cero.
-				for (itero_parejas = las_tuplas.begin();
-						itero_parejas != las_tuplas.end(); ++itero_parejas) {
-				
-					itero_dentro_de_la_pareja = itero_parejas->begin();
-
-#ifdef midebug
-				cout << "Primer valor Tupla: " << *itero_dentro_de_la_pareja
-						<< endl;
-#endif
-
-					coordenada_final[0] = base_variable[var_cero]
-							+ (*itero_dentro_de_la_pareja)
-							- minimo_variable[var_cero];
-
-					itero_dentro_de_la_pareja++;
-#ifdef midebug
-				cout << "Segundo valor Tupla: " << *itero_dentro_de_la_pareja
-						<< endl;
-#endif
-
-					coordenada_final[1] = base_variable[var_uno]
-							+ (*itero_dentro_de_la_pareja)
-							- minimo_variable[var_uno];
-
-#ifdef midebug
-				cout << "writing-0-C en:(" << coordenada_final[0] << ","
-						<< coordenada_final[1] << ")" << endl;
-#endif
-					matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-					matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-			}
-		}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	}
 
 
 
 	// Para el caso de reglas intensionales binarias, escribe 1 en la matriz 
 	void escribe_1_en_matriz(string var_cero, string var_uno,int i, int j)
 	{
-		int coordenada_final[2];
-
-	#ifdef midebug
-			cout << "Escribo 1 en: " << base_variable[var_cero]+i << " - " << j+base_variable[var_uno]+j << endl;
-	#endif
-		coordenada_final[0] = base_variable[var_cero]+i;
-		coordenada_final[1] = base_variable[var_uno]+j;
-		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-		
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 	// Para el caso de reglas intensionales binarias, escribe 0 en la matriz 
 	void escribe_0_en_matriz(string var_cero, string var_uno,int i, int j)
 	{
-		int coordenada_final[2];
-
-#ifdef midebug
-			cout << "Escribo 0 en: " << base_variable[var_cero]+i << " - " << j+base_variable[var_uno]+j << endl;
-#endif
-		coordenada_final[0] = base_variable[var_cero]+i;
-		coordenada_final[1] = base_variable[var_uno]+j;
-		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
 	}
-
-
-
-
-
-
-
-
-
-	
-
-
-
-
 
 	//Funcion que escribe en la matriz una regla AllEqual o AllDifferent
 	// Hay que adaptarla para el uso de las nuevas funciones.(nueva_escribe_en_matriz())
 	void  escribe_regla_all(string var_cero, string var_uno, int REGLA)
 	{
-		int i=0,j=0;
-		int coordenada_final[2];
-
-	if(REGLA==DIFERENTE)
-	{
-		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
-		{	
-			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
-			{
-#ifdef midebug
-				cout << "i: " << i << " - j: " << j;
-#endif
-					if(i!=j)
-					{
-#ifdef midebug
-						cout << "  -->  Son diferentes " ;
-#endif
-						coordenada_final[0]=base_variable[var_cero]+i;
-						coordenada_final[1]=base_variable[var_uno]+j;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-					}
-					else {
-						coordenada_final[0]=base_variable[var_cero]+i;
-						coordenada_final[1]=base_variable[var_uno]+j;
-						//if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
-						//	throw std::runtime_error("Error: UNA REGLA AllDifferent ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-					}
-#ifdef midebug					
-					cout << endl;
-#endif
-			}
-				
-		}
-	}
-
-	if(REGLA==IGUAL)
-	{
-		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
-		{	
-			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
-			{
-				//cout << "i: " << i << " - j: " << j;
-
-					if(i==j)
-					{
-#ifdef midebug
-						cout << "  -->  Son iguales " ;
-#endif
-						coordenada_final[0]=base_variable[var_cero]+i;
-						coordenada_final[1]=base_variable[var_uno]+j;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-					}
-					else {
-						coordenada_final[0]=base_variable[var_cero]+i;
-						coordenada_final[1]=base_variable[var_uno]+j;
-						//if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
-						//	throw std::runtime_error("Error: UNA REGLA AllEqual ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-					}
-#ifdef midebug	
-					cout << endl;
-#endif
-			}
-				
-		}
-	}
-		
 	}
 
 
@@ -943,6 +312,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		is_array=false;
 
+		cout << "Fin array .........." << endl;
+
 #ifdef midebug
 /* 		cout << "Base siguiente array: " << base_siguiente_array << endl;
 		cout << "Numero variables: " << numero_variables << " - Rango: "
@@ -965,6 +336,11 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	void beginVariables() {
 
 		
+		cout << "Creo el fichero MiniZinc ................" << endl;
+
+		crea_fichero_mzn();
+
+
 #ifdef midebug
 		cout << "COMIENZA la declaracion de variables............. " << endl;
 #endif
@@ -1765,31 +1141,13 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	void endInstance() 
 	{
-		time_t hora = time(NULL);
-		
+				
 
 		cout << endl;
 		cout << "FIN del parsing----------------" << endl;
 
-		// Pre-proceso final de la matriz.
-		pongo_diagonal_matriz_a_cero();
-		mi_remove_edges_same_var();
-
-		// Escribo fichero de variables.
-		cout << "Creando el fichero de Variables (.csp) ............" << endl;	
-		escribe_fichero_csp();			
-
-		cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
-
-		printf("%s",ctime(&hora));
-		cout << "La dimensión de la Matriz BINARIA: " << dimension_matriz << endl;
-
-		// Escribo grafo.
-		const clock_t comienzo = clock();
-		escribe_grafo_clq();
-		cout << "Tiempo empleado en escribir el fichero: " << float( clock () - comienzo ) /  (CLOCKS_PER_SEC * 60) 
-			<< " minutos." << endl;
-
+		cierra_fichero_mzn();
+		
 		
 		
 	}
@@ -1827,7 +1185,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 int main(int argc, char **argv) {
 	MiSolverPrintCallbacks miparser;
-	char *nombre_fichero_dimacs;
+	char *nombre_fichero_mzn;
 	int dimension = 0;
 	
 
@@ -1863,7 +1221,7 @@ int main(int argc, char **argv) {
 
 	/* ostream terminal(cout.rdbuf());
 	miparser.imprime_matriz("datos",terminal);
-	terminal.flush();  */
+	terminal.flush(); */
 		
     // Liberamos memoria
     delete [] miparser.matriz_datos;
