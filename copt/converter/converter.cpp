@@ -515,7 +515,7 @@ void crea_fichero_mzn()
 		cout << "Tamaño de la lista: " << list.size() << endl;
 		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
-		tabla_actual = "tabla" + to_string(indice_tabla);
+		tabla_actual = "table_" + to_string(indice_tabla);
 		indice_tabla++;
 
 		itero = list.begin();
