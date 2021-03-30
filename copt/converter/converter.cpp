@@ -49,6 +49,8 @@ private:
 	vector<string> lista_variables; 	// Guarda la lista de variables.
 	map<string, int> rango_array;	 	// Mapa de cada array con el rango de valores de las variables.
 	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables.
+	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables.
+	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables.
 
 
 
@@ -62,8 +64,6 @@ private:
 	string variable_anterior="Vacia";
 	map<string, int> base_array; 		// Mapa de cada array con su coordenada base.
 	map<string, int> base_variable;		// Mapa de cada Variable con su coordenada base, debe sustituir a base_array.
-	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables.
-	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables.
 	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias.
 										// de variables del array.
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
@@ -225,6 +225,8 @@ void crea_fichero_mzn()
 		var_line = var_line + to_string(numero_variables-1) +"] of var " + to_string(minimo_variables) + ".." 
 			+ to_string(maximo_variables) + ": " + array_actual + ";\n";
 		
+		rango_array[array_actual] = (maximo_variables - minimo_variables)+1;
+		
 		escribe_fichero_mzn(var_line);
 
 	}
@@ -245,10 +247,6 @@ void crea_fichero_mzn()
 		cout << "Empiezo con las Variables  ................" << endl;
 		
 	}
-
-
-
-
 
 
 
@@ -282,8 +280,6 @@ void crea_fichero_mzn()
 
 
 
-
-
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 		
 		cout << "Variable: " << id << " - Min value: " << minValue << " - Max vlue: " << maxValue << endl;
@@ -292,6 +288,9 @@ void crea_fichero_mzn()
 
 		minimo_variables = minValue;
 		maximo_variables = maxValue;
+		rango_variable[id] = (maxValue-minValue)+1;
+		maximo_variable[id] = maxValue;
+		minimo_variable[id] = minValue;
 		}
 
 
@@ -341,7 +340,7 @@ void crea_fichero_mzn()
 		vector<XVariable *>::iterator itero;
 		vector<vector<int>>::iterator itero_parejas;
 		vector<int>::iterator itero_dentro_de_la_pareja;
-		string aux,auxTuplas,auxArray;
+		string aux,auxTuplas,auxArray,auxGenero;
 		
 
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
@@ -366,7 +365,7 @@ void crea_fichero_mzn()
 		tabla_actual = "table_" + to_string(indice_tabla);
 		indice_tabla++;
 
-
+		
 		// Declaración de la tabla
 		auxArray = "\narray[1.." + to_string(tuples.size()) + ", 1..2] of int: " + tabla_actual + ";\n" ;
 		escribe_fichero_mzn(auxArray);
@@ -382,39 +381,65 @@ void crea_fichero_mzn()
 		cout << aux << endl;
 		escribe_fichero_mzn(aux);
 
+		// Creación de la tabla con las tuplas
+		aux = tabla_actual + " = array2d(1.."+ to_string(tuples.size()) + ", 1..2, [\n";
+		escribe_fichero_mzn(aux);
 
-		if (tuples.size()>0)
-		{
-			// Creación de la tabla con las tuplas
-			aux = tabla_actual + " = array2d(1.."+ to_string(tuples.size()) + ", 1..2, [\n";
-			escribe_fichero_mzn(aux);
-
-			for (itero_parejas = tuples.begin(); itero_parejas != tuples.end();++itero_parejas) 
-					{
-							itero_dentro_de_la_pareja = itero_parejas->begin();
-
+		for (itero_parejas = tuples.begin(); itero_parejas != tuples.end();++itero_parejas) 
+				{
+						itero_dentro_de_la_pareja = itero_parejas->begin();
 						#ifdef midebug
 							cout << "\tPrimer valor Tupla: " << *itero_dentro_de_la_pareja
-								<< endl;
-							
+							<< endl;
+
 						#endif
 
-							auxTuplas = to_string(*itero_dentro_de_la_pareja) + ",";
-							escribe_fichero_mzn(auxTuplas);
-							itero_dentro_de_la_pareja++;
-						
+						auxTuplas = to_string(*itero_dentro_de_la_pareja) + ",";
+						escribe_fichero_mzn(auxTuplas);
+						itero_dentro_de_la_pareja++;
+					
 						#ifdef midebug
 							cout << "\tSegundo valor Tupla: " << *itero_dentro_de_la_pareja
 								<< endl;
 						#endif
 
-							auxTuplas = to_string(*itero_dentro_de_la_pareja) + ",";
-							escribe_fichero_mzn(auxTuplas);
+						auxTuplas = to_string(*itero_dentro_de_la_pareja) + ",";
+						escribe_fichero_mzn(auxTuplas);
 					}
-			aux = "]);\n";
-			escribe_fichero_mzn(aux);
-		} else {
+		aux = "]);\n";
+		escribe_fichero_mzn(aux);
 
+		if (support && (tuples.size() == 0)) 
+		{
+			// Declaración de la tabla
+			auxArray = "\narray[1.." + to_string(rango_variable[list[0]->id]*rango_variable[list[1]->id]) +
+				", 1..2] of int: " + tabla_actual + ";\n" ;
+			escribe_fichero_mzn(auxArray);
+
+			auxGenero = tabla_actual + " = array2d(1.."+ to_string(rango_variable[list[0]->id]*rango_variable[list[1]->id]) + ", 1..2, [\n";
+			escribe_fichero_mzn(auxGenero);
+
+			cout << "\tMinimo var " << list[0]->id << ": " << minimo_variable[list[0]->id] << endl;
+			cout << "\tMinimo var " << list[1]->id << ": " << minimo_variable[list[1]->id] << endl;
+
+			cout << "\tMaximo var " << list[0]->id << ": " << maximo_variable[list[0]->id] << endl;
+			cout << "\tMaximo var " << list[1]->id << ": " << maximo_variable[list[1]->id] << endl;
+
+			cout << endl << endl;
+			cout << "TUPLAS GENERADAS: " << endl;
+
+			for (int i=minimo_variable[list[0]->id]; i <= maximo_variable[list[0]->id]; i++)
+				for (int j=minimo_variable[list[1]->id]; j <= maximo_variable[list[1]->id]; j++)
+				{
+					auxTuplas = to_string(i) + "," + to_string(j) + ",";
+				#ifdef midebug
+					cout << "\t" << i << " - " << j << endl;
+				#endif
+					escribe_fichero_mzn(auxTuplas);
+				}
+			cout << endl << endl;
+			auxGenero = "]);\n";
+			escribe_fichero_mzn(auxGenero);
 		}
 	}
 
