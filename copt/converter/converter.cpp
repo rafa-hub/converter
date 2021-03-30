@@ -14,7 +14,7 @@
 #include <time.h>
 
 // #define mipause
-// #define midebug
+#define midebug
 // #define mitest
 
 
@@ -39,17 +39,21 @@ class MiSolverPrintCallbacks: public XCSP3PrintCallbacks {
 
 private:
 
+	// Variables usadas en MiniZinc
 	int minimo_variables = 0;        	// Guarda el minimo valor de cada array
 	int maximo_variables = 0;        	// Guarda el minimo valor de cada array
 	vector<vector<int>> las_tuplas;   	// Guarda las tuplas, puesto que en
 	int indice_tabla = 0;				// Índice de las tablas que se van creando
 	string tabla_actual;				// Apunta a la tabla que se está utilizando en el momento
+	vector<string> lista_arrays;    	// Guarda la lista de arrays. Los arrays ya no se usan.
+	vector<string> lista_variables; 	// Guarda la lista de variables.
+	map<string, int> rango_array;	 	// Mapa de cada array con el rango de valores de las variables.
+	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables.
 
 
 
 
-
-	vector<string> 	lista_arrays;    	// Guarda la lista de arrays. Los arrays ya no se usan.
+	// Variables históricas.
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
 										// Todas las variables ahora se tratan como singleton. 
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable.
@@ -60,8 +64,6 @@ private:
 	map<string, int> base_variable;		// Mapa de cada Variable con su coordenada base, debe sustituir a base_array.
 	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables.
 	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables.
-	map<string, int> rango_array;	 	// Mapa de cada array con el rango de valores de las variables.
-	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables.
 	map<string, int> numero_variable;	// Mapa de cada array con el numero de instancias.
 										// de variables del array.
 	string array_actual = "empiezo"; 	// Sirve para identificar con que array se esta trabajando
@@ -82,7 +84,7 @@ public:
 	char *nombre_fichero_mzn;			// Puntero al nombre del fichero
 	FILE *fichero_mzn;					// Puntero a la estructura del fichero
 
-	vector<string> lista_variables; 			// Guarda la lista de variables.
+	
 	vector<string> lista_variables_discretas;	// Guarda la lista de variables con rango discreto.
 	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
 												// en cada posición se guarda el "número" de variables.
@@ -115,16 +117,7 @@ public:
 
 
 
-	// Escribe los resultados en un fichero
-	void escribe_fichero_csp() {
-		
-	}
-
-	// Genera el fichero .clq sin usar la clase UG (Undirected Graph)
-	void escribe_grafo_clq()
-	{
-		
-	}
+	
 
 
 
@@ -147,7 +140,7 @@ void crea_fichero_mzn()
 
 		fprintf(fichero_mzn,myText.c_str());	
 		fprintf(fichero_mzn,"include \"table.mzn\";\n\n\n");
-		fprintf(fichero_mzn,"%\\ Declaración de variables: \n\n");
+		fprintf(fichero_mzn,"% \\ Declaración de variables: \n\n");
 		
 	}
 
@@ -167,6 +160,8 @@ void crea_fichero_mzn()
 
 
 
+
+
 	void cierra_fichero_mzn()
 	{
 		int i=0;
@@ -179,79 +174,10 @@ void crea_fichero_mzn()
 			fprintf(fichero_mzn, aux.c_str());
 		}
 
-		fprintf(fichero_mzn,"\\n,];\n");
+		fprintf(fichero_mzn,"\"\\n\"];\n");
 
 		fclose(fichero_mzn);
 	}
-
-
-
-
-
-
-
-
-	
-	//removes edges corresponding to values of the same variable, from ug and matriz_datos
-	//(all incompatible since a variable may only have one value)
-	void mi_remove_edges_same_var()
-	{
-		
-	}
-
-	// Genera la matriz
-	void genera_matriz() {
-
-	}
-
-
-	// Certificacion de que la matriz tiene la diagonal principal a cero
-	void pongo_diagonal_matriz_a_cero() {
-	}
-
-	ostream& imprime_matriz(string matriz, ostream& o=cout) {
-		return o;
-	}
-
-
-	// REVISAR SI HAY QUE VOLVER A IMPLEMENTARLA.
-	// Funcion que escribe en la matriz reglas unarias. Hay que adaptarla a 
-	// no usar get_indice() o get_nombre()
-	void escribe_en_matriz_unaria(vector<int>& tuplas,string var_unaria, bool support)
-	{
-	}
-
-
-	void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, string var_uno, bool support) 
-	{
-
-	}
-
-
-
-	// Para el caso de reglas intensionales binarias, escribe 1 en la matriz 
-	void escribe_1_en_matriz(string var_cero, string var_uno,int i, int j)
-	{
-	}
-
-
-	// Para el caso de reglas intensionales binarias, escribe 0 en la matriz 
-	void escribe_0_en_matriz(string var_cero, string var_uno,int i, int j)
-	{
-	}
-
-	//Funcion que escribe en la matriz una regla AllEqual o AllDifferent
-	// Hay que adaptarla para el uso de las nuevas funciones.(nueva_escribe_en_matriz())
-	void  escribe_regla_all(string var_cero, string var_uno, int REGLA)
-	{
-	}
-
-
-
-
-
-
-
 
 
 
@@ -277,9 +203,8 @@ void crea_fichero_mzn()
 
 		cout << "Empiezo con el Array, reseteo los valores para el array:  " << id << endl;
 		array_actual = id;
+		lista_arrays.push_back(id);
 		numero_variables = 0;
-
-		
 	}
 
 
@@ -294,10 +219,8 @@ void crea_fichero_mzn()
 
 		
 		cout << "Fin array .......... " << array_actual  << endl;
-		cout << "Número variables array .......... " << numero_variables  << endl;
-		cout << "Rango:  " << minimo_variables << ".." << maximo_variables << endl;
-
-		
+		cout << "\t Número variables array .......... " << numero_variables  << endl;
+		cout << "\t Rango:  " << minimo_variables << ".." << maximo_variables << endl;
 		
 		var_line = var_line + to_string(numero_variables-1) +"] of var " + to_string(minimo_variables) + ".." 
 			+ to_string(maximo_variables) + ": " + array_actual + ";\n";
@@ -320,10 +243,7 @@ void crea_fichero_mzn()
 	void beginVariables() {
 
 		cout << "Empiezo con las Variables  ................" << endl;
-		cout << "Creo el fichero MiniZinc ................" << endl;
-
-		crea_fichero_mzn();
-
+		
 	}
 
 
@@ -348,15 +268,6 @@ void crea_fichero_mzn()
 		cout << " - FIN declaracion variables - " << endl << endl;
 
 		escribe_fichero_mzn("\n\n");
-		
-		
-
-#ifdef midebug
-		cout << " - FIN declaracion variables - " << endl << endl;
-#ifdef mipause
-		cin.get();
-#endif
-#endif
 	}
 
 
@@ -377,12 +288,10 @@ void crea_fichero_mzn()
 		
 		cout << "Variable: " << id << " - Min value: " << minValue << " - Max vlue: " << maxValue << endl;
 		numero_variables++;
-		lista_arrays.push_back(id);
+		lista_variables.push_back(id);
 
 		minimo_variables = minValue;
 		maximo_variables = maxValue;
-	
-
 		}
 
 
@@ -400,59 +309,9 @@ void crea_fichero_mzn()
 
 	//called for stand-alone values independent of a range: we assume they DO belong to a range
 	void buildVariableInteger(string id, vector<int> &values) override {
-
-		/* 
-		vector<int>::iterator itero_values;
-
-		if (primera_variable == "Si")
-		{
-			
-			base_variable[id] = 0;
-			primera_variable = "No";
-		}
-		else
-		{
-			variable_anterior = lista_variables.back();
-		}
-
-
-		lista_variables.push_back(id);
-		lista_variables_discretas.push_back(id);
-		rango_variable[id] = values.size();
-
-		rango_variables = values.size();
-		minimo_variables = values.front(); 		
-		maximo_variables = values.back();
-		mapa_indices[id] = numero_variables;
-		numero_variables++;
-
-		if (primera_variable == "No")	
-			base_variable[id] = base_variable[variable_anterior] + rango_variable[variable_anterior];
-
-
-		for (int i=0; i< values.size();i++)
-		{
-			valores_variable[id].push_back(values[i]);
-		}
-
-		cout << "Variable: " << id 	<< " - Base variable en la matriz: " << base_variable[id]
-			 << " - Rango: " << rango_variable[id] << endl;
-
-		cout  << " - min: " << values[0] << " - max: "
-		 		<< values.back() << " - Índice: " << mapa_indices[id] << " - Rango: " << rango_variable[id] <<  endl;
-
-		cout << "Valores: ";
-
-		for (int i=0; i< values.size();i++)
-		{
-			cout << valores_variable[id][i] << " ";
-		}
-		cout << endl; */
+		cout << "- ¡VARIABLES CON VALORES DISCRETOS! -" << endl;
+		
 	}
-
-
-
-
 
 
 
@@ -465,20 +324,8 @@ void crea_fichero_mzn()
 
 	//Versión para Restricciones UNARIAS
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
-		
-		
-		cout << "Regla UNARIA: "<< support << endl;
-		escribe_en_matriz_unaria(tuples,variable->id,support);
+		cout << "Constraint UNARIA .............." << endl;
 	}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -492,7 +339,9 @@ void crea_fichero_mzn()
 		vector<vector<int>> &tuples, bool support, bool hasStar) {
 
 		vector<XVariable *>::iterator itero;
-		string aux;
+		vector<vector<int>>::iterator itero_parejas;
+		vector<int>::iterator itero_dentro_de_la_pareja;
+		string aux,auxTuplas,auxArray;
 		
 
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
@@ -503,21 +352,27 @@ void crea_fichero_mzn()
 		if (support)
 		{
 			aux = "constraint table([";
+			cout << "SUPPORT Rule........" << endl;
 		} else 
 		{
 			aux = "constraint not table([";
+			cout << "CONFLICT Rule........" << endl;
 		}
 
-		// Guardo el valor de las tuplas por si es una restriccion de grupo
-		las_tuplas=tuples;
-
-
+		
 		cout << "Tamaño de la lista: " << list.size() << endl;
 		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
 		tabla_actual = "table_" + to_string(indice_tabla);
 		indice_tabla++;
 
+
+		// Declaración de la tabla
+		auxArray = "\narray[1.." + to_string(tuples.size()) + ", 1..2] of int: " + tabla_actual + ";\n" ;
+		escribe_fichero_mzn(auxArray);
+
+
+		// Creación línea Constraint
 		itero = list.begin();
 		aux = aux + (*itero)->id + ",";
 		
@@ -527,14 +382,40 @@ void crea_fichero_mzn()
 		cout << aux << endl;
 		escribe_fichero_mzn(aux);
 
-		// Genero la tabla
-		//for (i )
 
-		
-		aux = tabla_actual + " = array2d(1.."+ to_string(tuples.size()) + ", 1..2, [\n";
-		escribe_fichero_mzn(aux);
+		if (tuples.size()>0)
+		{
+			// Creación de la tabla con las tuplas
+			aux = tabla_actual + " = array2d(1.."+ to_string(tuples.size()) + ", 1..2, [\n";
+			escribe_fichero_mzn(aux);
 
+			for (itero_parejas = tuples.begin(); itero_parejas != tuples.end();++itero_parejas) 
+					{
+							itero_dentro_de_la_pareja = itero_parejas->begin();
 
+						#ifdef midebug
+							cout << "\tPrimer valor Tupla: " << *itero_dentro_de_la_pareja
+								<< endl;
+							
+						#endif
+
+							auxTuplas = to_string(*itero_dentro_de_la_pareja) + ",";
+							escribe_fichero_mzn(auxTuplas);
+							itero_dentro_de_la_pareja++;
+						
+						#ifdef midebug
+							cout << "\tSegundo valor Tupla: " << *itero_dentro_de_la_pareja
+								<< endl;
+						#endif
+
+							auxTuplas = to_string(*itero_dentro_de_la_pareja) + ",";
+							escribe_fichero_mzn(auxTuplas);
+					}
+			aux = "]);\n";
+			escribe_fichero_mzn(aux);
+		} else {
+
+		}
 	}
 
 
@@ -558,21 +439,18 @@ void crea_fichero_mzn()
 		string aux;
 
 
-		cout<< "Parsing buildConstraintExtension  AS ........................................."<< endl;
-
-	
-		 // las_tuplas,list[0]->id,list[1]->id,support
-
-
+		cout<< "\nParsing buildConstraintExtension  AS ........................................."<< endl;
 		cout << "Support: " << support << endl;
 
 		
 		if (support)
 		{
 			aux = "constraint table([";
+			cout << "SUPPORT Rule........" << endl;
 		} else 
 		{
 			aux = "constraint not table([";
+			cout << "CONFLICT Rule........" << endl;
 		}
 
 
@@ -591,449 +469,7 @@ void crea_fichero_mzn()
 		cout << aux << endl;
 		escribe_fichero_mzn(aux);
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	#ifdef mydebug
-		cout << "Tamaño de la lista: " << list.size() << endl;
-		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
-		for (itero = list.begin(); itero != list.end(); itero++)
-		{
-			cout << (*itero)->id << endl;
-		}
-	#endif
-		
-		if (list.size() == 2)
-		{
-			cout << "Regla BINARIA:" << endl;
-			nueva_escribe_en_matriz(las_tuplas,list[0]->id,list[1]->id,support);
-
-	#ifdef mydebug
-			cout << "Par de variables: " << (list[0]->id) << " - " << (list[1]->id)	<< endl;
-			cout <<  "Coordenada base nueva: " << base_variable[list[0]->id] << " - " << base_variable[list[1]->id] << endl;
-	#endif
-		}
-		else {
-			cout << "Tamaño de la regla: " << list.size() << endl;
-			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
-			exit(EXIT_CODE_NOT_IMPLEMENTED);
-		}
-
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-///////////////////////////
-//
-// PROCESSING ALL DIFFERENT
-//
-///////////////////////////
-
-
-
-	void buildConstraintAlldifferent(string id, vector<XVariable *> &list) {
-    	
-		int i=0,j=0,k=0;
-		int REGLA;
-
-		REGLA=DIFERENTE;		
-		cout << "\n   Mi allDiff constraint " << id << "Tamaño de la regla: "<< list.size() << endl;
-
-		/* if (list.size() != 2)
-		{
-			cout << "Tamaño de la regla: " << list.size() << endl;
-			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
-			exit(EXIT_CODE_NOT_IMPLEMENTED);
-		} */
-		
-		for (k=0;k<(list.size()-1);k++)
-			for(i=k,j=i+1; j<list.size();j++)
-			{
-				escribe_regla_all(list[i]->id,list[j]->id,REGLA);
-	
-	#ifdef midebug
-				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
-	#endif
-			}
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-	void buildConstraintAlldifferentMatrix(string id, vector<vector<XVariable *>> &matrix) {
-  		cout << "\n  ¡Mi!  allDiff matrix constraint" << id << endl;
-   		for(unsigned int i = 0 ; i < matrix.size() ; i++) {
-        	cout << "    i:    " << i << "  ";
-        	displayList(matrix[i]);
-    	}
-	}
-
-
-
-
-
-
-
-
-
-	void buildConstraintAlldifferentList(string id, vector<vector<XVariable *>> &lists) {
-    	cout << "\n  ¡Mi!  allDiff list constraint" << id << endl;
-    	for(unsigned int i = 0 ; i < (lists.size() < 4 ? lists.size() : 3) ; i++) {
-        	cout << "        ";
-        	displayList(lists[i]);
-    	}
-	}
-
-
-
-
-
-
-
-
-
-
-////////////////////
-//
-// PROCESSING ALL EQUAL
-//
-///////////////////
-
-
-	void buildConstraintAllEqual(string id, vector<XVariable *> &list) {
-    	
-		int i=0,j=0,k=0;
-		int REGLA;
-
-		REGLA=IGUAL;
-		cout << "\n   Mi allEqual constraint " << id << "Tamaño de la tupla: "<< list.size() << endl;
-		
-		
-		for (k=0;k<(list.size()-1);k++)
-		{
-			for(i=k,j=i+1; j<list.size();j++)
-			{
-	#ifdef midebug
-				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
-	#endif
-				escribe_regla_all(list[i]->id,list[j]->id,REGLA);
-			}
-		}
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-	////////////////////////////////////
-	//
-	// PROCESSING FORMULAS INTENSIONALES
-	//
-	////////////////////////////////////
-
-
-
-	void buildConstraintPrimitive(string id, OrderType orden, XVariable *x, int k, XVariable *y) {
-    	
-
-		cout << "\nFórmula simple.............. \n  " << id;
-		// cout << "\nVERSIÓN ESPECÍFICA .............. \n  " << id;
-			
-	// #ifdef midebug
-			cout << "\n   OPERACIONES BINARIAS ............... Order Type: " << orden <<endl;
-			cout << x->id << " base: " << base_variable[x->id] << " - Rango: " << rango_variable[x->id] << endl; 
-			cout << "Entero :" << k << endl;
-			cout << y->id << " base: " << base_variable[y->id] << " - Rango: " << rango_variable[x->id] << endl; 
-			cout <<  " : Operación: " << orden << endl; 
-	// #endif
-		
-		switch(orden)
-		{
-			case (LE):
-				cout << "Less or Equal (" << orden << ")" << endl;
-				for (int i = 0; i < rango_variable[x->id]; i++)
-					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] + k <= valores_variable[y->id][j])) // (+ k), versión específica para familia Scheduling
-							escribe_0_en_matriz(x->id,y->id,i,j);
-				break;
-			case (LT):
-				cout << "Less Than (" << orden << ")" << endl;
-				for (int i = 0; i < rango_variable[x->id]; i++)
-					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] < valores_variable[y->id][j]))
-							escribe_0_en_matriz(x->id,y->id,i,j);
-				break;
-			case (GE):
-				cout << "Greater or Equal (" << orden << ")" << endl;
-				for (int i = 0; i < rango_variable[x->id]; i++)
-					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] >= valores_variable[y->id][j]))
-							escribe_0_en_matriz(x->id,y->id,i,j); 
-				break;
-			case (GT):
-				cout << "Greater Than (" << orden << ")" << endl;
-				for (int i = 0; i < rango_variable[x->id]; i++)
-					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] > valores_variable[y->id][j]))
-							escribe_0_en_matriz(x->id,y->id,i,j);
-				break;
-			
-			case (IN):
-				cout << "Contenido en (" << orden << ")" << endl;
-				throw runtime_error("Pendiente de implementar ........\n");
-				exit(EXIT_CODE_NOT_IMPLEMENTED); 
-				
-			case (EQ):
-				cout << "Equal (" << orden << ")" << endl;
-				for (int i = 0; i < rango_variable[x->id]; i++)
-					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] == valores_variable[y->id][j]))
-							escribe_0_en_matriz(x->id,y->id,i,j);
-				break;
-			case (NE):
-				cout << "Not Equal (" << orden << ")" << endl;
-				for (int i = 0; i < rango_variable[x->id]; i++)
-					for (int j = 0; j < rango_variable[y->id]; j++)
-						if (!(valores_variable[x->id][i] != valores_variable[y->id][j]))
-							escribe_0_en_matriz(x->id,y->id,i,j);
-		} 
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  	void buildConstraintIntension(string id, Tree *tree) {
-		vector<string> variable;
-		vector<int> rango;
-    	map<string, int> tupla;
-		int resultado=0; 
-		int coordenadas_final[2];
-		
-
-    	cout << "\nFórmula compleja de orden: " << tree->arity() << " ..............   \n";
-    	
-		for(int i=0;i<tree->arity();i++)
-    	{
-     		variable.push_back(tree->listOfVariables[i]);
-			rango.push_back(rango_variable[tree->listOfVariables[i]]);
-
-	#ifdef mydebug
-			cout << tree->listOfVariables[i] << " ";
-	#endif
-    	}
-
-		cout << endl;
-
-		if (tree->arity() == 2)
-		{
-			for (int i=0;  i < rango[0]; i++)
-			{
-				for(int j=0; j < rango[1]; j++)
-				{
-					tupla[variable[0]]=valores_variable[variable[0]][i];
-					tupla[variable[1]]=valores_variable[variable[1]][j];
-					resultado = tree->evaluate(tupla);				
-	#ifdef midebug
-					cout << "valores: " << valores_variable[variable[0]][i] << " " << valores_variable[variable[1]][j] << " ";
-					cout << endl;
-					tree->prefixe();
-					cout << "=  " << resultado << endl;
-	#endif
-					if (!resultado)
-						escribe_0_en_matriz(variable[0],variable[1],i,j);			
-				}
-			}
-		}
-		else
-		{
-			throw runtime_error("FÓRMULA con más de dos variables, NO IMPLEMENTADO en esta versión del generador de grafos........");
-			exit(EXIT_CODE_NOT_IMPLEMENTED); 
-
-		}
-    	
-	}
-
-
-
-
-
-
-
-
-
-//////////////////////////////////
-//
-// 	MÁS INTENSIONAL
-//
-//////////////////////////////////
-
-
-
-
-	void buildConstraintPrimitive(string id, XVariable *x, bool in, int min, int max) {
-		
-		int coordenada_final[2];
-
-		cout << "\n  Constraint simple," << x->id 
-			<< (in ? " in " : " not in ") << min << ".." << max <<"\n";
-		
-		cout << "Para el fichero Sadeh, son todo unos.\n";
-
-
-#ifdef midebug
-			cout << "Escribo 0 en: " << base_variable[x->id] << " - " << base_variable[x->id] << endl;
-#endif
-		// PENDIENTE DE IMPLEMENTAR, SOLO VÁLIDA PARA FICHEROS SADEH.
-		coordenada_final[0] = base_variable[x->id]+min;
-		coordenada_final[1] = base_variable[x->id]+max;
-		matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-		matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1; 
-	}
-
-
-
-
-
-
-
-
-
-
-//////////////////////////////////
-//
-// 	PROCESANDO REGLAS NEL
-//
-//////////////////////////////////
-
-
-
-
-	// string id, vector<XVariable *> &list, int startIndex, XVariable *value
-	void buildConstraintChannel(string, vector<XVariable *> &list, int, XVariable *value)
-	{
-    	cout << "\n    chachacha - channel constraint" << endl;
-    	cout << "        ";
-    	displayList(list);
-    	cout << "        value: " << *value << endl;
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	// string id, vector<XVariable *> &list1, int startIndex1, vector<XVariable *> &list2, int startIndex2
-	void buildConstraintChannel(string, vector<XVariable *> &list1, int, vector<XVariable *> &list2, int) {
-		
-		int coordenada_final[2],coordenada_base[2];
-		int i = 0,j = 0, k=0;
-				
-		cout << "\n   Restricción de \"CANAL\": " << endl;
-		cout << "        list1 ";
-		displayList(list1);
-		cout << "        list2 ";
-		displayList(list2);
-		cout << endl;
-
-		for(int i = 0; i < list1.size(); i++)
-		{
-			// cout << "Variable1: " << list1[i]->id << endl;
-			coordenada_base[0] = base_variable[list1[i]->id];
-
-			for (int j = 0; j < list1.size(); j++)
-			{	
-				
-
-				// cout << "Variable2: " << list2[i]->id << endl;
-				// cout << "Pongo el cero de la columna " << j << endl;
-
-				coordenada_base[1] = base_variable[list2[j]->id];
-
-				coordenada_final[0] = coordenada_base[0]+j;
-				coordenada_final[1] = coordenada_base[1]+i;
-
-				matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-				matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
-			}	
-				
-			
-		}
-
-
-	}
-
-
-
-
 
 
 
@@ -1128,6 +564,10 @@ void crea_fichero_mzn()
 		cout << "Empieza Instancia tipo: " << type << endl;
 #endif
 
+		cout << "Creo el fichero MiniZinc ................" << endl;
+
+		crea_fichero_mzn();
+
 		//XCSP3PrintCallbacks::beginInstance(type);
 	}
 
@@ -1146,10 +586,11 @@ void crea_fichero_mzn()
 				
 
 		cout << endl;
-		cout << "FIN del parsing----------------" << endl;
+		cout << "FIN del parsing, closing file ----------------" << endl;
 
 		cierra_fichero_mzn();
-		
+
+
 		
 		
 	}
@@ -1226,7 +667,7 @@ int main(int argc, char **argv) {
 	terminal.flush(); */
 		
     // Liberamos memoria
-    delete [] miparser.matriz_datos;
+    // delete [] miparser.matriz_datos;
 	
 	
 	exit(EXIT_CODE_SUCCESS);
