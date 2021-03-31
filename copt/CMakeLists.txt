@@ -91,7 +91,7 @@ include_directories(
 
 add_library(${LIBRARY_NAME} STATIC ${LIB_SOURCES} ${LIB_HEADERS})
 target_link_libraries(${LIBRARY_NAME} ${LIBXML2_LIBRARIES})
-set(APPLICATION_NAME converter)
+set(APPLICATION_NAME minizinc_gen)
 
 
 find_package( Threads )

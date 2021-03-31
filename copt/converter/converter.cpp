@@ -14,7 +14,7 @@
 #include <time.h>
 
 // #define mipause
-#define midebug
+// #define midebug
 // #define mitest
 
 
@@ -51,6 +51,7 @@ private:
 	map<string, int> rango_variable; 	// Mapa con el rango de valores de las variables.
 	map<string, int> maximo_variable; 	// Guarda el máximo del rango de cada una de las variables.
 	map<string, int> minimo_variable; 	// Guarda el minimo del rango de cada una de las variables.
+	
 
 
 
@@ -309,7 +310,7 @@ void crea_fichero_mzn()
 	//called for stand-alone values independent of a range: we assume they DO belong to a range
 	void buildVariableInteger(string id, vector<int> &values) override {
 		cout << "- ¡VARIABLES CON VALORES DISCRETOS! -" << endl;
-		
+		cout << "- NOT IMPLEMENTED YET -" << endl;
 	}
 
 
@@ -324,6 +325,7 @@ void crea_fichero_mzn()
 	//Versión para Restricciones UNARIAS
 	void buildConstraintExtension(string id, XVariable *variable, vector<int> &tuples, bool support, bool hasStar) {
 		cout << "Constraint UNARIA .............." << endl;
+		cout << "- NOT IMPLEMENTED YET -" << endl;
 	}
 
 
@@ -342,11 +344,20 @@ void crea_fichero_mzn()
 		vector<int>::iterator itero_dentro_de_la_pareja;
 		string aux,auxTuplas,auxArray,auxGenero;
 		
-
 		cout<< "Parsing buildConstraintExtension..........................................."<< endl;
 
-		cout << "Support: " << support << endl;
+		// Guardo las tuplas porque en buildConstraintExtensionAs no me las pasan
+		// y por si las necesito
+		las_tuplas = tuples;
 
+		cout << "Tamaño de la lista: " << list.size() << endl;
+		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
+
+		if (las_tuplas.size() == 0)
+		{
+			cout << "Empty Constraint, do nothing ................" << endl << endl;
+			return;
+		}
 		
 		if (support)
 		{
@@ -357,19 +368,14 @@ void crea_fichero_mzn()
 			aux = "constraint not table([";
 			cout << "CONFLICT Rule........" << endl;
 		}
-
 		
-		cout << "Tamaño de la lista: " << list.size() << endl;
-		cout << "Tamaño tuplas: " << las_tuplas.size() << endl;
 
 		tabla_actual = "table_" + to_string(indice_tabla);
 		indice_tabla++;
 
-		
 		// Declaración de la tabla
 		auxArray = "\narray[1.." + to_string(tuples.size()) + ", 1..2] of int: " + tabla_actual + ";\n" ;
 		escribe_fichero_mzn(auxArray);
-
 
 		// Creación línea Constraint
 		itero = list.begin();
@@ -391,7 +397,6 @@ void crea_fichero_mzn()
 						#ifdef midebug
 							cout << "\tPrimer valor Tupla: " << *itero_dentro_de_la_pareja
 							<< endl;
-
 						#endif
 
 						auxTuplas = to_string(*itero_dentro_de_la_pareja) + ",";
@@ -408,39 +413,6 @@ void crea_fichero_mzn()
 					}
 		aux = "]);\n";
 		escribe_fichero_mzn(aux);
-
-		if (support && (tuples.size() == 0)) 
-		{
-			// Declaración de la tabla
-			auxArray = "\narray[1.." + to_string(rango_variable[list[0]->id]*rango_variable[list[1]->id]) +
-				", 1..2] of int: " + tabla_actual + ";\n" ;
-			escribe_fichero_mzn(auxArray);
-
-			auxGenero = tabla_actual + " = array2d(1.."+ to_string(rango_variable[list[0]->id]*rango_variable[list[1]->id]) + ", 1..2, [\n";
-			escribe_fichero_mzn(auxGenero);
-
-			cout << "\tMinimo var " << list[0]->id << ": " << minimo_variable[list[0]->id] << endl;
-			cout << "\tMinimo var " << list[1]->id << ": " << minimo_variable[list[1]->id] << endl;
-
-			cout << "\tMaximo var " << list[0]->id << ": " << maximo_variable[list[0]->id] << endl;
-			cout << "\tMaximo var " << list[1]->id << ": " << maximo_variable[list[1]->id] << endl;
-
-			cout << endl << endl;
-			cout << "TUPLAS GENERADAS: " << endl;
-
-			for (int i=minimo_variable[list[0]->id]; i <= maximo_variable[list[0]->id]; i++)
-				for (int j=minimo_variable[list[1]->id]; j <= maximo_variable[list[1]->id]; j++)
-				{
-					auxTuplas = to_string(i) + "," + to_string(j) + ",";
-				#ifdef midebug
-					cout << "\t" << i << " - " << j << endl;
-				#endif
-					escribe_fichero_mzn(auxTuplas);
-				}
-			cout << endl << endl;
-			auxGenero = "]);\n";
-			escribe_fichero_mzn(auxGenero);
-		}
 	}
 
 
@@ -463,6 +435,7 @@ void crea_fichero_mzn()
 		vector<XVariable *>::iterator itero;
 		string aux;
 
+		
 
 		cout<< "\nParsing buildConstraintExtension  AS ........................................."<< endl;
 		cout << "Support: " << support << endl;
