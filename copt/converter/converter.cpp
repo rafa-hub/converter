@@ -412,7 +412,8 @@ public:
 		int j = 0;
 		
 		if (matriz == "datos") {
-			cout<<"MATRIZ DE DATOS-----------------"<<endl;
+			
+			// cout<<"MATRIZ DE DATOS-----------------"<<endl;
 			
 			
 			/*
@@ -1832,6 +1833,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 int main(int argc, char **argv) {
 	MiSolverPrintCallbacks miparser;
 	char *nombre_fichero_dimacs;
+	string nombre_matriz_salida = "log_mat_";
 	int dimension = 0;
 	
 
@@ -1861,7 +1863,10 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	ofstream fmat("log_mat.txt", ios::out);
+	nombre_matriz_salida += argv[1]; // + ".txt";
+	nombre_matriz_salida += ".txt";
+	cout << "Matriz a Fichero .......... " << nombre_matriz_salida << endl;
+ 	ofstream fmat(nombre_matriz_salida, ios::out);
 	miparser.imprime_matriz("datos",fmat);
 	fmat.flush();
 
