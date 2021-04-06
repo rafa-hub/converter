@@ -413,6 +413,9 @@ public:
 		
 		if (matriz == "datos") {
 			cout<<"MATRIZ DE DATOS-----------------"<<endl;
+			
+			
+			/*
 			o << "    ";
 			for(int x = 0; x < lista_variables.size(); x++)
 			{
@@ -421,7 +424,7 @@ public:
 
 			o << endl;
 
-			for (int x = 0; x < dimension_matriz; x++) 
+			 
 			{
 				if (x == (j*rango_variable[lista_variables[j]]))
 				{
@@ -430,10 +433,11 @@ public:
 				} else {
 					o << "    ";
 				}
-
+			} */
+			for (int x = 0; x < dimension_matriz; x++){ 
 				for (int y = 0; y < dimension_matriz; y++){
-					o << matriz_datos[x][y] << " ";
-				}
+						o << matriz_datos[x][y] << " ";
+					}
 				o << endl;
 			}
 			o << "\n\n" << endl;
@@ -1857,13 +1861,13 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
- 	/* ofstream fmat("log_mat.txt", ios::out);
+ 	ofstream fmat("log_mat.txt", ios::out);
 	miparser.imprime_matriz("datos",fmat);
-	fmat.flush(); */
+	fmat.flush();
 
-	/* ostream terminal(cout.rdbuf());
+	ostream terminal(cout.rdbuf());
 	miparser.imprime_matriz("datos",terminal);
-	terminal.flush();  */
+	terminal.flush(); 
 		
     // Liberamos memoria
     delete [] miparser.matriz_datos;
