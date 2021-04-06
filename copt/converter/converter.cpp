@@ -169,7 +169,7 @@ void crea_fichero_mzn()
 		string aux;
 
 		fprintf(fichero_mzn,"\n\nsolve satisfy;\n\n");
-		fprintf(fichero_mzn,"output [\"black-hole: \",");
+		fprintf(fichero_mzn,"output [\"Solution: \",");
 		for (i=0;i<lista_arrays.size();i++){
 			aux = "show(" + lista_arrays[i] + "),";
 			fprintf(fichero_mzn, aux.c_str());
