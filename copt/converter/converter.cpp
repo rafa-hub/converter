@@ -633,7 +633,7 @@ int main(int argc, char **argv) {
 	
 
 	if (argc != 2) {
-		throw std::runtime_error("usage: ./csp xcsp3instance.xml");
+		throw std::runtime_error("usage: ./minzinc_gen xcsp3instance.xml");
 		return 0;
 	}
 
@@ -648,7 +648,7 @@ int main(int argc, char **argv) {
 		parser.parse(argv[1]); // fileName is a string
 	} catch (exception &e) {
 		cout.flush();
-		cerr << "\n\tUnexpectedd exxception: \n";
+		cerr << "\n\tUnexpected exception from Parser Implementation: \n";
 		cerr << "\t" << e.what() << endl;
 		exit(EXIT_CODE_ERROR_COMMAND);
 	}
