@@ -42,6 +42,15 @@ private:
 	vector<string> 	lista_arrays;    	// Guarda la lista de arrays. Los arrays ya no se usan.
 	bool is_array=false;				// PSS-determina si una varaible es un singleton o forma parte de un array
 										// Todas las variables ahora se tratan como singleton. 
+	int indice_tabla = 0;				// Índice de las tablas que se van creando
+	string tabla_actual;				// Apunta a la tabla que se está utilizando en el momento
+
+	vector<string> lista_variables; 			// Guarda la lista de variables.
+	vector<string> lista_variables_discretas;	// Guarda la lista de variables con rango discreto.
+	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
+												// en cada posición se guarda el "número" de variables.
+												// Sirve para generar el fichero CSP
+
 	map<string,int> mapa_indices;		// Guarda el índice de cada variable.
 	map<string, vector<int>> valores_variable;	// Guarda los valores discretos de una variable.
 	string primera_variable = "Si";		// Permite calcular la base de las variables en la matriz, según se leen.
@@ -70,12 +79,10 @@ private:
 public:
 
 	char nombre_fichero[256]; 			// Nombre del fichero XML a procesar
+	char *nombre_fichero_mzn;			// Puntero al nombre del fichero
+	FILE *fichero_mzn;					// Puntero a la estructura del fichero
 
-	vector<string> lista_variables; 			// Guarda la lista de variables.
-	vector<string> lista_variables_discretas;	// Guarda la lista de variables con rango discreto.
-	vector<int> lista_variables_ternarias;		// Guarda la lista de variables binarizadas, 
-												// en cada posición se guarda el "número" de variables.
-												// Sirve para generar el fichero CSP
+
 	// int indice_var_ternarias_con_ceros = 0;		// Va indexando las variables ternarias. (a substituir por algo más consistente)
 	// vector <int> dimension_variables_ternarias;	// Guarda el número de tuplas posibles para cada var ternaria.
 	int **matriz_ternaria;
@@ -111,12 +118,188 @@ public:
 
 
 
-	void set_nombre_fichero(char *nombre) {
+	void set_nombre_fichero(char *nombre) 
+	{
 		strcpy(nombre_fichero, nombre);
 	}
 
 
 
+
+
+	void crea_fichero_mzn()
+	{
+		string var = nombre_fichero;
+		string myText;
+		
+		
+		// Procedo a escribir el fichero.
+		nombre_fichero_mzn = strrchr(nombre_fichero, '.');
+		strcpy(nombre_fichero_mzn, ".mzn");
+		fichero_mzn = fopen(nombre_fichero,"w");
+		cout << "Nombre fichero .MZN: " << nombre_fichero << endl;
+		
+		// Escribo la cabecera del fichero.
+
+		myText = "% \\ Fichero en formato MINIZINC creado a partir del fichero XCSP3 " + var + "\n\n";
+
+		fprintf(fichero_mzn,myText.c_str());	
+		fprintf(fichero_mzn,"include \"table.mzn\";\n\n\n");
+		fprintf(fichero_mzn,"% \\ Declaración de variables: \n\n");
+		
+	}
+
+
+
+
+
+	void escribe_fichero_mzn(string texto)
+	{
+
+		fprintf(fichero_mzn,texto.c_str());
+
+	}
+
+
+
+	int cuento_unos(string var1,string var2)
+	{
+		int cuenta = 0;	
+		cout << "base uno: " << base_variable[var1] << endl;
+		cout << "Rango uno: " << rango_variable[var1] << endl;
+
+		cout << "base dos: " << base_variable[var2] << endl;
+		cout << "Rango dos: " << rango_variable[var2] << endl;
+
+		for (int i = base_variable[var1];i< base_variable[var1] + rango_variable[var1];i++)
+		{
+			for(int j= base_variable[var2];j < base_variable[var2] + rango_variable[var2];j++)
+			{
+				cout << "Coordenadas: " << i << "-" << j << ": " << matriz_datos[i][j] << " ";
+				if (matriz_datos[i][j] == 1)
+					cuenta++;
+				
+			}
+			cout << endl;
+		}
+
+		return cuenta;
+	}
+
+
+
+
+	void genero_regla(string var1,string var2,int numero_unos)
+	{
+		string aux = "\nconstraint table([" + var1 + "," + var2 + "],";
+		string auxArray,auxTabla;
+
+		cout << "\nGENERO TABLA PARA ..............." << aux << endl;
+		
+		
+		tabla_actual = "table_" + to_string(indice_tabla);
+		indice_tabla++;
+
+		aux += tabla_actual + ");\n";
+		escribe_fichero_mzn(aux);
+
+		// Declaración de la tabla
+		auxArray = "\narray[1.." + to_string(numero_unos) + ", 1..2] of int: " + tabla_actual + ";\n" ;
+		escribe_fichero_mzn(auxArray);
+
+		auxTabla = tabla_actual + " = array2d(1.."+ to_string(numero_unos) + ", 1..2, [\n";
+		escribe_fichero_mzn(auxTabla);
+
+		for (int i=0; i < rango_variable[var1];i++)
+			{
+				for (int j = 0; j < rango_variable[var2];j++)
+				{
+					int indice1 = base_variable[var1]+i;
+					int indice2 = base_variable[var2]+j;	
+					if (matriz_datos[indice1][indice2] == 1)
+					{
+						cout << "Tuplas: " << i << "," << j << endl;
+						escribe_fichero_mzn(to_string(i)+","+to_string(j)+",\n");
+					}
+
+					
+				}
+			}
+		
+		escribe_fichero_mzn("]);\n");
+
+		
+	}
+
+
+
+
+
+
+
+
+	void vuelca_matriz_to_mnz()
+	{
+		int numero_unos = 0;
+		
+		
+		if (lista_variables.size() > 1){
+
+			for (int i=0; i< lista_variables.size()-1;i++)
+			{
+				for (int j = i+1; j<lista_variables.size();j++)
+				{
+					numero_unos = cuento_unos(lista_variables[i],lista_variables[j]);
+					if (numero_unos > 0)
+					{
+						genero_regla(lista_variables[i],lista_variables[j],numero_unos);
+					}
+	
+					escribe_fichero_mzn("\n");
+				}
+			}
+
+
+
+
+
+		}else{
+			cout << "no hay variables." << endl;
+		}
+		
+		/* // Recorro la matriz y voy escribiendo todas las aristas.
+		for (int i=0; i< lista_variables.size() ;i++)
+		{
+			escribe_fichero_mzn(lista_variables[i]+": ");
+			for (int j=0; j < rango_variable[lista_variables[i]]; j++)
+				escribe_fichero_mzn(to_string(j)+ "-");
+			
+			escribe_fichero_mzn("\n");
+			
+		}
+		escribe_fichero_mzn("\n");
+		cout << endl; */
+	}
+
+
+
+
+	void cierra_fichero_mzn()
+	{
+		int i=0;
+		string aux;
+
+		fprintf(fichero_mzn,"\n\nsolve satisfy;\n\n");
+		fprintf(fichero_mzn,"output [\"Solution: \",");
+		for (i=0;i<lista_arrays.size();i++){
+			aux = "show(" + lista_arrays[i] + "),";
+			fprintf(fichero_mzn, aux.c_str());
+		}
+
+		fprintf(fichero_mzn,"\"\\n\"];\n");
+
+		fclose(fichero_mzn);
+	}
 
 
 
@@ -338,7 +521,8 @@ public:
 		// Inicializo los valores de la matriz a 1.
 		for (int i=0; i< dimension_matriz;i++)
 			for (int j=0;j<dimension_matriz;j++)
-				matriz_datos[i][j]=1 ;
+				//matriz_datos[i][j]= 0;
+				matriz_datos[i][j]= 1;
 
 
 #ifdef midebug
@@ -941,6 +1125,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	// Deprecated, ahora se calcula de otra manera.
 	void endVariableArray() {
 
+		string var_line = "array[0..";
+
 		base_siguiente_array += (numero_variables * rango_variables);
 		numero_variable[array_actual] = numero_variables;
 		rango_array[array_actual] = rango_variables;
@@ -953,6 +1139,12 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		cout << "Numero variables: " << numero_variables << " - Rango: "
 				<< rango_array << endl; */
 #endif
+		var_line = var_line + to_string(numero_variables-1) +"] of var " + to_string(minimo_variables) + ".." 
+			+ to_string(maximo_variables) + ": " + array_actual + ";\n";
+		
+		rango_array[array_actual] = (maximo_variables - minimo_variables)+1;
+		
+		escribe_fichero_mzn(var_line);
 
 	}
 
@@ -1003,7 +1195,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		genera_matriz();
 		//cout << "Dimensión de la matriz: " << dimension_matriz << endl;		
 		//cout << "Matriz generada .............." << endl;
-
+		escribe_fichero_mzn("\n");
 
 #ifdef midebug
 		cout << " - FIN declaracion variables - " << endl << endl;
@@ -1754,6 +1946,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 #ifdef midebug
 		cout << "Empieza Instancia tipo: " << type << endl;
 #endif
+		cout << "Creando el fichero MiniZinc ...... "  << endl;
+		crea_fichero_mzn();
 
 		//XCSP3PrintCallbacks::beginInstance(type);
 	}
@@ -1795,8 +1989,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		cout << "Tiempo empleado en escribir el fichero: " << float( clock () - comienzo ) /  (CLOCKS_PER_SEC * 60) 
 			<< " minutos." << endl;
 
-		
-		
+		vuelca_matriz_to_mnz();
+		cierra_fichero_mzn();
 	}
 
 
