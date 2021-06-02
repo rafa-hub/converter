@@ -135,7 +135,7 @@ public:
 		
 		// Procedo a escribir el fichero.
 		nombre_fichero_mzn = strrchr(nombre_fichero, '.');
-		strcpy(nombre_fichero_mzn, ".mzn");
+		strcpy(nombre_fichero_mzn, "fromXML.mzn");
 		fichero_mzn = fopen(nombre_fichero,"w");
 		cout << "Nombre fichero .MZN: " << nombre_fichero << endl;
 		
@@ -153,38 +153,64 @@ public:
 
 
 
+
+
 	void escribe_fichero_mzn(string texto)
 	{
-
 		fprintf(fichero_mzn,texto.c_str());
-
 	}
+
+
+
+
+
+
 
 
 
 	int cuento_unos(string var1,string var2)
 	{
 		int cuenta = 0;	
-		cout << "base uno: " << base_variable[var1] << endl;
-		cout << "Rango uno: " << rango_variable[var1] << endl;
+		// cout << "base uno: " << base_variable[var1] << endl;
 
-		cout << "base dos: " << base_variable[var2] << endl;
-		cout << "Rango dos: " << rango_variable[var2] << endl;
+		cout << "\nEmpiezo con la pareja de variables: " << var1 << " - " << var2 << endl;
+		cout << "Rango variable uno: " << rango_variable[var1] << endl;
+
+		// cout << "base dos: " << base_variable[var2] << endl;
+		cout << "Rango variable dos: " << rango_variable[var2] << endl;
 
 		for (int i = base_variable[var1];i< base_variable[var1] + rango_variable[var1];i++)
 		{
 			for(int j= base_variable[var2];j < base_variable[var2] + rango_variable[var2];j++)
 			{
-				cout << "Coordenadas: " << i << "-" << j << ": " << matriz_datos[i][j] << " ";
+				//cout << "Coordenadas: " << i << "-" << j << ": " << matriz_datos[i][j] << " ";
 				if (matriz_datos[i][j] == 1)
 					cuenta++;
 				
 			}
-			cout << endl;
 		}
 
-		return cuenta;
+		cout << "Contados: " << cuenta << " unos" << endl;
+		
+
+		if ((rango_variable[var1] * rango_variable[var2]) == cuenta)
+		{
+			cout << "Son todo unos............: " << (rango_variable[var1] * rango_variable[var2]) << endl;
+		}
+
+
+		if (cuenta == (rango_variable[var1] * rango_variable[var2]) || cuenta == 0)
+		{
+			return 0;
+		}
+		else
+		{
+			return cuenta;
+		}
+		
 	}
+
+
 
 
 
@@ -218,17 +244,12 @@ public:
 					int indice2 = base_variable[var2]+j;	
 					if (matriz_datos[indice1][indice2] == 1)
 					{
-						cout << "Tuplas: " << i << "," << j << endl;
+						//cout << "Tuplas: " << i << "," << j << endl;
 						escribe_fichero_mzn(to_string(i)+","+to_string(j)+",\n");
 					}
-
-					
 				}
 			}
-		
 		escribe_fichero_mzn("]);\n");
-
-		
 	}
 
 
@@ -250,12 +271,15 @@ public:
 				for (int j = i+1; j<lista_variables.size();j++)
 				{
 					numero_unos = cuento_unos(lista_variables[i],lista_variables[j]);
-					if (numero_unos > 0)
+					cout << "Valor recibido de Número de unos: " << numero_unos << endl;
+					if (numero_unos != 0)
 					{
+						cout << "Escribo en el fichero las tuplas .............." << endl;
 						genero_regla(lista_variables[i],lista_variables[j],numero_unos);
+						escribe_fichero_mzn("\n");
+					} else{
+						cout << "No hago nada ..........\n" << endl;
 					}
-	
-					escribe_fichero_mzn("\n");
 				}
 			}
 
@@ -284,6 +308,8 @@ public:
 
 
 
+
+
 	void cierra_fichero_mzn()
 	{
 		int i=0;
@@ -295,9 +321,7 @@ public:
 			aux = "show(" + lista_arrays[i] + "),";
 			fprintf(fichero_mzn, aux.c_str());
 		}
-
 		fprintf(fichero_mzn,"\"\\n\"];\n");
-
 		fclose(fichero_mzn);
 	}
 
@@ -473,11 +497,6 @@ public:
 
 
 	
-
-
-
-
-
 
 
 
@@ -1097,6 +1116,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		
 
 		array_actual = id;
+		lista_arrays.push_back(id);
 		base_array[id] = base_siguiente_array;
 		rango_array[id] = 0;
 
@@ -1129,6 +1149,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		base_siguiente_array += (numero_variables * rango_variables);
 		numero_variable[array_actual] = numero_variables;
+		// rango_array[array_actual] = (maximo_variables - minimo_variables)+1;
 		rango_array[array_actual] = rango_variables;
 		minimo_variable[array_actual] = minimo_variables;
 
@@ -1139,13 +1160,16 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		cout << "Numero variables: " << numero_variables << " - Rango: "
 				<< rango_array << endl; */
 #endif
-		var_line = var_line + to_string(numero_variables-1) +"] of var " + to_string(minimo_variables) + ".." 
-			+ to_string(maximo_variables) + ": " + array_actual + ";\n";
-		
-		rango_array[array_actual] = (maximo_variables - minimo_variables)+1;
-		
-		escribe_fichero_mzn(var_line);
 
+		cout << "Fin array .......... " << array_actual  << endl;
+		cout << "\t Número variables array .......... " << numero_variables  << endl;
+		cout << "\t Rango:  " << minimo_variables << ".." << maximo_variables << endl;
+
+		
+		var_line = var_line + to_string(numero_variables-1) +"] of var 0.." 
+			+ to_string(rango_variables-1) + ": " + array_actual + ";\n";
+				
+		escribe_fichero_mzn(var_line);
 	}
 
 
@@ -1246,7 +1270,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 		// Para tratar los arrays actualmente deprecated, sin uso
 		rango_variables = (maxValue - minValue) + 1;
-		minimo_variables = minValue;			
+		minimo_variables = minValue;
+		maximo_variables = maxValue;			
 		numero_variables++;
 		
 		// Para tratar cada variable de manera individual
@@ -2049,14 +2074,14 @@ int main(int argc, char **argv) {
 		parser.parse(argv[1]); // fileName is a string
 	} catch (exception &e) {
 		cout.flush();
-		cerr << "\n\tUnexpectedd exxception: \n";
+		cerr << "\n\tUnexpectedd exception: \n";
 		cerr << "\t" << e.what() << endl;
 		exit(EXIT_CODE_ERROR_COMMAND);
 	}
 
 
 
-	//salida matriz de datos
+	//Salida Matriz de datos a un fichero de log.
 	nombre_matriz_salida += argv[1]; // + ".txt";
 	nombre_matriz_salida += ".txt";
 	cout << "Matriz a Fichero .......... " << nombre_matriz_salida << endl;
@@ -2064,6 +2089,7 @@ int main(int argc, char **argv) {
 	miparser.imprime_matriz("datos",fmat);
 	fmat.flush();
 
+	// Salida por el terminal
 	ostream terminal(cout.rdbuf());
 	miparser.imprime_matriz("datos",terminal);
 	terminal.flush(); 
