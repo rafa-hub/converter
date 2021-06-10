@@ -807,9 +807,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	if(REGLA == DIFERENTE)
 	{
-		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
+		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]);i++)
 		{	
-			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]+minimo_variable[var_uno]);j++)
+			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]);j++)
 			{
 #ifdef midebug
 				cout << "i: " << i << " - j: " << j;
@@ -1294,13 +1294,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		REGLA = DIFERENTE;		
 		cout << "\n   MMy allDiff constraint " << id << "Tamaño de la regla: "<< list.size() << endl;
 
-		/* if (list.size() != 2)
-		{
-			cout << "Tamaño de la regla: " << list.size() << endl;
-			throw runtime_error("ERROR: Tamaño no procesado con esta versión del generador de grafos.");
-			exit(EXIT_CODE_NOT_IMPLEMENTED);
-		} */
-		
 		for (k=0;k<(list.size()-1);k++)
 			for(i=k,j=i+1; j<list.size();j++)
 			{
@@ -1368,7 +1361,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		int i=0,j=0,k=0;
 		int REGLA;
 
-		REGLA=IGUAL;
+		REGLA = IGUAL;
 		cout << "\n   Mi allEqual constraint " << id << "Tamaño de la tupla: "<< list.size() << endl;
 		
 		
