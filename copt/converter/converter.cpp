@@ -14,7 +14,7 @@
 #include <time.h>
 
 // #define mipause
-// #define midebug
+#define midebug
 // #define mitest
 
 
@@ -949,9 +949,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		is_array=false;
 
 #ifdef midebug
-/* 		cout << "Base siguiente array: " << base_siguiente_array << endl;
-		cout << "Numero variables: " << numero_variables << " - Rango: "
-				<< rango_array << endl; */
+		cout << "Base siguiente array: " << base_siguiente_array << endl;
+		cout << "Numero variables: " << numero_variables << endl; 
 #endif
 
 	}
@@ -1029,7 +1028,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
 		
-		// cout << "Primera Variable: " << primera_variable;
+		cout << "Primera Variable: " << primera_variable << " - " << id << endl;
 
 		if (primera_variable == "Si")
 		{
@@ -1042,7 +1041,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			variable_anterior = lista_variables.back();
 		}
 
-		// cout << " - Variable anterior: " << variable_anterior << endl;
+		cout << " - Variable anterior: " << variable_anterior << endl;
 		
 		lista_variables.push_back(id);			
 		mapa_indices[id]=numero_variables;
@@ -1085,11 +1084,12 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-	//called for stand-alone values independent of a range: we assume they DO belong to a range
+	//called for stand-alone values independent of a range
 	void buildVariableInteger(string id, vector<int> &values) override {
-
+		
 		vector<int>::iterator itero_values;
 
+		cout << "Variable discreta " << id << endl;
 		if (primera_variable == "Si")
 		{
 			
@@ -1863,16 +1863,16 @@ int main(int argc, char **argv) {
 
 
 	//salida matriz de datos
-	nombre_matriz_salida += argv[1]; // + ".txt";
-	nombre_matriz_salida += ".txt";
-	cout << "Matriz a Fichero .......... " << nombre_matriz_salida << endl;
- 	ofstream fmat(nombre_matriz_salida, ios::out);
-	miparser.imprime_matriz("datos",fmat);
-	fmat.flush();
+	// nombre_matriz_salida += argv[1]; // + ".txt";
+	// nombre_matriz_salida += ".txt";
+	// cout << "Matriz a Fichero .......... " << nombre_matriz_salida << endl;
+ 	// ofstream fmat(nombre_matriz_salida, ios::out);
+	// miparser.imprime_matriz("datos",fmat);
+	// fmat.flush();
 
-	ostream terminal(cout.rdbuf());
-	miparser.imprime_matriz("datos",terminal);
-	terminal.flush(); 
+	// ostream terminal(cout.rdbuf());
+	// miparser.imprime_matriz("datos",terminal);
+	// terminal.flush(); 
 		
     // Liberamos memoria
     delete [] miparser.matriz_datos;
