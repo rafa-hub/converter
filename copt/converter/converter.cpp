@@ -805,7 +805,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		int i=0,j=0;
 		int coordenada_final[2];
 
-	if(REGLA==DIFERENTE)
+	if(REGLA == DIFERENTE)
 	{
 		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]+minimo_variable[var_cero]);i++)
 		{	
@@ -827,11 +827,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 					else {
 						coordenada_final[0]=base_variable[var_cero]+i;
 						coordenada_final[1]=base_variable[var_uno]+j;
-						//if(matriz_datos[coordenada_final[0]][coordenada_final[1]] == 0 || matriz_datos[coordenada_final[1]][coordenada_final[0]] == 0)
-						//	throw std::runtime_error("Error: UNA REGLA AllDifferent ESTÁ INTENTANDO ESCRIBIR EN UNA PARTE DE LA MATRIZ PREVIAMENTE ESCRITA");
 						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
 						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-
 					}
 #ifdef midebug					
 					cout << endl;
@@ -993,19 +990,12 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 	// Genera la matriz, que una vez escrita, servirá para generar el grafo.
 	void endVariables() {
 
-		//Escribo el fichero .csp
-		//escribe_fichero_csp();
-		
-
-		
-		//cout << "Genero la matriz Binaria............." << endl;
 		genera_matriz();
-		//cout << "Dimensión de la matriz: " << dimension_matriz << endl;		
-		//cout << "Matriz generada .............." << endl;
-
 
 #ifdef midebug
 		cout << " - FIN declaracion variables - " << endl << endl;
+		cout << "Genero la matriz Binaria............." << endl;
+		cout << "Dimensión de la matriz: " << dimension_matriz << endl;		
 #ifdef mipause
 		cin.get();
 #endif
@@ -1027,8 +1017,10 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 	void buildVariableInteger(string id, int minValue, int maxValue) override {
-		
+
+#ifdef midebug
 		cout << "Primera Variable: " << primera_variable << " - " << id << endl;
+#endif
 
 		if (primera_variable == "Si")
 		{
@@ -1065,10 +1057,10 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		if (primera_variable == "No")	
 			base_variable[id] = base_variable[variable_anterior] + rango_variable[variable_anterior];
 		
-		
-		// cout << "Variable: " << id << " indice: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
-		//		<< maxValue << " - Base variable en la matriz: " << base_variable[id] << " - Rango: " << rango_variable[id] << endl;
-
+#ifdef midebug
+		cout << "Variable: " << id << " indice: "<< (numero_variables-1) << " - min: " << minValue << " - max: "
+			<< maxValue << " - Base variable en la matriz: " << base_variable[id] << " - Rango: " << rango_variable[id] << endl;
+#endif
 		}
 
 
@@ -1121,6 +1113,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			valores_variable[id].push_back(values[i]);
 		}
 
+#ifdef midebug
 		cout << "Variable: " << id 	<< " - Base variable en la matriz: " << base_variable[id]
 			 << " - Rango: " << rango_variable[id] << endl;
 
@@ -1134,6 +1127,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			cout << valores_variable[id][i] << " ";
 		}
 		cout << endl;
+#endif
 	}
 
 
@@ -1297,8 +1291,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		int i=0,j=0,k=0;
 		int REGLA;
 
-		REGLA=DIFERENTE;		
-		cout << "\n   Mi allDiff constraint " << id << "Tamaño de la regla: "<< list.size() << endl;
+		REGLA = DIFERENTE;		
+		cout << "\n   MMy allDiff constraint " << id << "Tamaño de la regla: "<< list.size() << endl;
 
 		/* if (list.size() != 2)
 		{
