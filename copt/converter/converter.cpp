@@ -14,7 +14,7 @@
 #include <time.h>
 
 // #define mipause
-#define midebug
+// #define midebug
 // #define mitest
 
 
@@ -303,6 +303,7 @@ public:
 	void genera_matriz() {
 		vector<string>::iterator lista;
 	
+		cout << "\nConstruyendo la MATRIZ ............" << endl;
 
 		for (lista = lista_variables.begin(); lista != lista_variables.end(); lista++)
 				{
@@ -311,7 +312,6 @@ public:
 					cout << "Rango variable: " << rango_variable[*lista] << endl;
 					cout << "Dimensión acumulada: " << dimension_matriz << endl;
 				}		
-		
 	
 		if(dimension_matriz >= LIMITE_NUM_VARIABLES)
 			{
@@ -321,9 +321,9 @@ public:
 				
 			}
 			
-
 		matriz_datos = new int* [dimension_matriz];
 		cout << "Espacio para punteros asignado ..................." << endl;
+
 		for (int i=0;i<dimension_matriz;i++)
 		{
 			matriz_datos[i]=new int[dimension_matriz];
@@ -340,12 +340,6 @@ public:
 			for (int j=0;j<dimension_matriz;j++)
 				matriz_datos[i][j]=1 ;
 
-
-#ifdef midebug
-		//ofstream fmatriz("pocholo.txt", ios::out);
-		//imprime_matriz("datos",fmatriz);
-		//imprime_matriz("shadow",fmatriz); 
-#endif
 	}
 
 
@@ -787,11 +781,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 
-
-
-
-
-
 	
 
 
@@ -807,36 +796,24 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 	if(REGLA == DIFERENTE)
 	{
-		for (i=minimo_variable[var_cero];i<(rango_variable[var_cero]);i++)
-		{	
-			for (j=minimo_variable[var_uno];j<(rango_variable[var_uno]);j++)
+		for (i = 0; i < rango_variable[var_cero]; i++)
+		{
+			// cout << var_cero << ": " << valores_variable[var_cero][i] << " - ";
+			for(j= 0; j < rango_variable[var_uno]; j++)
 			{
-#ifdef midebug
-				cout << "i: " << i << " - j: " << j;
-#endif
-					if(i!=j)
-					{
-#ifdef midebug
-						cout << "  -->  Son diferentes " ;
-#endif
-						coordenada_final[0]=base_variable[var_cero]+i;
-						coordenada_final[1]=base_variable[var_uno]+j;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 1;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 1;
-					}
-					else {
-						coordenada_final[0]=base_variable[var_cero]+i;
-						coordenada_final[1]=base_variable[var_uno]+j;
-						matriz_datos[coordenada_final[0]][coordenada_final[1]] = 0;
-						matriz_datos[coordenada_final[1]][coordenada_final[0]] = 0;
-					}
-#ifdef midebug					
-					cout << endl;
-#endif
+				// cout << valores_variable[var_uno][j] << " ";
+				if (valores_variable[var_cero][i] == valores_variable[var_uno][j])
+				{
+					// cout << "\n MATCH! ......." << endl;
+					escribe_0_en_matriz(var_cero,var_uno,i,j);
+				}
 			}
-				
+			// cout << endl;
 		}
+		// cout << endl;
 	}
+
+	
 
 	if(REGLA==IGUAL)
 	{
@@ -963,13 +940,9 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 	// Comienza el proceso de variables. De momento no se hace nada.
-	void beginVariables() {
-
-		
-#ifdef midebug
-		cout << "COMIENZA la declaracion de variables............. " << endl;
-#endif
-
+	void beginVariables() 
+	{
+		cout << "\nCOMIENZA la declaracion de variables............. " << endl;
 	}
 
 
@@ -1022,6 +995,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		cout << "Primera Variable: " << primera_variable << " - " << id << endl;
 #endif
 
+		cout << "Variable rango: " << id << endl;
+
 		if (primera_variable == "Si")
 		{
 			
@@ -1033,7 +1008,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 			variable_anterior = lista_variables.back();
 		}
 
-		cout << " - Variable anterior: " << variable_anterior << endl;
+		// cout << " - Variable anterior: " << variable_anterior << endl;
 		
 		lista_variables.push_back(id);			
 		mapa_indices[id]=numero_variables;
@@ -1081,7 +1056,8 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		
 		vector<int>::iterator itero_values;
 
-		cout << "Variable discreta " << id << endl;
+		cout << "Variable discreta: " << id << endl;
+
 		if (primera_variable == "Si")
 		{
 			
@@ -1092,7 +1068,6 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		{
 			variable_anterior = lista_variables.back();
 		}
-
 
 		lista_variables.push_back(id);
 		lista_variables_discretas.push_back(id);
@@ -1292,16 +1267,15 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		int REGLA;
 
 		REGLA = DIFERENTE;		
-		cout << "\n   MMy allDiff constraint " << id << "Tamaño de la regla: "<< list.size() << endl;
+		cout << "\n   AllDiff constraint " << id << "Tamaño de la regla: "<< list.size() << endl;
 
 		for (k=0;k<(list.size()-1);k++)
 			for(i=k,j=i+1; j<list.size();j++)
 			{
-				escribe_regla_all(list[i]->id,list[j]->id,REGLA);
-	
 	#ifdef midebug
 				cout << "Pareja: " << list[i]->id << " , " << list[j]->id << endl;
 	#endif
+				escribe_regla_all(list[i]->id,list[j]->id,REGLA);
 			}
 	}
 
@@ -1679,7 +1653,7 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 
 	void endConstraints() {
-		cout << "Fin declaración Constraints .................." << endl << endl;
+		cout << "Fin declaración Constraints .................." << endl;
 	}
 	
 	
@@ -1694,24 +1668,18 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 
 // Sin uso de momento
 
-	void beginGroup(string id) {
-
-
+	void beginGroup(string id) 
+	{
 		cout << "Comienzo Grupo ....... " << id << endl;
-
-
-		
 	}
 
 
 
 
 
-	void endGroup() {
-
-
-		cout << "Fin Grupo .......\n\n " << endl;
-		
+	void endGroup()
+	{
+		cout << "\nFin Grupo .......\n" << endl;		
 	}
 
 
@@ -1761,14 +1729,14 @@ void nueva_escribe_en_matriz(vector<vector<int> >& tuplas,string var_cero, strin
 		
 
 		cout << endl;
-		cout << "FIN del parsing----------------" << endl;
+		cout << "FIN del parsing----------------\n" << endl;
 
 		// Pre-proceso final de la matriz.
 		pongo_diagonal_matriz_a_cero();
 		mi_remove_edges_same_var();
 
 		// Escribo fichero de variables.
-		cout << "Creando el fichero de Variables (.csp) ............" << endl;	
+		cout << "\nCreando el fichero de Variables (.csp) ............" << endl;	
 		escribe_fichero_csp();			
 
 		cout << "Creando el fichero DIMACS con el grafo (.clq) ............" << endl;
